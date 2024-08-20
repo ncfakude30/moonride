@@ -1,7 +1,9 @@
 # MoonRide
 
+<div align="center">
+    <img src="https://github.com/user-attachments/assets/a0610813-de9f-49d2-ab67-ea331ef9680b" alt="MoonRide Logo" width="500" height="auto" />
+</div>
 
-![MoonRide](https://github.com/user-attachments/assets/a0610813-de9f-49d2-ab67-ea331ef9680b)
 
 **MoonRide** is an advanced ride-sharing application designed to connect users with drivers seamlessly. It includes real-time tracking, secure QR code verification, and integrated map services for accurate navigation. This project leverages modern technologies including NestJS, DynamoDB, API Gateway, and AWS Lambda to deliver a robust and scalable solution.
 
@@ -154,4 +156,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [PayPal](https://www.paypal.com/)
 
 For any questions or issues, please open an issue or contact us at [your-email@example.com].
-
