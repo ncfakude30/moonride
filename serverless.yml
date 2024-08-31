@@ -1,0 +1,85 @@
+service: moonrides
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+  environment:
+    TRIPS_TABLE: TripsTable
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+        - dynamodb:Query
+      Resource:
+        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRIPS_TABLE}
+
+functions:
+  # Lambda for getting recent trips
+  getRecentTrips:
+    handler: lambdas/rides.ride
+    events:
+      - http:
+          path: recent-trips
+          method: get
+
+  # Lambda for selecting a ride
+  selectRide:
+    handler: lambdas/rides/select-ride.handler
+    events:
+      - http:
+          path: select-ride
+          method: post
+
+  # Lambda for processing payment
+  processPayment:
+    handler: lambdas/payment/process-payment.handler
+    events:
+      - http:
+          path: process-payment
+          method: post
+
+  # Lambda for getting user currency
+  getUserCurrency:
+    handler: lambdas/user/user.handler
+    events:
+      - http:
+          path: get-user-currency
+          method: get
+
+resources:
+  Resources:
+    RecentTripsTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:provider.environment.TRIPS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: tripDate
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+          - AttributeName: tripDate
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    layer: true
+    slim: true
+
+package:
+  individually: true
+  exclude:
+    - node_modules/**
+    - .serverless/**
+    - .webpack/**
