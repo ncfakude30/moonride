@@ -63,15 +63,15 @@ function RecentTrips() {
 export default RecentTrips;
 
 const RecentTripsWrapper = tw.div`
-    flex flex-col space-y-4 p-4
+    flex flex-col space-y-2 p-4 // Reduced space between items
 `;
 
 const Title = tw.h2`
-    text-xl font-bold mb-4
+    text-xl font-bold mb-2 // Reduced margin-bottom
 `;
 
 const TripCard = tw.div`
-    flex items-center bg-white shadow-md rounded-lg p-4
+    flex items-center bg-white shadow-md rounded-lg p-3 // Reduced padding
 `;
 
 const TripDetails = tw.div`

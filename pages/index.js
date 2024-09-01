@@ -7,13 +7,15 @@ import { auth } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useRouter } from 'next/router';
 import RecentTrips from './components/RecentTrips'; // Import the RecentTrips component
+import MoonRidesImage from '../public/moon-ride.png';
+import Image from 'next/image';
 
 export default function Home() {
     const [user, setUser] = useState(null);
     const router = useRouter();
 
     useEffect(() => {
-        return onAuthStateChanged(auth, user => {
+        return onAuthStateChanged(auth, (user) => {
             if (user) {
                 setUser({
                     name: user.displayName,
@@ -30,8 +32,8 @@ export default function Home() {
         <Wrapper>
             <Map />
             <ActionItems>
-                <Header>
-                    <UberLogo src='https://i.ibb.co/ZMhy8ws/uber-logo.png' />
+                <Header style={{ backgroundColor: '#1a1a2e' }}> {/* Dark blue color */}
+                    <Image src={MoonRidesImage} alt="MoonRides Logo" height={112} width={112} />
                     <Profile>
                         <Name>{user && user.name}</Name>
                         <UserImage
@@ -48,16 +50,17 @@ export default function Home() {
                         </ActionButton>
                     </Link>
                     <ActionButton>
+                        <Badge>Coming Soon</Badge>
                         <ActionButtonImage src='https://i.ibb.co/n776JLm/bike.png' />
                         Wheels
                     </ActionButton>
                     <ActionButton>
+                        <Badge>Coming Soon</Badge>
                         <ActionButtonImage src='https://i.ibb.co/5RjchBg/uberschedule.png' />
                         Reserve
                     </ActionButton>
                 </ActionButtons>
-                <InputButton>Where to</InputButton>
-                <RecentTrips /> {/* Add the RecentTrips component here */}
+                <RecentTrips />
             </ActionItems>
         </Wrapper>
     );
@@ -65,6 +68,7 @@ export default function Home() {
 
 const Wrapper = tw.div`
     flex flex-col h-screen
+    bg-gradient-to-b from-[#0f0f3f] to-[#0a0a1a] // Night sky gradient with dark blue tones
 `;
 
 const ActionItems = tw.div`
@@ -72,11 +76,8 @@ const ActionItems = tw.div`
 `;
 
 const Header = tw.div`
-    flex justify-between items-center
-`;
-
-const UberLogo = tw.img`
-    h-28
+    flex justify-between items-center p-4
+    rounded-lg // Optional: Add rounded corners if desired
 `;
 
 const Profile = tw.div`
@@ -84,7 +85,7 @@ const Profile = tw.div`
 `;
 
 const Name = tw.div`
-    mr-4 w-20 text-sm
+    mr-4 w-20 text-sm text-gray-300 font-medium // Light gray color, medium weight
 `;
 
 const UserImage = tw.img`
@@ -96,11 +97,16 @@ const ActionButtons = tw.div`
 `;
 
 const ActionButton = tw.div`
-    flex flex-col flex-1 bg-gray-200 m-1 h-32 items-center justify-center rounded-lg transform hover:scale-105 transition text-xl
+    relative flex flex-col flex-1 bg-gray-200 m-1 h-32 items-center justify-center rounded-lg overflow-hidden transform hover:scale-105 transition text-xl
 `;
 
 const ActionButtonImage = tw.img`
     h-3/5
+`;
+
+const Badge = tw.div`
+    absolute top-1 left-1 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full
+    whitespace-nowrap
 `;
 
 const InputButton = tw.div`

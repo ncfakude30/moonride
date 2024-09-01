@@ -1,18 +1,101 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import tw from 'tailwind-styled-components';
 import Link from 'next/link';
+import mapboxgl from 'mapbox-gl'; // Import Mapbox GL JS
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'; // Import Mapbox Geocoder
+
+mapboxgl.accessToken = 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ';
 
 function Search() {
     const [pickup, setPickup] = useState('');
     const [dropoff, setDropoff] = useState('');
+    const [map, setMap] = useState(null);
+    const [pickupMarker, setPickupMarker] = useState(null);
+    const [dropoffMarker, setDropoffMarker] = useState(null);
+
+    useEffect(() => {
+        const mapContainer = document.getElementById('map');
+        if (mapContainer && !map) {
+            const newMap = new mapboxgl.Map({
+                container: mapContainer,
+                style: 'mapbox://styles/mapbox/satellite-v9', // Use satellite imagery
+                center: [-74.5, 40], // Default center
+                zoom: 9,
+            });
+
+            // Add Geocoder Control
+            const geocoder = new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                types: 'address',
+                placeholder: 'Search for a location',
+                mapboxgl: mapboxgl
+            });
+
+            // Handle search result for pickup and dropoff
+            geocoder.on('result', (e) => {
+                const { place_name, center } = e.result;
+                if (!pickupMarker) {
+                    setPickup(place_name);
+                    setPickupMarker(new mapboxgl.Marker({ color: 'blue' })
+                        .setLngLat(center)
+                        .addTo(newMap));
+                    newMap.setCenter(center); // Center the map on pickup location
+                } else {
+                    setDropoff(place_name);
+                    setDropoffMarker(new mapboxgl.Marker({ color: 'red' })
+                        .setLngLat(center)
+                        .addTo(newMap));
+                }
+            });
+
+            newMap.addControl(geocoder);
+
+            // Add event listener to handle map clicks
+            newMap.on('click', (e) => {
+                if (!pickupMarker) {
+                    setPickupMarker(new mapboxgl.Marker({ color: 'blue' })
+                        .setLngLat(e.lngLat)
+                        .addTo(newMap));
+                    setPickup([e.lngLat.lng, e.lngLat.lat]);
+                } else if (!dropoffMarker) {
+                    setDropoffMarker(new mapboxgl.Marker({ color: 'red' })
+                        .setLngLat(e.lngLat)
+                        .addTo(newMap));
+                    setDropoff([e.lngLat.lng, e.lngLat.lat]);
+                }
+            });
+
+            // Get and set user location
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    newMap.setCenter([longitude, latitude]);
+                    newMap.setZoom(14); // Set zoom level closer to user's location
+                },
+                (error) => {
+                    console.error('Error getting user location:', error);
+                    // Optionally handle error and set default location
+                }
+            );
+
+            setMap(newMap);
+        }
+    }, [map]);
+
+    
+    const handlePickupChange = (e) => {
+        const value = e.target.value;
+        setPickup(value);
+    };
+
+    const handleDropoffChange = (e) => {
+        const value = e.target.value;
+        setDropoff(value);
+    };
 
     return (
         <Wrapper>
-            <ButtonContainer>
-                <Link href='/'>
-                    <BackButton src='https://img.icons8.com/ios-filled/50/000000/left.png' />
-                </Link>
-            </ButtonContainer>
+            <MapContainer id="map" />
             <InputContainer>
                 <FromToIcons>
                     <Circle src='https://img.icons8.com/ios-filled/50/9CA3AF/filled-circle.png' />
@@ -23,12 +106,12 @@ function Search() {
                     <Input
                         placeholder='Enter pickup location'
                         value={pickup}
-                        onChange={e => setPickup(e.target.value)}
+                        onChange={handlePickupChange}
                     />
                     <Input
                         placeholder='Where to?'
                         value={dropoff}
-                        onChange={e => setDropoff(e.target.value)}
+                        onChange={handleDropoffChange}
                     />
                 </InputBoxes>
                 <PlusIcon src='https://img.icons8.com/ios/50/000000/plus-math.png' />
@@ -40,8 +123,8 @@ function Search() {
             <Link href={{
                 pathname: '/confirm',
                 query: {
-                    pickup: pickup,
-                    dropoff: dropoff,
+                    pickup: pickupMarker ? pickupMarker.getLngLat().toArray().join(',') : pickup,
+                    dropoff: dropoffMarker ? dropoffMarker.getLngLat().toArray().join(',') : dropoff,
                 }
             }}>
                 <ConfirmContainer>
@@ -52,10 +135,15 @@ function Search() {
     );
 };
 
+
 export default Search;
 
 const Wrapper = tw.div`
     bg-gray-200 h-screen
+`;
+
+const MapContainer = tw.div`
+    h-1/2 w-full
 `;
 
 const ButtonContainer = tw.div`
