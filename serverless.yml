@@ -16,6 +16,14 @@ provider:
         - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRIPS_TABLE}
 
 functions:
+  # Lambda to login recent trips
+  login:
+    handler: lambdas/user.login
+    events:
+      - http:
+          path: login
+          method: post
+  
   # Lambda for getting recent trips
   getRecentTrips:
     handler: lambdas/rides.ride
