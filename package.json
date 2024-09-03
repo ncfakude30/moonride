@@ -1,12 +1,14 @@
 {
-  "name": "uber-clone",
+  "name": "moonrides",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider next dev",
     "build": "NODE_OPTIONS=--openssl-legacy-provider next build",
-    "start": "next start",
-    "lint": "next lint",
-    "deploy": "serverless deploy"
+    "start": "NODE_OPTIONS=--openssl-legacy-provider next start",
+    "lint": "NODE_OPTIONS=--openssl-legacy-provider next lint",
+    "deploy": "NODE_OPTIONS=--openssl-legacy-provider serverless deploy"
+
+    
   },
   "dependencies": {
     "@mapbox/mapbox-gl-geocoder": "^5.0.2",
