@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build Next.js app
+      - name: Build MoonRides app
         run: npm run build
 
       - name: Build Docker image
@@ -36,8 +36,8 @@ jobs:
 
       - name: Push Docker image to DockerHub
         run: |
-          docker tag moonride ${{ secrets.DOCKER_REPOSITORY }}/moonride:latest
-          docker push ${{ secrets.DOCKER_REPOSITORY }}/moonride:latest
+          docker tag moonride ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
 
       - name: Deploy to ECS
         run: |
