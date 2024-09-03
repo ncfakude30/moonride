@@ -73,7 +73,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide }) {
                             <Service>{car.service}</Service>
                             <Time>5 min away</Time>
                         </CarDetails>
-                        <Price>{currency === 'ZAR' ? 'R' : '$'}{(rideDuration * car.multiplier).toFixed(2)}</Price>
+                        <Price>{currency === 'ZAR' ? 'R' : 'R'}{(rideDuration * car.multiplier).toFixed(2)}</Price>
                     </Car>
                 ))}
             </CarList>

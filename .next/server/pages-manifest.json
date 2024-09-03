@@ -1,0 +1,17 @@
+{
+  "/_app": "pages/_app.js",
+  "/api/hello": "pages/api/hello.js",
+  "/api/user/login": "pages/api/user/login.js",
+  "/components/Map": "pages/components/Map.html",
+  "/components/RecentTrips": "pages/components/RecentTrips.html",
+  "/components/RideSelector": "pages/components/RideSelector.html",
+  "/confirm": "pages/confirm.html",
+  "/": "pages/index.html",
+  "/login": "pages/login.html",
+  "/payment": "pages/payment.html",
+  "/search": "pages/search.html",
+  "/success": "pages/success.html",
+  "/_error": "pages/_error.js",
+  "/_document": "pages/_document.js",
+  "/404": "pages/404.html"
+}
