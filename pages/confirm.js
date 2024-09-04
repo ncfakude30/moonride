@@ -5,6 +5,8 @@ import { useRouter } from 'next/router';
 import RideSelector from './components/RideSelector';
 import Link from 'next/link';
 import Image from 'next/image';
+import { addTrip } from './api/app.service';
+
 
 function Confirm() {
     const router = useRouter();
@@ -79,6 +81,20 @@ function Confirm() {
         });
     };
 
+    const handlePaymentSuccess = async () => {
+        // Assuming you get payment confirmation in some way
+        const tripData = {
+            pickup: pickup,
+            dropoff: dropoff,
+            price: selectedCar.price, // Or other appropriate price
+            time: selectedCar.time,   // Or other appropriate time
+            rating: selectedCar.rating,
+            driverProfile: selectedCar.driverProfile,
+        };
+        await addTrip(tripData);
+        router.push('/confirmation'); // Redirect to a confirmation page
+    };
+
     if (loading) return <p>Loading...</p>;
 
     return (
@@ -108,7 +124,7 @@ function Confirm() {
             </RideContainer>
         </Wrapper>
     );
-};
+}
 
 export default Confirm;
 

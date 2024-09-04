@@ -20,6 +20,7 @@ export default function Home() {
                 setUser({
                     name: user.displayName,
                     photoUrl: user.photoURL,
+                    id: user?.uid || user.displayName
                 });
             } else {
                 setUser(null);
