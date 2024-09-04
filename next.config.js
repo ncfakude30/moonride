@@ -1,6 +1,6 @@
 module.exports = {
   reactStrictMode: true,
   images: {
-    domains: ['img.icons8.com', 'i.ibb.co', 'randomuser.me'], // Add other domains if needed
+    domains: ['img.icons8.com', 'i.ibb.co', 'randomuser.me', 'moonride.co.za', 'moonrides.co.za'], // Add other domains if needed
   },
 }
