@@ -1,0 +1,13 @@
+{
+  "permissions": {},
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "tripsTable",
+      "environmentVariableName": "TRIPS_TABLE"
+    }
+  ],
+  "secretNames": [
+    "MAPS_API"
+  ]
+}

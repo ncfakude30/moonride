@@ -1,0 +1,13 @@
+{
+  "permissions": {},
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "paymentUtl",
+      "environmentVariableName": "PAYMENT_UTL"
+    }
+  ],
+  "secretNames": [
+    "PAYMENT_ACCESS_KEY"
+  ]
+}

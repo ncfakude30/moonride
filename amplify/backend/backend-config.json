@@ -1,0 +1,87 @@
+{
+  "api": {
+    "TripsPI": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "getUserTrips"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "RequestAPI"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "payment"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    }
+  },
+  "function": {
+    "RequestAPI": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "getUserTrips": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "payment": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_getUserTrips_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getUserTrips"
+        }
+      ]
+    },
+    "AMPLIFY_function_getUserTrips_tripsTable": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getUserTrips"
+        }
+      ]
+    },
+    "AMPLIFY_function_payment_paymentUtl": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "payment"
+        }
+      ]
+    },
+    "AMPLIFY_function_payment_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "payment"
+        }
+      ]
+    }
+  }
+}
