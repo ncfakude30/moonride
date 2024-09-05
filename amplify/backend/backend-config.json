@@ -1,6 +1,6 @@
 {
   "api": {
-    "TripsPI": {
+    "trips": {
       "dependsOn": [
         {
           "attributes": [
@@ -16,7 +16,7 @@
             "Arn"
           ],
           "category": "function",
-          "resourceName": "RequestAPI"
+          "resourceName": "request"
         },
         {
           "attributes": [
@@ -32,7 +32,7 @@
     }
   },
   "function": {
-    "RequestAPI": {
+    "request": {
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"

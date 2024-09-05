@@ -17,7 +17,7 @@
           "tripsTable": "moonrides-trips",
           "secretsPathAmplifyAppId": "dfafpmd9vbffd"
         },
-        "RequestAPI": {},
+        "request": {},
         "payment": {
           "paymentUtl": "https://payment.co.za/pay",
           "secretsPathAmplifyAppId": "dfafpmd9vbffd"

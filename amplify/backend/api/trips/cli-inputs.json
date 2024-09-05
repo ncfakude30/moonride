@@ -10,7 +10,7 @@
     },
     "/request": {
       "name": "/request",
-      "lambdaFunction": "RequestAPI",
+      "lambdaFunction": "request",
       "permissions": {
         "setting": "open"
       }
