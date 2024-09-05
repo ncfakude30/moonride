@@ -42,6 +42,11 @@ jobs:
       - name: Install Serverless Framework
         run: npm install -g serverless
 
+      - name: Serverless Login
+        run: |
+          serverless config credentials --provider aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }} --profile default
+          echo ${{ secrets.SERVERLESS_ACCESS_KEY }} > ~/.serverless/credentials
+
       - name: Deploy Serverless Application
         run: |
           serverless deploy --verbose
