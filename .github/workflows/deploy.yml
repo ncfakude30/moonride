@@ -39,6 +39,17 @@ jobs:
           docker tag moonride ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
 
+      - name: Install Serverless Framework
+        run: npm install -g serverless
+
+      - name: Deploy Serverless Application
+        run: |
+          serverless deploy --verbose
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}  # Optional, if using session tokens
+
       - name: Deploy to ECS
         run: |
           aws ecs update-service \

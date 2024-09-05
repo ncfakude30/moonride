@@ -6,7 +6,7 @@ dynamodb = boto3.resource('dynamodb')
 table_name = os.environ.get('RECENT_TRIPS_TABLE')
 table = dynamodb.Table(table_name)
 
-def get_recent_trips(event, context):
+def handler(event, context):
     user_id = event['queryStringParameters']['userId']
 
     response = table.query(

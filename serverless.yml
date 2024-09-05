@@ -18,7 +18,7 @@ provider:
 functions:
   # Lambda to login recent trips
   login:
-    handler: lambdas/user.login
+    image: moonrides-image
     events:
       - http:
           path: login
@@ -26,35 +26,27 @@ functions:
   
   # Lambda for getting recent trips
   getRecentTrips:
-    handler: lambdas/rides.ride
+    image: moonrides-image
     events:
       - http:
-          path: recent-trips
+          path: trips
           method: get
 
   # Lambda for selecting a ride
-  selectRide:
-    handler: lambdas/rides/select-ride.handler
+  requestRide:
+    image: moonrides-image
     events:
       - http:
-          path: select-ride
+          path: request
           method: post
 
   # Lambda for processing payment
   processPayment:
-    handler: lambdas/payment/process-payment.handler
+    image: moonrides-image
     events:
       - http:
-          path: process-payment
+          path: payment
           method: post
-
-  # Lambda for getting user currency
-  getUserCurrency:
-    handler: lambdas/user/user.handler
-    events:
-      - http:
-          path: get-user-currency
-          method: get
 
 resources:
   Resources:
@@ -84,6 +76,7 @@ custom:
     dockerizePip: true
     layer: true
     slim: true
+    zip: true
 
 package:
   individually: true
@@ -91,3 +84,5 @@ package:
     - node_modules/**
     - .serverless/**
     - .webpack/**
+    - .pytest_cache/** # Exclude pytest cache if present
+    - tests/** # Exclude tests directory if present

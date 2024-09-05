@@ -6,7 +6,7 @@
     "build": "NODE_OPTIONS=--openssl-legacy-provider next build",
     "start": "NODE_OPTIONS=--openssl-legacy-provider nodemon server.js",
     "lint": "NODE_OPTIONS=--openssl-legacy-provider next lint",
-    "deploy": "NODE_OPTIONS=--openssl-legacy-provider serverless deploy"
+    "deploy": "serverless deploy"
   },
   "dependencies": {
     "@mapbox/mapbox-gl-geocoder": "^5.0.2",
