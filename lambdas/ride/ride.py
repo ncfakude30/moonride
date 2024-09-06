@@ -44,5 +44,7 @@ def handler(event, context):
         'body': json.dumps(result),
         'headers': {
             'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*', 
+            'Access-Control-Allow-Credentials': True,
         }
     }
