@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import tw from 'tailwind-styled-components';
 import Image from 'next/image';
-import  fetchRecentTrips  from '../api/app.service';
-
+import { fetchRecentTrips } from '../api/app.service';
 function RecentTrips({ user }) {
     const [trips, setTrips] = useState([]);
     const [loading, setLoading] = useState(true);
