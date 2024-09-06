@@ -12,7 +12,7 @@ export async function fetchRecentTrips(userId) {
             params: { userId }
         });
         console.error(`My fetch: ${JSON.stringify(response.data)}`)
-        return response.data.recentTrips;
+        return response.data.trips;
     } catch (error) {
         console.error('Error fetching recent trips:', error);
         return [];
