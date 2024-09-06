@@ -1,66 +1,39 @@
-name: Deploy MoonRides App
+name: Deploy Moonride Lambdas
 
 on:
   push:
+    paths:
+      - 'lambdas/**'
     branches:
-      - develop
+      - main  # or your default branch
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18' # Use the same Node.js version as in Dockerfile
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
 
-      - name: Install dependencies
-        run: npm install
+    - name: Install Serverless Framework
+      run: npm install -g serverless
 
-      - name: Build MoonRides app
-        run: npm run build
+    - name: Install dependencies
+      run: |
+        cd lambdas
+        pip install -r requirements.txt
 
-      - name: Build Docker image
-        run: |
-          docker build -t moonride .
-
-      - name: Log in to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Push Docker image to DockerHub
-        run: |
-          docker tag moonride ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
-
-      - name: Install Serverless Framework
-        run: npm install -g serverless
-
-      - name: Configure Serverless Framework Authentication
-        run: |
-          echo ${{ secrets.SERVERLESS_ACCESS_KEY }} > ~/.serverless/credentials
-
-      - name: Deploy Serverless Application
-        run: |
-          serverless deploy --verbose
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-
-      - name: Deploy to ECS
-        run: |
-          aws ecs update-service \
-            --cluster ${{ secrets.ECS_CLUSTER_NAME }} \
-            --service ${{ secrets.ECS_SERVICE_NAME }} \
-            --force-new-deployment \
-            --region ${{ secrets.AWS_REGION }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    - name: Deploy Serverless
+      run: |
+        cd lambdas
+        echo ${{ secrets.SERVERLESS_ACCESS_KEY }}
+        serverless deploy
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: us-east-1  # or your region
