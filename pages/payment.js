@@ -5,7 +5,7 @@ import { requestTrip } from './api/app.service'; // Import the requestTrip funct
 
 function Payment() {
     const router = useRouter();
-    const { pickup, dropoff, ride } = router.query;
+    const { pickup, dropoff, ride, user } = router.query;
 
     const [selectedCar, setSelectedCar] = useState(null);
     const [pickupPlace, setPickupPlace] = useState('');
@@ -13,6 +13,10 @@ function Payment() {
     const [paymentStatus, setPaymentStatus] = useState(null);
 
     useEffect(() => {
+        if(!user) {
+            router.push('/login');
+        }
+
         if (ride) {
             setSelectedCar(JSON.parse(ride));
         }
@@ -60,15 +64,16 @@ function Payment() {
                 time: selectedCar ? selectedCar.time : 0,   // Or other appropriate time
                 rating: selectedCar ? selectedCar.rating : 0,
                 driverProfile: selectedCar ? selectedCar.driverProfile : '',
+                userId: user?.id,
+                ...user,
             };
 
             // Add trip data after successful payment
-            await requestTrip(tripData);
-
-            setPaymentStatus('success');
-            setTimeout(() => {
-                router.push('/confirmation'); // Redirect to confirmation page
-            }, 1000);
+            await requestTrip(tripData).then((response) => {
+                console.log(`Success: ${JSON.stringify(response)}`);
+                setPaymentStatus('success');
+                router.push('/'); // Redirect to confirmation page
+            });
         } catch (error) {
             setPaymentStatus('failure');
         }

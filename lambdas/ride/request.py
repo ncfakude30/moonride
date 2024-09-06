@@ -35,6 +35,7 @@ def handler(event, context):
             # Construct the item to be added to DynamoDB
             item = {
                 'tripId': trip_id,
+                'userId': body.get('userId'),
                 'pickup': body.get('pickup'),
                 'dropoff': body.get('dropoff'),
                 'price': body.get('price'),

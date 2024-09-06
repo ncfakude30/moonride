@@ -44,7 +44,10 @@ export default function Home() {
                     </Profile>
                 </Header>
                 <ActionButtons>
-                    <Link href='/search'>
+                    <Link href={{
+                        pathname: '/search',
+                        query: { user}
+                    }}>
                         <ActionButton>
                             <ActionButtonImage src='https://i.ibb.co/cyvcpfF/uberx.png' />
                             Ride

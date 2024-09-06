@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import tw from 'tailwind-styled-components';
 import Link from 'next/link';
 import mapboxgl from 'mapbox-gl'; // Import Mapbox GL JS
@@ -7,13 +8,19 @@ import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'; // Import Mapbox Geocod
 mapboxgl.accessToken = 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ';
 
 function Search() {
+    const router = useRouter();
+    const { user } = router.query;
     const [pickup, setPickup] = useState('');
     const [dropoff, setDropoff] = useState('');
     const [map, setMap] = useState(null);
     const [pickupMarker, setPickupMarker] = useState(null);
     const [dropoffMarker, setDropoffMarker] = useState(null);
-
+    
     useEffect(() => {
+        if(!user) {
+            router.push('/login');
+        }
+        
         const mapContainer = document.getElementById('map');
         if (mapContainer && !map) {
             const newMap = new mapboxgl.Map({
@@ -125,6 +132,7 @@ function Search() {
                 query: {
                     pickup: pickupMarker ? pickupMarker.getLngLat().toArray().join(',') : pickup,
                     dropoff: dropoffMarker ? dropoffMarker.getLngLat().toArray().join(',') : dropoff,
+                    user,
                 }
             }}>
                 <ConfirmContainer>

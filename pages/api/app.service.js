@@ -12,6 +12,19 @@ const apiClient = axios.create({
     }
 });
 
+// Function to request pickup and dropoff
+export const loginApi = async (dto) => {
+    try {
+        
+        const response = await axios.post(`${apiEndpoint}/login`, dto);
+        return response.data;
+    } catch (error) {
+        console.error('Error logging trip:', error);
+        throw error; // Re-throw error to handle it in the component
+    }
+};
+
+
 // Fetch recent trips with pagination support
 export async function fetchRecentTrips(userId, lastEvaluatedKey = null, limit = 5) {
     try {

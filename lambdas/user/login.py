@@ -10,11 +10,11 @@ USERS_TABLE = os.getenv('USERS_TABLE', 'moonrides-users')
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(USERS_TABLE)
 
-def lambda_handler(event, context):
+def handler(event, context):
     headers = {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',  # Allow requests from any origin
-        'Access-Control-Allow-Methods': 'OPTIONS,GET',  # Allow specific HTTP methods
+        'Access-Control-Allow-Methods': 'OPTIONS,POST',  # Allow specific HTTP methods
         'Access-Control-Allow-Headers': 'Content-Type'
     }
 
@@ -26,44 +26,63 @@ def lambda_handler(event, context):
             'body': json.dumps({'message': 'CORS preflight successful'})
         }
 
-    if event['httpMethod'] == 'GET':
+    if event['httpMethod'] == 'POST':
         try:
-            # Retrieve userId from query parameters
-            user_id = event['queryStringParameters'].get('userId')
-            
-            # Validate userId
-            if not user_id:
+            # Parse the incoming request body
+            body = json.loads(event.get('body', '{}'))
+            email = body.get('email')
+            displayName = body.get('displayName')
+            photoURL = body.get('photoURL')
+            userId = body.get('id')
+
+            # Validate required fields
+            if not all([userId, email, displayName, photoURL]):
                 return {
                     'statusCode': 400,
                     'headers': headers,
-                    'body': json.dumps({'message': 'Missing userId parameter'})
+                    'body': json.dumps({'message': 'Missing required fields'})
                 }
 
-            # Query the DynamoDB table
+            # Check if the user already exists
             response = table.get_item(
-                Key={'userId': user_id}  # Assuming userId is the email in this context
+                Key={'userId': userId}
             )
 
-            # Check if the user exists
-            if 'Item' not in response:
+            if 'Item' in response:
                 return {
-                    'statusCode': 404,
+                    'statusCode': 409,
                     'headers': headers,
-                    'body': json.dumps({'message': 'User not found'})
+                    'body': json.dumps({'message': 'User already exists'})
                 }
 
-            # Return the user data
+            # Store user information in DynamoDB
+            table.put_item(
+                Item={
+                    'userId': userId,
+                    'email': email,
+                    'displayName': displayName,
+                    'photoURL': photoURL
+                }
+            )
+
             return {
-                'statusCode': 200,
+                'statusCode': 201,
                 'headers': headers,
-                'body': json.dumps(response['Item'])
+                'body': json.dumps({'message': 'User data stored successfully'})
+            }
+
+        except json.JSONDecodeError:
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'message': 'Invalid JSON format'})
             }
 
         except ClientError as e:
             return {
                 'statusCode': 500,
                 'headers': headers,
-                'body': json.dumps({'message': f'Error retrieving user data: {e.response["Error"]["Message"]}'})
+                'body': json.dumps({'message': f'Error storing user data: {e.response["Error"]["Message"]}'})
             }
 
         except Exception as e:

@@ -29,11 +29,20 @@ provider:
 functions:
   # Lambda for logging in
   login:
-    handler: login.handler
+    handler: user/login.handler
     events:
       - http:
           path: login
           method: post
+          cors: true  # Enable CORS for this endpoint
+
+    # Lambda for user info
+  user:
+    handler: user/user.handler
+    events:
+      - http:
+          path: user
+          method: get
           cors: true  # Enable CORS for this endpoint
   
   # Lambda for getting recent trips

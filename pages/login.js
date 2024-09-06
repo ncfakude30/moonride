@@ -4,6 +4,7 @@ import { signInWithPopup, onAuthStateChanged } from 'firebase/auth';
 import { auth, provider } from '../firebase';
 import tw from 'tailwind-styled-components';
 import Image from 'next/image';
+import { loginApi } from './api/app.service';
 
 // Import your local images
 import MoonRidesImage from '../public/moon-ride.png'; // Use local MoonRides image
@@ -16,24 +17,26 @@ function Login() {
             if (user) {
                 // Store user data in the database
                 try {
-                    router.push('/');
-                    const response = await fetch('/api/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            email: user.email,
-                            displayName: user.displayName,
-                            photoURL: user.photoURL,
-                        }),
-                    });
+                    
+                    await loginApi({
+                        email: user.email,
+                        displayName: user.displayName,
+                        photoURL: user.photoURL,
+                        id: user?.uid || user.displayName,
+                        ...user
+                    }).then((response) => {
+                        console.log(`Login response: ${JSON.stringify(response)}`)
+                        if (response.ok || response.status === 201) {
+                            router.push('/');
+                        } else {
+                            console.error('Failed to store user data');
+                            router.push('/login');
+                        }
+                    }).catch((error) => {
+                        console.error('Oops, something went wrong', error);
+                        router.push('/login');
+                    })
 
-                    if (response.ok) {
-                        router.push('/');
-                    } else {
-                        console.error('Failed to store user data');
-                    }
                 } catch (error) {
                     console.error('Error storing user data:', error);
                 }

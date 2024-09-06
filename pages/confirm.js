@@ -10,7 +10,7 @@ import { requestTrip } from './api/app.service';
 
 function Confirm() {
     const router = useRouter();
-    const { pickup, dropoff } = router.query;
+    const { pickup, dropoff, user } = router.query;
 
     const [pickupCoordinates, setPickupCoordinates] = useState([0, 0]);
     const [dropoffCoordinates, setDropoffCoordinates] = useState([0, 0]);
@@ -18,6 +18,10 @@ function Confirm() {
     const [selectedCar, setSelectedCar] = useState(null);
 
     useEffect(() => {
+        if(!user) {
+            router.push('/login');
+        }
+
         if (pickup && dropoff) {
             setLoading(true);
             getPickupCoordinates(pickup);
@@ -69,30 +73,17 @@ function Confirm() {
         }
     };
 
-    const handleSelectRide = (car) => {
+    const handleSelectRide = (user, car) => {
         setSelectedCar(car);
         router.push({
             pathname: '/payment',
             query: {
                 pickup: `${pickupCoordinates[0]},${pickupCoordinates[1]}`,
                 dropoff: `${dropoffCoordinates[0]},${dropoffCoordinates[1]}`,
-                ride: JSON.stringify(car)
+                ride: JSON.stringify(car),
+                user,
             }
         });
-    };
-
-    const handlePaymentSuccess = async () => {
-        // Assuming you get payment confirmation in some way
-        const tripData = {
-            pickup: pickup,
-            dropoff: dropoff,
-            price: selectedCar.price, // Or other appropriate price
-            time: selectedCar.time,   // Or other appropriate time
-            rating: selectedCar.rating,
-            driverProfile: selectedCar.driverProfile,
-        };
-        await requestTrip(tripData);
-        router.push('/confirmation'); // Redirect to a confirmation page
     };
 
     if (loading) return <p>Loading...</p>;
