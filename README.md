@@ -17,7 +17,6 @@ Then open [http://localhost:3000](http://localhost:3000) with your browser.
 
 ## Development
 
-
 * [React](https://reactjs.org/)
 * [Next.js](https://nextjs.org/)
 * [Firebase](https://firebase.google.com/)
