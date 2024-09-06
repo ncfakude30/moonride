@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import RideSelector from './components/RideSelector';
 import Link from 'next/link';
 import Image from 'next/image';
-import { addTrip } from './api/app.service';
+import { requestTrip } from './api/app.service';
 
 
 function Confirm() {
@@ -91,7 +91,7 @@ function Confirm() {
             rating: selectedCar.rating,
             driverProfile: selectedCar.driverProfile,
         };
-        await addTrip(tripData);
+        await requestTrip(tripData);
         router.push('/confirmation'); // Redirect to a confirmation page
     };
 

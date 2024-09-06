@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import tw from 'tailwind-styled-components';
-import { requestTrip } from './api/app.service'; // Import the addTrip function
+import { requestTrip } from './api/app.service'; // Import the requestTrip function
 
 function Payment() {
     const router = useRouter();
