@@ -18,6 +18,10 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Install dependencies for Serverless Framework
+        working-directory: ./lambdas
+        run: npm install
+
       - name: Install Serverless Framework
         run: npm install -g serverless
 
