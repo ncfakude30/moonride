@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import tw from 'tailwind-styled-components';
 import Image from 'next/image';
 import { fetchRecentTrips } from '../api/app.service';
+
 function RecentTrips({ user }) {
     const [trips, setTrips] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -14,6 +15,7 @@ function RecentTrips({ user }) {
             try {
                 setLoading(true);
                 const fetchedTrips = await fetchRecentTrips(user?.id, lastEvaluatedKey);
+                console.log(`My fetch: ${JSON.stringify(fetchedTrips)}`)
                 if (fetchedTrips.trips.length > 0) {
                     setTrips(prevTrips => append ? [...prevTrips, ...fetchedTrips.trips] : fetchedTrips.trips);
                 }

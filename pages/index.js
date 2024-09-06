@@ -61,7 +61,7 @@ export default function Home() {
                         Reserve
                     </ActionButton>
                 </ActionButtons>
-                <RecentTrips />
+                <RecentTrips user={user} />
             </ActionItems>
         </Wrapper>
     );

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const apiEndpoint = 'https://ufqmmf6blc.execute-api.us-east-1.amazonaws.com/dev';
+const apiEndpoint = process.env.API_BASE_URL || 'https://ufqmmf6blc.execute-api.us-east-1.amazonaws.com/dev'
 
 // Create a centralized axios instance with default configuration
 const apiClient = axios.create({
