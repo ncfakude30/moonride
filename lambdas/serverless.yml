@@ -47,7 +47,7 @@ functions:
 
   # Lambda for selecting a ride
   requestRide:
-    handler: request_ride.handler
+    handler: ride/request.handler
     events:
       - http:
           path: request
