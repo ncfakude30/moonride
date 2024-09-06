@@ -1,39 +1,26 @@
-name: Deploy Moonride Lambdas
+name: Deploy Moonride Backend
 
 on:
   push:
-    paths:
-      - 'lambdas/**'
     branches:
-      - main  # or your default branch
+      - develop
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.9
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
 
-    - name: Install Serverless Framework
-      run: npm install -g serverless
+      - name: Install Serverless Framework
+        run: npm install -g serverless
 
-    - name: Install dependencies
-      run: |
-        cd lambdas
-        pip install -r requirements.txt
-
-    - name: Deploy Serverless
-      run: |
-        cd lambdas
-        echo ${{ secrets.SERVERLESS_ACCESS_KEY }}
-        serverless deploy
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: us-east-1  # or your region
+      - name: Deploy Backend to AWS Lambda
+        working-directory: ./lambdas
+        run: serverless deploy

@@ -2,13 +2,13 @@
 
 import axios from 'axios';
 
-const apiEndpoint = 'https://t8qeu3k.execute-api.us-east-1.amazonaws.com/dev-moonrides';
+const apiEndpoint = 'https://ufqmmf6blc.execute-api.us-east-1.amazonaws.com/dev';
 
 // Fetch recent trips
 export async function fetchRecentTrips(userId) {
     try {
         console.error(`My fetch: ${JSON.stringify(userId)}`)
-        const response = await axios.get(`${apiEndpoint}/recent-trips`, {
+        const response = await axios.get(`${apiEndpoint}/trips`, {
             params: { userId }
         });
         console.error(`My fetch: ${JSON.stringify(response.data)}`)
