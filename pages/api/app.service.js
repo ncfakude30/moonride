@@ -32,15 +32,15 @@ export async function fetchRecentTrips(userId, lastEvaluatedKey = null, limit = 
     }
 }
 
-// Add a new trip
-export async function addTrip(tripData) {
+
+// Function to request pickup and dropoff
+export const requestTrip = async (dto) => {
     try {
-        const response = await apiClient.post('/request', tripData);
+        
+        const response = await axios.post(`${apiEndpoint}/request`, dto);
         return response.data;
     } catch (error) {
-        console.error('Error adding trip:', error);
-        return {
-            error: error.response ? error.response.data : 'An error occurred while adding the trip'
-        };
+        console.error('Error requesting trip:', error);
+        throw error; // Re-throw error to handle it in the component
     }
-}
+};

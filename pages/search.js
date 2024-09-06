@@ -73,7 +73,7 @@ function Search() {
                     newMap.setZoom(14); // Set zoom level closer to user's location
                 },
                 (error) => {
-                    console.error('Error getting user location:', error);
+                    logger.error('Error getting user location:', error);
                     // Optionally handle error and set default location
                 }
             );

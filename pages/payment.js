@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import tw from 'tailwind-styled-components';
+import { requestTrip } from './api/app.service'; // Import the addTrip function
 
 function Payment() {
     const router = useRouter();
@@ -50,9 +51,23 @@ function Payment() {
         try {
             // Mock payment process
             await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate network delay
+
+            // Assuming you have the trip data
+            const tripData = {
+                pickup: pickup,
+                dropoff: dropoff,
+                price: selectedCar ? selectedCar.price : 0, // Or other appropriate price
+                time: selectedCar ? selectedCar.time : 0,   // Or other appropriate time
+                rating: selectedCar ? selectedCar.rating : 0,
+                driverProfile: selectedCar ? selectedCar.driverProfile : '',
+            };
+
+            // Add trip data after successful payment
+            await requestTrip(tripData);
+
             setPaymentStatus('success');
             setTimeout(() => {
-                router.push('/'); // Redirect to home page after payment success
+                router.push('/confirmation'); // Redirect to confirmation page
             }, 1000);
         } catch (error) {
             setPaymentStatus('failure');
@@ -72,7 +87,7 @@ function Payment() {
                         <p><strong>Price:</strong> {selectedCar.multiplier * 10}</p> {/* Replace with actual price calculation */}
                     </div>
                 )}
-                {paymentStatus === 'success' && <SuccessMessage>Payment successful! Redirecting to home...</SuccessMessage>}
+                {paymentStatus === 'success' && <SuccessMessage>Payment successful! Redirecting to confirmation...</SuccessMessage>}
                 {paymentStatus === 'failure' && <ErrorMessage>Payment failed. Please try again.</ErrorMessage>}
             </Details>
             <Button onClick={handlePayment}>Confirm Payment</Button>
