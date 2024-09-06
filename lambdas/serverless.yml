@@ -38,7 +38,7 @@ functions:
   
   # Lambda for getting recent trips
   getRecentTrips:
-    handler: get_recent_trips.handler
+    handler: ride/ride.handler
     events:
       - http:
           path: trips
