@@ -1,0 +1,100 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: ncfcorp
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: moon-rides
+service: moonrides
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+  environment:
+    TRIPS_TABLE: TripsTable
+    # Add any additional environment variables here
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+        - dynamodb:Query
+      Resource:
+        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRIPS_TABLE}
+    - Effect: "Allow"
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: "*"
+
+functions:
+  # Lambda for logging in
+  login:
+    handler: login.handler
+    events:
+      - http:
+          path: login
+          method: post
+          cors: true  # Enable CORS for this endpoint
+  
+  # Lambda for getting recent trips
+  getRecentTrips:
+    handler: get_recent_trips.handler
+    events:
+      - http:
+          path: trips
+          method: get
+          cors: true  # Enable CORS for this endpoint
+
+  # Lambda for selecting a ride
+  requestRide:
+    handler: request_ride.handler
+    events:
+      - http:
+          path: request
+          method: post
+          cors: true  # Enable CORS for this endpoint
+
+  # Lambda for processing payment
+  processPayment:
+    handler: process_payment.handler
+    events:
+      - http:
+          path: payment
+          method: post
+          cors: true  # Enable CORS for this endpoint
+
+resources:
+  Resources:
+    TripsTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:provider.environment.TRIPS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: tripDate
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+          - AttributeName: tripDate
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    layer: true
+    slim: true
+    zip: true
+
+package:
+  individually: true
+  include:
+    - vendor/**
+    - handler.py
