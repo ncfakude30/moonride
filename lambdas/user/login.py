@@ -4,7 +4,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 # Environment variables
-USERS_TABLE = os.getenv('USERS_TABLE', 'moonrides-users')
+USERS_TABLE = os.getenv('USERS_TABLE', 'UsersTable')
 
 # Initialize DynamoDB resource
 dynamodb = boto3.resource('dynamodb')
