@@ -165,10 +165,6 @@ resources:
         AttributeDefinitions:
           - AttributeName: messageId
             AttributeType: S
-          - AttributeName: senderConnectionId
-            AttributeType: S
-          - AttributeName: recipientConnectionId
-            AttributeType: S
         KeySchema:
           - AttributeName: messageId
             KeyType: HASH
