@@ -3,24 +3,21 @@ import json
 import boto3
 from botocore.exceptions import ClientError
 
-# Environment variables
 USERS_TABLE = os.getenv('USERS_TABLE', 'moonrides-users')
-
-# Initialize DynamoDB resource
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(USERS_TABLE)
 
 def handler(event, context):
+    print(f'Received event: {event}')
     headers = {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',  # Allow requests from any origin
-        'Access-Control-Allow-Methods': 'OPTIONS,POST',  # Allow specific HTTP methods
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS,POST',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Allow-Credentials': True,
     }
-    
+
     if event['httpMethod'] == 'OPTIONS':
-        # Handle CORS preflight requests
         return {
             'statusCode': 200,
             'headers': headers,
@@ -29,14 +26,12 @@ def handler(event, context):
 
     if event['httpMethod'] == 'POST':
         try:
-            # Parse the incoming request body
             body = json.loads(event.get('body', '{}'))
             email = body.get('email')
             displayName = body.get('displayName')
             photoURL = body.get('photoURL')
             userId = body.get('id')
 
-            # Validate required fields
             if not all([userId, email, displayName, photoURL]):
                 return {
                     'statusCode': 400,
@@ -44,10 +39,7 @@ def handler(event, context):
                     'body': json.dumps({'message': 'Missing required fields'})
                 }
 
-            # Check if the user already exists
-            response = table.get_item(
-                Key={'userId': userId}
-            )
+            response = table.get_item(Key={'userId': userId})
 
             if 'Item' in response:
                 return {
@@ -56,7 +48,6 @@ def handler(event, context):
                     'body': json.dumps({'message': 'User already exists'})
                 }
 
-            # Store user information in DynamoDB
             table.put_item(
                 Item={
                     'userId': userId,
@@ -80,6 +71,7 @@ def handler(event, context):
             }
 
         except ClientError as e:
+            print(f'ClientError: {e}')
             return {
                 'statusCode': 500,
                 'headers': headers,
@@ -87,15 +79,15 @@ def handler(event, context):
             }
 
         except Exception as e:
+            print(f'Exception: {str(e)}')
             return {
                 'statusCode': 500,
                 'headers': headers,
                 'body': json.dumps({'message': f'Internal server error: {str(e)}'})
             }
     
-    else:
-        return {
-            'statusCode': 405,
-            'headers': headers,
-            'body': json.dumps({'message': 'Method not allowed'})
-        }
+    return {
+        'statusCode': 405,
+        'headers': headers,
+        'body': json.dumps({'message': 'Method not allowed'})
+    }

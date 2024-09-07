@@ -20,6 +20,7 @@ export const loginApi = async (dto) => {
         return response.data;
     } catch (error) {
         console.error('Error logging trip:', error);
+        console.error(error)
         throw error; // Re-throw error to handle it in the component
     }
 };

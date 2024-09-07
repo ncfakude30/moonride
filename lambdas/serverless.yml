@@ -10,7 +10,7 @@ provider:
   region: us-east-1
   environment:
     TRIPS_TABLE: TripsTable
-    # Add any additional environment variables here
+    USERS_TABLE: UsersTable  # Added Users Table environment variable
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -19,6 +19,7 @@ provider:
         - dynamodb:Query
       Resource:
         - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRIPS_TABLE}
+        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}  # Allow access to Users Table
     - Effect: "Allow"
       Action:
         - logs:CreateLogGroup
@@ -27,50 +28,85 @@ provider:
       Resource: "*"
 
 functions:
-  # Lambda for logging in
   login:
     handler: user/login.handler
     events:
       - http:
           path: login
           method: post
-          cors: true  # Enable CORS for this endpoint
+          cors:
+            origin:
+              - 'https://www.moonride.co.za'
+              - 'https://moonride.co.za'
+              - 'http://localhost:3000'  # Allow local testing on port 3000
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
 
-    # Lambda for user info
-  user:
-    handler: user/user.handler
+  getUser:
+    handler: user/getUser.handler  # Lambda function to retrieve user data
     events:
       - http:
-          path: user
+          path: user/{userId}
           method: get
-          cors: true  # Enable CORS for this endpoint
+          cors:
+            origin:
+              - 'https://www.moonride.co.za'
+              - 'https://moonride.co.za'
+              - 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
   
-  # Lambda for getting recent trips
   getRecentTrips:
     handler: ride/ride.handler
     events:
       - http:
           path: trips
           method: get
-          cors: true  # Enable CORS for this endpoint
+          cors:
+            origin:
+              - 'https://www.moonride.co.za'
+              - 'https://moonride.co.za'
+              - 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
 
-  # Lambda for selecting a ride
   requestRide:
     handler: ride/request.handler
     events:
       - http:
           path: request
           method: post
-          cors: true  # Enable CORS for this endpoint
+          cors:
+            origin:
+              - 'https://www.moonride.co.za'
+              - 'https://moonride.co.za'
+              - 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
 
-  # Lambda for processing payment
   processPayment:
     handler: process_payment.handler
     events:
       - http:
           path: payment
           method: post
-          cors: true  # Enable CORS for this endpoint
+          cors:
+            origin:
+              - 'https://www.moonride.co.za'
+              - 'https://moonride.co.za'
+              - 'http://localhost:3000'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
 
 resources:
   Resources:
@@ -88,6 +124,20 @@ resources:
             KeyType: HASH
           - AttributeName: tripDate
             KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+
+    UsersTable:  # Added UsersTable resource
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:provider.environment.USERS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5

@@ -9,7 +9,7 @@ PAGE_LIMIT = os.getenv('PAGE_LIMIT', 5)
 dynamodb = boto3.resource('dynamodb')
 
 def handler(event, context):
-    print(f'My event: {event}')
+    print(f'Received event: {event}')
     
     user_id = event['queryStringParameters']['userId']
     limit = int(event['queryStringParameters'].get('limit', PAGE_LIMIT))  # Number of items per page

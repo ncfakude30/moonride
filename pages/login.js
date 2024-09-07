@@ -26,7 +26,7 @@ function Login() {
                         ...user
                     }).then((response) => {
                         console.log(`Login response: ${JSON.stringify({response})}`);
-                        if (response.ok || response.status === 201) {
+                        if (response.ok || response.status === 201 || response.status === 409) {
                             router.push('/');
                         } else {
                             console.error('Failed to store user data');
