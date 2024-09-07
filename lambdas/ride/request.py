@@ -48,7 +48,9 @@ def handler(event, context):
                 'time': body.get('time'),
                 'rating': body.get('rating'),
                 'driverProfile': body.get('driverProfile'),
-                'tripDate': trip_date  # Add the tripDate attribute
+                'pickupName': body.get('pickupName'),
+                'dropoffName': body.get('dropoffName'),
+                'tripDate': trip_date
             }
             
             # Add the item to DynamoDB

@@ -78,6 +78,8 @@ function Payment() {
                 rating: selectedCar ? selectedCar.rating : 0,
                 driverProfile: selectedCar ? selectedCar.driverProfile : '',
                 userId: `${user?.userId || user?.id  || user?.uuid}`,
+                pickupName: pickupPlace,
+                dropoffName: dropoffPlace,
                 ...user, // Spread loggedUser properties
             };
 

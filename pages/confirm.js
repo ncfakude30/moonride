@@ -79,7 +79,7 @@ function Confirm() {
         }
     };
 
-    const handleSelectRide = (user, car) => {
+    const handleSelectRide = (car) => {
         setSelectedCar(car);
 
         console.log(`User in confirm button: ${JSON.stringify({loggedUser})}`)
