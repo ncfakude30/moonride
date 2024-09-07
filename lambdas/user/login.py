@@ -4,34 +4,32 @@ import boto3
 from botocore.exceptions import ClientError
 
 # Environment variables
-USERS_TABLE = os.getenv('USERS_TABLE', 'UsersTable')
+USERS_TABLE = os.getenv('USERS_TABLE', 'moonrides-users')
 
 # Initialize DynamoDB resource
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(USERS_TABLE)
 
 def handler(event, context):
-    # CORS headers
-    allowed_origins = ['https://www.moonride.co.za', 'http://localhost:3000']
-    origin = event.get('headers', {}).get('origin')
-    
-    response_headers = {
+    print(f'Received event: {event}')
+    headers = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS,POST',
         'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-        'Access-Control-Allow-Origin': origin if origin in allowed_origins else 'https://www.moonride.co.za',
-        'Access-Control-Allow-Credentials': 'true'
+         'Access-Control-Allow-Credentials': 'true'
     }
 
     if event['httpMethod'] == 'OPTIONS':
-        # Handle CORS preflight requests
+         # Handle CORS preflight requests
         return {
             'statusCode': 200,
-            'headers': response_headers,
+            'headers': headers,
             'body': json.dumps({'message': 'CORS preflight successful'})
         }
 
     if event['httpMethod'] == 'POST':
         try:
-            # Parse the incoming request body
             body = json.loads(event.get('body', '{}'))
             email = body.get('email')
             displayName = body.get('displayName')
@@ -42,23 +40,19 @@ def handler(event, context):
             if not all([userId, email, displayName, photoURL]):
                 return {
                     'statusCode': 400,
-                    'headers': response_headers,
+                    'headers': headers,
                     'body': json.dumps({'message': 'Missing required fields'})
                 }
 
-            # Check if the user already exists
-            response = table.get_item(
-                Key={'userId': userId}
-            )
+            response = table.get_item(Key={'userId': userId})
 
             if 'Item' in response:
                 return {
-                    'statusCode': 409,
-                    'headers': response_headers,
-                    'body': json.dumps({'message': 'User already exists'})
+                    'statusCode': 200,
+                    'headers': headers,
+                    'body': json.dumps({'message': 'User already exists', 'success': True})
                 }
 
-            # Store user information in DynamoDB
             table.put_item(
                 Item={
                     'userId': userId,
@@ -70,34 +64,35 @@ def handler(event, context):
 
             return {
                 'statusCode': 201,
-                'headers': response_headers,
-                'body': json.dumps({'message': 'User data stored successfully'})
+                'headers': headers,
+                'body': json.dumps({'message': 'User data stored successfully', 'success': True})
             }
 
         except json.JSONDecodeError:
             return {
                 'statusCode': 400,
-                'headers': response_headers,
+                'headers': headers,
                 'body': json.dumps({'message': 'Invalid JSON format'})
             }
 
         except ClientError as e:
+            print(f'ClientError: {e}')
             return {
                 'statusCode': 500,
-                'headers': response_headers,
+                'headers': headers,
                 'body': json.dumps({'message': f'Error storing user data: {e.response["Error"]["Message"]}'})
             }
 
         except Exception as e:
+            print(f'Exception: {str(e)}')
             return {
                 'statusCode': 500,
-                'headers': response_headers,
+                'headers': headers,
                 'body': json.dumps({'message': f'Internal server error: {str(e)}'})
             }
     
-    else:
-        return {
-            'statusCode': 405,
-            'headers': response_headers,
-            'body': json.dumps({'message': 'Method not allowed'})
-        }
+    return {
+        'statusCode': 405,
+        'headers': headers,
+        'body': json.dumps({'message': 'Method not allowed'})
+    }
