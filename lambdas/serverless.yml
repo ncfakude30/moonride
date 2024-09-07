@@ -116,6 +116,7 @@ functions:
       - websocket:
           route: $default
 
+
 resources:
   Resources:
     TripsTable:
