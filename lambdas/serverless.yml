@@ -104,9 +104,7 @@ resources:
             KeyType: HASH
           - AttributeName: tripDate
             KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
+        BillingMode: PAY_PER_REQUEST  # Use on-demand mode
 
     UsersTable:  # Added UsersTable resource
       Type: "AWS::DynamoDB::Table"
@@ -118,9 +116,7 @@ resources:
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
+        BillingMode: PAY_PER_REQUEST  # Use on-demand mode
 
 plugins:
   - serverless-python-requirements
