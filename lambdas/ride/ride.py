@@ -2,11 +2,17 @@ import os
 import boto3
 from boto3.dynamodb.conditions import Key
 import json
+from decimal import Decimal
 
 RECENT_TRIPS_TABLE = os.getenv('RECENT_TRIPS_TABLE', 'TripsTable')
 PAGE_LIMIT = int(os.getenv('PAGE_LIMIT', 5))  # Ensure PAGE_LIMIT is an integer
 
 dynamodb = boto3.resource('dynamodb')
+
+def decimal_to_float(obj):
+    if isinstance(obj, Decimal):
+        return float(obj)
+    raise TypeError("Object of type Decimal is not JSON serializable")
 
 def handler(event, context):
     print(f'Received event: {event}')
@@ -58,7 +64,7 @@ def handler(event, context):
     
             # Prepare the result with pagination information
             result = {
-                'trips': response['Items']
+                'trips': [json.loads(json.dumps(item), object_hook=decimal_to_float) for item in response['Items']]
             }
     
             # If there are more items to be fetched, include the LastEvaluatedKey
@@ -68,7 +74,7 @@ def handler(event, context):
             return {
                 'statusCode': 200,
                 'headers': headers,
-                'body': json.dumps(result)
+                'body': json.dumps(result, default=decimal_to_float)
             }
         except Exception as e:
             print(f"Exception occurred: {str(e)}")
