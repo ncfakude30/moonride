@@ -25,7 +25,7 @@ function Login() {
                         id: user?.uid || user.displayName,
                         ...user
                     }).then((response) => {
-                        console.log(`Login response: ${JSON.stringify(response)}`)
+                        console.log(`Login response: ${JSON.stringify({response})}`);
                         if (response.ok || response.status === 201) {
                             router.push('/');
                         } else {

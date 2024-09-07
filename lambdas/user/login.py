@@ -15,9 +15,10 @@ def handler(event, context):
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',  # Allow requests from any origin
         'Access-Control-Allow-Methods': 'OPTIONS,POST',  # Allow specific HTTP methods
-        'Access-Control-Allow-Headers': 'Content-Type'
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Credentials': True,
     }
-
+    
     if event['httpMethod'] == 'OPTIONS':
         # Handle CORS preflight requests
         return {
