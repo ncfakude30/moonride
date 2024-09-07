@@ -15,7 +15,7 @@ function Payment() {
 
     useEffect(() => {
         // Redirect to login page if no loggedUser is found
-        if (!loggedUser) {
+        if (!user) {
             router.push('/login');
         }
 
@@ -27,7 +27,7 @@ function Payment() {
             fetchPlaceName(pickup, 'pickup');
             fetchPlaceName(dropoff, 'dropoff');
         }
-    }, [ride, pickup, dropoff, loggedUser, router]);
+    }, [ride, pickup, dropoff, user, router]);
 
     const fetchPlaceName = async (coordinates, type) => {
         try {
@@ -55,7 +55,7 @@ function Payment() {
     };
 
     const handlePayment = async () => {
-        if (!loggedUser) {
+        if (!user) {
             // Handle the case where loggedUser is not available
             console.error('User is not logged in');
             setPaymentStatus('failure');
@@ -74,8 +74,8 @@ function Payment() {
                 time: selectedCar ? selectedCar.time : 0,   // Or other appropriate time
                 rating: selectedCar ? selectedCar.rating : 0,
                 driverProfile: selectedCar ? selectedCar.driverProfile : '',
-                userId: loggedUser.id,
-                ...loggedUser, // Spread loggedUser properties
+                userId: `${user?.uuid || user?.id}`,
+                ...user, // Spread loggedUser properties
             };
 
             // Add trip data after successful payment
