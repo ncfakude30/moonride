@@ -197,7 +197,7 @@ resources:
         ApiId: !Ref WebSocketApi
         RouteKey: '$connect'
         AuthorizationType: NONE
-        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:functions.connect.arn}/invocations'
+        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${WebSocketConnectLambda.Arn}/invocations'
 
     WebSocketApiRouteDisconnect:
       Type: 'AWS::ApiGatewayV2::Route'
@@ -205,7 +205,7 @@ resources:
         ApiId: !Ref WebSocketApi
         RouteKey: '$disconnect'
         AuthorizationType: NONE
-        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:functions.disconnect.arn}/invocations'
+        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${WebSocketDisconnectLambda.Arn}/invocations'
 
     WebSocketApiRouteMessage:
       Type: 'AWS::ApiGatewayV2::Route'
@@ -213,14 +213,14 @@ resources:
         ApiId: !Ref WebSocketApi
         RouteKey: '$default'
         AuthorizationType: NONE
-        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:functions.message.arn}/invocations'
+        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${WebSocketMessageLambda.Arn}/invocations'
 
     WebSocketApiIntegrationConnect:
       Type: 'AWS::ApiGatewayV2::Integration'
       Properties:
         ApiId: !Ref WebSocketApi
         IntegrationType: AWS_PROXY
-        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:functions.connect.arn}/invocations'
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${WebSocketConnectLambda.Arn}/invocations'
         PayloadFormatVersion: '2.0'
 
     WebSocketApiIntegrationDisconnect:
@@ -228,7 +228,7 @@ resources:
       Properties:
         ApiId: !Ref WebSocketApi
         IntegrationType: AWS_PROXY
-        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:functions.disconnect.arn}/invocations'
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${WebSocketDisconnectLambda.Arn}/invocations'
         PayloadFormatVersion: '2.0'
 
     WebSocketApiIntegrationMessage:
@@ -236,7 +236,7 @@ resources:
       Properties:
         ApiId: !Ref WebSocketApi
         IntegrationType: AWS_PROXY
-        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:functions.message.arn}/invocations'
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${WebSocketMessageLambda.Arn}/invocations'
         PayloadFormatVersion: '2.0'
 
     WebSocketApiPermissionConnect:
