@@ -6,9 +6,8 @@ import { requestTrip } from './api/app.service'; // Import the requestTrip funct
 function Payment() {
     const router = useRouter();
     let { pickup, dropoff, ride, user } = router.query;
-    user = user ? JSON.parse(user) : null;
-
     const [selectedCar, setSelectedCar] = useState(null);
+    const [loggedUser, setUser] = useState(null);
     const [pickupPlace, setPickupPlace] = useState('');
     const [dropoffPlace, setDropoffPlace] = useState('');
     const [paymentStatus, setPaymentStatus] = useState(null);
@@ -18,6 +17,8 @@ function Payment() {
         if (!user) {
             router.push('/login');
         }
+        
+        setUser(JSON.parse(user));
 
         // Set selected car and place names
         if (ride) {
@@ -74,9 +75,11 @@ function Payment() {
                 time: selectedCar ? selectedCar.time : 0,   // Or other appropriate time
                 rating: selectedCar ? selectedCar.rating : 0,
                 driverProfile: selectedCar ? selectedCar.driverProfile : '',
-                userId: `${user?.uuid || user?.id}`,
+                userId: `${loggedUser?.uuid || loggedUser?.id}`,
                 ...user, // Spread loggedUser properties
             };
+
+            console.log(`My trip: ${JSON.stringify({loggedUser})}`)
 
             // Add trip data after successful payment
             await requestTrip(tripData).then((response) => {
