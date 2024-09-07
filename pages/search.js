@@ -9,9 +9,9 @@ mapboxgl.accessToken = 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2d
 
 function Search() {
     const router = useRouter();
-    let { user } = router.query;
-    user = user ? JSON.parse(user) : null;
+    const { user } = router.query;
     
+    const [loggedUser, setUser] = useState(null);
     const [pickup, setPickup] = useState('');
     const [dropoff, setDropoff] = useState('');
     const [map, setMap] = useState(null);
@@ -20,8 +20,11 @@ function Search() {
     
     useEffect(() => {
         if (!user) {
+            setUser(null);
             router.push('/login');
         }
+
+        setUser(JSON.parse(user));
         
         const mapContainer = document.getElementById('map');
         if (mapContainer && !map) {
@@ -128,7 +131,7 @@ function Search() {
                 query: {
                     pickup: pickupMarker ? pickupMarker.getLngLat().toArray().join(',') : pickup,
                     dropoff: dropoffMarker ? dropoffMarker.getLngLat().toArray().join(',') : dropoff,
-                    user: JSON.stringify(user),
+                    user: JSON.stringify(loggedUser),
                 }
             }}>
                 <ConfirmContainer>

@@ -2,6 +2,7 @@ import os
 import boto3
 from uuid import uuid4
 import json
+from datetime import datetime
 
 TRIP_TABLE = os.getenv('TRIP_TABLE', 'TripsTable')
 
@@ -15,7 +16,7 @@ def handler(event, context):
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'OPTIONS,POST',
         'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-         'Access-Control-Allow-Credentials': 'true'
+        'Access-Control-Allow-Credentials': 'true'
     }
 
     if event['httpMethod'] == 'OPTIONS':
@@ -34,6 +35,9 @@ def handler(event, context):
             # Generate a unique tripId
             trip_id = str(uuid4())
             
+            # Get the current date and time for tripDate
+            trip_date = datetime.utcnow().isoformat()  # ISO 8601 format
+            
             # Construct the item to be added to DynamoDB
             item = {
                 'tripId': trip_id,
@@ -44,6 +48,7 @@ def handler(event, context):
                 'time': body.get('time'),
                 'rating': body.get('rating'),
                 'driverProfile': body.get('driverProfile'),
+                'tripDate': trip_date  # Add the tripDate attribute
             }
             
             # Add the item to DynamoDB
@@ -59,11 +64,11 @@ def handler(event, context):
                 })
             }
         except Exception as e:
-            print(e)
+            print(f"Exception occurred: {str(e)}")
             return {
                 'statusCode': 500,
                 'headers': headers,
-                'body': json.dumps({'message': 'Error adding trip'})
+                'body': json.dumps({'message': 'Error adding trip', 'error': str(e)})
             }
     else:
         return {

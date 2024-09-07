@@ -23,16 +23,22 @@ const getUserCountryCode = async () => {
     }
 };
 
-function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide }) {
+function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, loggedUser }) {
     const [rideDuration, setRideDuration] = useState(0);
     const [selectedCar, setSelectedCar] = useState(null);
-    const [currency, setCurrency] = useState('USD');
+    const [currency, setCurrency] = useState('ZAR');
+    const [user, setUser] = useState(loggedUser);
 
     useEffect(() => {
+        if(loggedUser) {
+            setUser(user);
+        }
+
         const fetchData = async () => {
             const countryCode = await getUserCountryCode();
             setCurrency(getCurrencyCode(countryCode));
         };
+
 
         fetchData();
     }, []);
@@ -53,7 +59,8 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide }) {
             .catch(err => console.error('Fetch error:', err));
     }, [pickupCoordinates, dropoffCoordinates]);
 
-    const handleCarClick = (car) => {
+    const handleCarClick = (user, car) => {
+        setUser(user)
         setSelectedCar(car);
         onSelectRide(car); // Notify parent component about the selected car
     };
@@ -65,7 +72,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide }) {
                 {carList.map((car, index) => (
                     <Car 
                         key={index} 
-                        onClick={() => handleCarClick(car)}
+                        onClick={() => handleCarClick(loggedUser, car)}
                         isSelected={selectedCar?.service === car.service}
                     >
                         <CarImage src={car.imgUrl} />

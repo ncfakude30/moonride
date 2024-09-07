@@ -5,32 +5,35 @@ import { useRouter } from 'next/router';
 import RideSelector from './components/RideSelector';
 import Link from 'next/link';
 import Image from 'next/image';
-import { requestTrip } from './api/app.service';
 
 
 function Confirm() {
     const router = useRouter();
     let { pickup, dropoff, user } = router.query;
 
-    const [loggedUser, setUser] = useState(null);
+  
     const [pickupCoordinates, setPickupCoordinates] = useState([0, 0]);
     const [dropoffCoordinates, setDropoffCoordinates] = useState([0, 0]);
     const [loading, setLoading] = useState(true);
     const [selectedCar, setSelectedCar] = useState(null);
+    const [loggedUser, setUser] = useState(null);
 
     useEffect(() => {
         if(!user) {
+            setUser(null)
             router.push('/login');
         }
 
-        setUser(JSON.parse(user))
+        setUser(JSON.parse(user || loggedUser))
+
+        console.log(`User in confirm intially: ${JSON.stringify(user)}`)
 
         if (pickup && dropoff) {
             setLoading(true);
             getPickupCoordinates(pickup);
             getDropoffCoordinates(dropoff);
         }
-    }, [pickup, dropoff, user]);
+    }, [pickup, dropoff, user, router]);
 
     useEffect(() => {
         if (pickupCoordinates.length > 0 && dropoffCoordinates.length > 0) {
@@ -78,13 +81,16 @@ function Confirm() {
 
     const handleSelectRide = (user, car) => {
         setSelectedCar(car);
+
+        console.log(`User in confirm button: ${JSON.stringify({loggedUser})}`)
+
         router.push({
             pathname: '/payment',
             query: {
                 pickup: `${pickupCoordinates[0]},${pickupCoordinates[1]}`,
                 dropoff: `${dropoffCoordinates[0]},${dropoffCoordinates[1]}`,
                 ride: JSON.stringify(car),
-                user: JSON.stringify(user),
+                user: JSON.stringify({userId: loggedUser?.id || loggedUser?.uuid,...loggedUser}),
             }
         });
     };
@@ -109,6 +115,7 @@ function Confirm() {
                     pickupCoordinates={pickupCoordinates}
                     dropoffCoordinates={dropoffCoordinates}
                     onSelectRide={handleSelectRide}
+                    loggedUser={loggedUser}
                 />
                 <ConfirmButtonContainer>
                     <ConfirmButton onClick={() => handleSelectRide(loggedUser, selectedCar)}>

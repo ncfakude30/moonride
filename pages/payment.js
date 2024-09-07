@@ -7,6 +7,7 @@ function Payment() {
     const router = useRouter();
     let { pickup, dropoff, ride, user } = router.query;
     const [selectedCar, setSelectedCar] = useState(null);
+
     const [loggedUser, setUser] = useState(null);
     const [pickupPlace, setPickupPlace] = useState('');
     const [dropoffPlace, setDropoffPlace] = useState('');
@@ -15,9 +16,10 @@ function Payment() {
     useEffect(() => {
         // Redirect to login page if no loggedUser is found
         if (!user) {
+            setUser(null)
             router.push('/login');
         }
-        
+
         setUser(JSON.parse(user));
 
         // Set selected car and place names
@@ -55,7 +57,7 @@ function Payment() {
         }
     };
 
-    const handlePayment = async () => {
+    const handlePayment = async (user) => {
         if (!user) {
             // Handle the case where loggedUser is not available
             console.error('User is not logged in');
@@ -75,11 +77,11 @@ function Payment() {
                 time: selectedCar ? selectedCar.time : 0,   // Or other appropriate time
                 rating: selectedCar ? selectedCar.rating : 0,
                 driverProfile: selectedCar ? selectedCar.driverProfile : '',
-                userId: `${loggedUser?.uuid || loggedUser?.id}`,
+                userId: `${user?.userId || user?.id  || user?.uuid}`,
                 ...user, // Spread loggedUser properties
             };
 
-            console.log(`My trip: ${JSON.stringify({loggedUser})}`)
+            console.log(`My trip user: ${JSON.stringify({user})}`)
 
             // Add trip data after successful payment
             await requestTrip(tripData).then((response) => {
@@ -109,9 +111,10 @@ function Payment() {
                 {paymentStatus === 'success' && <SuccessMessage>Payment successful! Redirecting to confirmation...</SuccessMessage>}
                 {paymentStatus === 'failure' && <ErrorMessage>Payment failed. Please try again.</ErrorMessage>}
             </Details>
-            <Button onClick={handlePayment}>Confirm Payment</Button>
+            <Button  onClick={() => handlePayment(loggedUser)}>Confirm Payment</Button>
         </Wrapper>
     );
+   
 }
 
 export default Payment;

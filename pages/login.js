@@ -22,7 +22,7 @@ function Login() {
                         email: user.email,
                         displayName: user.displayName,
                         photoURL: user.photoURL,
-                        id: user?.uid || user.displayName,
+                        id: user?.id || user.uid,
                         ...user
                     }).then((response) => {
                         console.log(`Login response: ${JSON.stringify({response})}`);
