@@ -27,7 +27,7 @@ export const loginApi = async (dto) => {
 
 
 // Fetch recent trips with pagination support
-export async function fetchRecentTrips(userId, lastEvaluatedKey = null, limit = 5) {
+export async function fetchRecentTrips(userId, lastEvaluatedKey = null, limit = 3) {
     try {
         const params = { userId, limit };
         if (lastEvaluatedKey) {
