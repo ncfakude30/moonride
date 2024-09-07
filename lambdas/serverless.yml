@@ -6,13 +6,13 @@ provider:
   name: aws
   runtime: python3.9
   region: us-east-1
-  stage: ${opt:stage, 'dev'}  # Default to 'dev' if stage is not provided
+  stage: ${opt:stage, 'dev'}
   environment:
     TRIPS_TABLE: TripsTable
     USERS_TABLE: UsersTable
     CONNECTIONS_TABLE: ConnectionsTable
     MESSAGES_TABLE: MessagesTable
-    WEBSOCKET_ENDPOINT: !Sub 'https://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/'
+    WEBSOCKET_ENDPOINT: !Sub 'wss://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/'
 
   iamRoleStatements:
     - Effect: "Allow"
@@ -180,7 +180,7 @@ resources:
         Name: WebSocketApi
         ProtocolType: WEBSOCKET
         RouteSelectionExpression: '$request.body.action'
-        
+
     WebSocketApiDeployment:
       Type: 'AWS::ApiGatewayV2::Deployment'
       Properties:
@@ -201,7 +201,7 @@ resources:
         ApiId: !Ref WebSocketApi
         RouteKey: '$connect'
         AuthorizationType: NONE
-        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:provider.functions.connect.arn}/invocations'
+        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${connect.Arn}/invocations'
 
     WebSocketApiRouteDisconnect:
       Type: 'AWS::ApiGatewayV2::Route'
@@ -209,7 +209,7 @@ resources:
         ApiId: !Ref WebSocketApi
         RouteKey: '$disconnect'
         AuthorizationType: NONE
-        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:provider.functions.disconnect.arn}/invocations'
+        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${disconnect.Arn}/invocations'
 
     WebSocketApiRouteMessage:
       Type: 'AWS::ApiGatewayV2::Route'
@@ -217,14 +217,14 @@ resources:
         ApiId: !Ref WebSocketApi
         RouteKey: '$default'
         AuthorizationType: NONE
-        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:provider.functions.message.arn}/invocations'
+        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${message.Arn}/invocations'
 
     WebSocketApiIntegrationConnect:
       Type: 'AWS::ApiGatewayV2::Integration'
       Properties:
         ApiId: !Ref WebSocketApi
         IntegrationType: AWS_PROXY
-        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:provider.functions.connect.arn}/invocations'
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${connect.Arn}/invocations'
         PayloadFormatVersion: '2.0'
 
     WebSocketApiIntegrationDisconnect:
@@ -232,7 +232,7 @@ resources:
       Properties:
         ApiId: !Ref WebSocketApi
         IntegrationType: AWS_PROXY
-        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:provider.functions.disconnect.arn}/invocations'
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${disconnect.Arn}/invocations'
         PayloadFormatVersion: '2.0'
 
     WebSocketApiIntegrationMessage:
@@ -240,7 +240,7 @@ resources:
       Properties:
         ApiId: !Ref WebSocketApi
         IntegrationType: AWS_PROXY
-        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:provider.functions.message.arn}/invocations'
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${message.Arn}/invocations'
         PayloadFormatVersion: '2.0'
 
     WebSocketApiPermissionConnect:
