@@ -13,7 +13,8 @@ def handler(event, context):
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',  # Allow requests from any origin
         'Access-Control-Allow-Methods': 'OPTIONS,POST',  # Allow specific HTTP methods
-        'Access-Control-Allow-Headers': 'Content-Type'
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+         'Access-Control-Allow-Credentials': 'true'
     }
 
     if event['httpMethod'] == 'OPTIONS':
@@ -52,7 +53,8 @@ def handler(event, context):
                 'headers': headers,
                 'body': json.dumps({
                     'message': 'Trip successfully added',
-                    'tripId': trip_id
+                    'tripId': trip_id,
+                    'status': 200,
                 })
             }
         except Exception as e:

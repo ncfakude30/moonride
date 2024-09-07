@@ -2,14 +2,16 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import tw from 'tailwind-styled-components';
 import Link from 'next/link';
-import mapboxgl from 'mapbox-gl'; // Import Mapbox GL JS
-import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'; // Import Mapbox Geocoder
+import mapboxgl from 'mapbox-gl';
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ';
 
 function Search() {
     const router = useRouter();
-    const { user } = router.query;
+    let { user } = router.query;
+    user = user ? JSON.parse(user) : null;
+    
     const [pickup, setPickup] = useState('');
     const [dropoff, setDropoff] = useState('');
     const [map, setMap] = useState(null);
@@ -17,7 +19,7 @@ function Search() {
     const [dropoffMarker, setDropoffMarker] = useState(null);
     
     useEffect(() => {
-        if(!user) {
+        if (!user) {
             router.push('/login');
         }
         
@@ -25,12 +27,11 @@ function Search() {
         if (mapContainer && !map) {
             const newMap = new mapboxgl.Map({
                 container: mapContainer,
-                style: 'mapbox://styles/mapbox/satellite-v9', // Use satellite imagery
-                center: [-74.5, 40], // Default center
+                style: 'mapbox://styles/mapbox/satellite-v9',
+                center: [-74.5, 40],
                 zoom: 9,
             });
 
-            // Add Geocoder Control
             const geocoder = new MapboxGeocoder({
                 accessToken: mapboxgl.accessToken,
                 types: 'address',
@@ -38,7 +39,6 @@ function Search() {
                 mapboxgl: mapboxgl
             });
 
-            // Handle search result for pickup and dropoff
             geocoder.on('result', (e) => {
                 const { place_name, center } = e.result;
                 if (!pickupMarker) {
@@ -46,7 +46,7 @@ function Search() {
                     setPickupMarker(new mapboxgl.Marker({ color: 'blue' })
                         .setLngLat(center)
                         .addTo(newMap));
-                    newMap.setCenter(center); // Center the map on pickup location
+                    newMap.setCenter(center);
                 } else {
                     setDropoff(place_name);
                     setDropoffMarker(new mapboxgl.Marker({ color: 'red' })
@@ -57,7 +57,6 @@ function Search() {
 
             newMap.addControl(geocoder);
 
-            // Add event listener to handle map clicks
             newMap.on('click', (e) => {
                 if (!pickupMarker) {
                     setPickupMarker(new mapboxgl.Marker({ color: 'blue' })
@@ -72,24 +71,21 @@ function Search() {
                 }
             });
 
-            // Get and set user location
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const { latitude, longitude } = position.coords;
                     newMap.setCenter([longitude, latitude]);
-                    newMap.setZoom(14); // Set zoom level closer to user's location
+                    newMap.setZoom(14);
                 },
                 (error) => {
-                    logger.error('Error getting user location:', error);
-                    // Optionally handle error and set default location
+                    console.error('Error getting user location:', error);
                 }
             );
 
             setMap(newMap);
         }
-    }, [map]);
+    }, [map, pickupMarker, dropoffMarker, user, router]);
 
-    
     const handlePickupChange = (e) => {
         const value = e.target.value;
         setPickup(value);
@@ -132,7 +128,7 @@ function Search() {
                 query: {
                     pickup: pickupMarker ? pickupMarker.getLngLat().toArray().join(',') : pickup,
                     dropoff: dropoffMarker ? dropoffMarker.getLngLat().toArray().join(',') : dropoff,
-                    user,
+                    user: JSON.stringify(user),
                 }
             }}>
                 <ConfirmContainer>
@@ -142,7 +138,6 @@ function Search() {
         </Wrapper>
     );
 };
-
 
 export default Search;
 
@@ -154,20 +149,12 @@ const MapContainer = tw.div`
     h-1/2 w-full
 `;
 
-const ButtonContainer = tw.div`
-    bg-white px-4
-`;
-
-const BackButton = tw.img`
-    h-12 cursor-pointer
+const InputContainer = tw.div`
+    bg-white flex items-center px-4 mb-2
 `;
 
 const FromToIcons = tw.div`
     w-10 flex flex-col mr-2 items-center
-`;
-
-const InputContainer = tw.div`
-    bg-white flex items-center px-4 mb-2
 `;
 
 const Circle = tw.img`

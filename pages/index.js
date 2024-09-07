@@ -45,14 +45,16 @@ export default function Home() {
                     </Profile>
                 </Header>
                 <ActionButtons>
-                    <Link href={{
+                    <Link
+                    href={{
                         pathname: '/search',
-                        query: { user}
-                    }}>
-                        <ActionButton>
-                            <ActionButtonImage src='https://i.ibb.co/cyvcpfF/uberx.png' />
-                            Ride
-                        </ActionButton>
+                        query: { user: JSON.stringify(user) }
+                    }}
+                    >
+                    <ActionButton>
+                        <ActionButtonImage src='https://i.ibb.co/cyvcpfF/uberx.png' />
+                        Ride
+                    </ActionButton>
                     </Link>
                     <ActionButton>
                         <Badge>Coming Soon</Badge>

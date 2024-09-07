@@ -10,7 +10,8 @@ import { requestTrip } from './api/app.service';
 
 function Confirm() {
     const router = useRouter();
-    const { pickup, dropoff, user } = router.query;
+    let { pickup, dropoff, user } = router.query;
+    user = user ? JSON.parse(user) : null;
 
     const [pickupCoordinates, setPickupCoordinates] = useState([0, 0]);
     const [dropoffCoordinates, setDropoffCoordinates] = useState([0, 0]);
@@ -81,7 +82,7 @@ function Confirm() {
                 pickup: `${pickupCoordinates[0]},${pickupCoordinates[1]}`,
                 dropoff: `${dropoffCoordinates[0]},${dropoffCoordinates[1]}`,
                 ride: JSON.stringify(car),
-                user,
+                user: JSON.stringify(user),
             }
         });
     };

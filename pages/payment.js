@@ -5,7 +5,8 @@ import { requestTrip } from './api/app.service'; // Import the requestTrip funct
 
 function Payment() {
     const router = useRouter();
-    const { pickup, dropoff, ride, user } = router.query;
+    let { pickup, dropoff, ride, user } = router.query;
+    user = user ? JSON.parse(user) : null;
 
     const [selectedCar, setSelectedCar] = useState(null);
     const [pickupPlace, setPickupPlace] = useState('');
@@ -70,7 +71,7 @@ function Payment() {
 
             // Add trip data after successful payment
             await requestTrip(tripData).then((response) => {
-                console.log(`Success: ${JSON.stringify(response)}`);
+                console.log(`Success: ${JSON.stringify({response})}`);
                 setPaymentStatus('success');
                 router.push('/'); // Redirect to confirmation page
             });
