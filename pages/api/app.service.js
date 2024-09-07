@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const apiEndpoint = process.env.API_BASE_URL || 'https://ufqmmf6blc.execute-api.us-east-1.amazonaws.com/dev'
+const apiEndpoint = process.env.API_BASE_URL || 'https://ufqmmf6blc.execute-api.us-east-1.amazonaws.com/dev';
 
 // Create a centralized axios instance with default configuration
 const apiClient = axios.create({
@@ -12,21 +12,65 @@ const apiClient = axios.create({
     }
 });
 
-// Function to request pickup and dropoff
+// WebSocket class for handling WebSocket connection and messages
+class WebSocketService {
+    constructor(url) {
+        this.url = url;
+        this.ws = null;
+    }
+
+    connect() {
+        if (this.ws) return; // Already connected
+
+        this.ws = new WebSocket(this.url);
+
+        this.ws.onopen = () => {
+            console.log('WebSocket connected');
+        };
+
+        this.ws.onmessage = (event) => {
+            console.log('WebSocket message received:', event.data);
+        };
+
+        this.ws.onclose = () => {
+            console.log('WebSocket disconnected');
+        };
+
+        this.ws.onerror = (error) => {
+            console.error('WebSocket error', error);
+        };
+    }
+
+    sendMessage(message) {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify(message));
+        } else {
+            console.error('WebSocket is not connected');
+        }
+    }
+
+    close() {
+        if (this.ws) {
+            this.ws.close();
+            this.ws = null;
+        }
+    }
+}
+
+// Initialize WebSocketService
+const webSocketService = new WebSocketService('wss://your-websocket-url');
+
+// API functions
 export const loginApi = async (dto) => {
     try {
-        
         const response = await axios.post(`${apiEndpoint}/login`, dto);
         return response.data;
     } catch (error) {
         console.error('Error logging trip:', error);
-        console.error(error)
-        throw error; // Re-throw error to handle it in the component
+        throw error;
     }
 };
 
-
-// Fetch recent trips with pagination support
 export async function fetchRecentTrips(userId, lastEvaluatedKey = null, limit = 3) {
     try {
         const params = { userId, limit };
@@ -46,15 +90,18 @@ export async function fetchRecentTrips(userId, lastEvaluatedKey = null, limit = 
     }
 }
 
-
-// Function to request pickup and dropoff
 export const requestTrip = async (dto) => {
     try {
-        
         const response = await axios.post(`${apiEndpoint}/request`, dto);
         return response.data;
     } catch (error) {
         console.error('Error requesting trip:', error);
-        throw error; // Re-throw error to handle it in the component
+        throw error;
     }
+};
+
+// Export the WebSocket service instance
+export default {
+    apiClient,
+    webSocketService
 };

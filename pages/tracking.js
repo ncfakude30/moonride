@@ -4,14 +4,18 @@ import tw from 'tailwind-styled-components';
 import Map from './components/Map'; // Adjust the import path as needed
 import Image from 'next/image';
 import Link from 'next/link';
+import { useWebSocket } from '../contexts/WebSocketContext';
 
-function Tracking() {
+const Tracking = () => {
     const router = useRouter();
     const { pickup, dropoff } = router.query;
+    const ws = useWebSocket();
 
     const [pickupCoords, setPickupCoords] = useState(null);
     const [dropoffCoords, setDropoffCoords] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
 
     useEffect(() => {
         if (pickup && dropoff) {
@@ -23,6 +27,24 @@ function Tracking() {
             setLoading(false);
         }
     }, [pickup, dropoff]);
+
+    useEffect(() => {
+        if (ws) {
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.action === 'chat_message') {
+                    setMessages(prevMessages => [...prevMessages, data.message]);
+                }
+            };
+        }
+    }, [ws]);
+
+    const handleSendMessage = () => {
+        if (newMessage.trim() && ws) {
+            ws.sendMessage({ action: 'chat_message', message: newMessage });
+            setNewMessage('');
+        }
+    };
 
     if (loading) {
         return <LoadingMessage>Loading map...</LoadingMessage>;
@@ -47,7 +69,7 @@ function Tracking() {
             <InfoContainer>
                 <DriverInfo>
                     <ProfilePicture
-                          src='https://randomuser.me/api/portraits/med/women/1.jpg'
+                        src='https://randomuser.me/api/portraits/med/women/1.jpg'
                         alt='Driver Profile'
                     />
                     <DriverDetails>
@@ -59,38 +81,35 @@ function Tracking() {
                 <ChatBox>
                     <ChatHeader>Chat with the driver:</ChatHeader>
                     <MessageList>
-                        {/* Example Messages */}
-                        <MessageRow isUser={false}>
-                            <ProfilePictureSmall
-                                  src='https://randomuser.me/api/portraits/med/women/1.jpg'
-                                alt='Driver'
-                            />
-                            <MessageBubble>
-                                Hi, I’m on my way!
-                            </MessageBubble>
-                        </MessageRow>
-                        <MessageRow isUser={true}>
-                            <MessageBubble isUser={true}>
-                                Great, thank you!
-                            </MessageBubble>
-                            <ProfilePictureSmall
-                                src='https://randomuser.me/api/portraits/med/women/1.jpg'
-                                alt='User'
-                            />
-                        </MessageRow>
+                        {messages.map((msg, index) => (
+                            <MessageRow key={index} isUser={msg.isUser}>
+                                <ProfilePictureSmall
+                                    src={msg.isUser ? 'https://randomuser.me/api/portraits/med/women/1.jpg' : 'https://randomuser.me/api/portraits/med/women/1.jpg'}
+                                    alt={msg.isUser ? 'User' : 'Driver'}
+                                />
+                                <MessageBubble isUser={msg.isUser}>
+                                    {msg.text}
+                                </MessageBubble>
+                            </MessageRow>
+                        ))}
                     </MessageList>
                     <ChatInputContainer>
-                        <ChatInput placeholder="Type a message..." />
-                        <SendButton>Send</SendButton>
+                        <ChatInput
+                            placeholder="Type a message..."
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                        />
+                        <SendButton onClick={handleSendMessage}>Send</SendButton>
                     </ChatInputContainer>
                 </ChatBox>
             </InfoContainer>
         </Container>
     );
-}
+};
 
 export default Tracking;
 
+// Styled components
 const Container = tw.div`
     relative h-screen
 `;

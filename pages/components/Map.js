@@ -4,8 +4,9 @@ import mapboxgl from '!mapbox-gl';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ';
 
-export const Map = (props) => {
+const Map = ({ pickupCoordinates, dropoffCoordinates }) => {
     const [userLocation, setUserLocation] = useState(null);
+    const [map, setMap] = useState(null);
 
     useEffect(() => {
         // Function to get user's location
@@ -18,65 +19,79 @@ export const Map = (props) => {
                             position.coords.latitude
                         ]);
                     },
-                    (error) => {
-                        console.error('Error getting user location:', error);
-                        // Fallback to default location (e.g., United States)
-                        setUserLocation([-99.29011, 39.39172]);
+                    () => {
+                        setUserLocation([-99.29011, 39.39172]); // Default to a central location
                     }
                 );
             } else {
-                console.error('Geolocation is not supported by this browser.');
-                // Fallback to default location (e.g., United States)
-                setUserLocation([-99.29011, 39.39172]);
+                setUserLocation([-99.29011, 39.39172]); // Default to a central location
             }
         };
 
         getUserLocation();
-
     }, []);
 
     useEffect(() => {
         if (userLocation) {
-            const map = new mapboxgl.Map({
+            const mapInstance = new mapboxgl.Map({
                 container: 'map',
                 style: 'mapbox://styles/drakosi/ckvcwq3rwdw4314o3i2ho8tph',
-                center: userLocation, // Set map center to user's location
+                center: userLocation,
                 zoom: 12,
             });
 
-            if (props.pickupCoordinates) {
-                addToMap(map, props.pickupCoordinates);
+            setMap(mapInstance);
+
+            const addMarker = (coordinates) => {
+                new mapboxgl.Marker()
+                    .setLngLat(coordinates)
+                    .addTo(mapInstance);
             };
 
-            if (props.dropoffCoordinates) {
-                addToMap(map, props.dropoffCoordinates);
+            if (pickupCoordinates) {
+                addMarker(pickupCoordinates);
+            }
+
+            if (dropoffCoordinates) {
+                addMarker(dropoffCoordinates);
+            }
+
+            if (pickupCoordinates && dropoffCoordinates) {
+                mapInstance.fitBounds([
+                    pickupCoordinates, dropoffCoordinates
+                ], { padding: 60 });
+            }
+
+            const ws = new WebSocket('wss://your-websocket-url');
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.action === 'new_trip') {
+                    if (data.pickup) {
+                        addMarker(data.pickup);
+                    }
+                    if (data.dropoff) {
+                        addMarker(data.dropoff);
+                    }
+                    if (data.pickup && data.dropoff) {
+                        mapInstance.fitBounds([
+                            data.pickup, data.dropoff
+                        ], { padding: 60 });
+                    }
+                }
             };
 
-            if (props.pickupCoordinates && props.dropoffCoordinates) {
-                map.fitBounds([
-                    props.pickupCoordinates, props.dropoffCoordinates
-                ], {
-                    padding: 60
-                });
+            return () => {
+                ws.close();
             };
         }
-    }, [userLocation, props.pickupCoordinates, props.dropoffCoordinates]);
+    }, [userLocation, pickupCoordinates, dropoffCoordinates]);
 
-    const addToMap = (map, coordinates) => {
-        new mapboxgl.Marker()
-            .setLngLat(coordinates)
-            .addTo(map);
-    };
-
-    return (
-        <Wrapper id='map'>
-            {/* Map container */}
-        </Wrapper>
-    );
+    return <MapWrapper id='map' />;
 };
 
 export default Map;
 
-const Wrapper = tw.div`
-    flex-1 h-1/2
+const MapWrapper = tw.div`
+    flex-1 h-full
 `;

@@ -1,6 +1,4 @@
-# "org" ensures this Service is used with the correct Serverless Framework Access Key.
 org: ncfcorp
-# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
 app: moon-rides
 service: moonrides
 
@@ -10,21 +8,32 @@ provider:
   region: us-east-1
   environment:
     TRIPS_TABLE: TripsTable
-    USERS_TABLE: UsersTable  # Added Users Table environment variable
+    USERS_TABLE: UsersTable
+    CONNECTIONS_TABLE: ConnectionsTable
+    MESSAGES_TABLE: MessagesTable
+    WEBSOCKET_ENDPOINT: !Sub 'https://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/'
+
   iamRoleStatements:
     - Effect: "Allow"
       Action:
         - dynamodb:PutItem
         - dynamodb:GetItem
         - dynamodb:Query
+        - dynamodb:Scan
       Resource:
         - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRIPS_TABLE}
-        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}  # Allow access to Users Table
+        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}
+        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.CONNECTIONS_TABLE}
+        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.MESSAGES_TABLE}
     - Effect: "Allow"
       Action:
         - logs:CreateLogGroup
         - logs:CreateLogStream
         - logs:PutLogEvents
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - apigateway:POST
       Resource: "*"
 
 functions:
@@ -41,7 +50,7 @@ functions:
             allowCredentials: true
 
   getUser:
-    handler: user/getUser.handler  # Lambda function to retrieve user data
+    handler: user/getUser.handler
     events:
       - http:
           path: user/{userId}
@@ -88,6 +97,24 @@ functions:
               - Authorization
             allowCredentials: true
 
+  connect:
+    handler: websocket/connect.handler
+    events:
+      - websocket:
+          route: $connect
+
+  disconnect:
+    handler: websocket/disconnect.handler
+    events:
+      - websocket:
+          route: $disconnect
+
+  message:
+    handler: websocket/message.handler
+    events:
+      - websocket:
+          route: $default
+
 resources:
   Resources:
     TripsTable:
@@ -104,9 +131,9 @@ resources:
             KeyType: HASH
           - AttributeName: tripDate
             KeyType: RANGE
-        BillingMode: PAY_PER_REQUEST  # Use on-demand mode
+        BillingMode: PAY_PER_REQUEST
 
-    UsersTable:  # Added UsersTable resource
+    UsersTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
         TableName: ${self:provider.environment.USERS_TABLE}
@@ -116,7 +143,128 @@ resources:
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
-        BillingMode: PAY_PER_REQUEST  # Use on-demand mode
+        BillingMode: PAY_PER_REQUEST
+
+    ConnectionsTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:provider.environment.CONNECTIONS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    MessagesTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:provider.environment.MESSAGES_TABLE}
+        AttributeDefinitions:
+          - AttributeName: messageId
+            AttributeType: S
+          - AttributeName: senderConnectionId
+            AttributeType: S
+          - AttributeName: recipientConnectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: messageId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    WebSocketApi:
+      Type: 'AWS::ApiGatewayV2::Api'
+      Properties:
+        Name: WebSocketApi
+        ProtocolType: WEBSOCKET
+        RouteSelectionExpression: '$request.body.action'
+        
+    WebSocketApiDeployment:
+      Type: 'AWS::ApiGatewayV2::Deployment'
+      Properties:
+        ApiId: !Ref WebSocketApi
+      DependsOn:
+        - WebSocketApiStage
+
+    WebSocketApiStage:
+      Type: 'AWS::ApiGatewayV2::Stage'
+      Properties:
+        ApiId: !Ref WebSocketApi
+        StageName: '$default'
+        AutoDeploy: true
+
+    WebSocketApiRouteConnect:
+      Type: 'AWS::ApiGatewayV2::Route'
+      Properties:
+        ApiId: !Ref WebSocketApi
+        RouteKey: '$connect'
+        AuthorizationType: NONE
+        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:custom.connectLambdaArn}/invocations'
+
+    WebSocketApiRouteDisconnect:
+      Type: 'AWS::ApiGatewayV2::Route'
+      Properties:
+        ApiId: !Ref WebSocketApi
+        RouteKey: '$disconnect'
+        AuthorizationType: NONE
+        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:custom.disconnectLambdaArn}/invocations'
+
+    WebSocketApiRouteMessage:
+      Type: 'AWS::ApiGatewayV2::Route'
+      Properties:
+        ApiId: !Ref WebSocketApi
+        RouteKey: '$default'
+        AuthorizationType: NONE
+        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:custom.messageLambdaArn}/invocations'
+
+    WebSocketApiIntegrationConnect:
+      Type: 'AWS::ApiGatewayV2::Integration'
+      Properties:
+        ApiId: !Ref WebSocketApi
+        IntegrationType: AWS_PROXY
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:custom.connectLambdaArn}/invocations'
+        PayloadFormatVersion: '2.0'
+
+    WebSocketApiIntegrationDisconnect:
+      Type: 'AWS::ApiGatewayV2::Integration'
+      Properties:
+        ApiId: !Ref WebSocketApi
+        IntegrationType: AWS_PROXY
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:custom.disconnectLambdaArn}/invocations'
+        PayloadFormatVersion: '2.0'
+
+    WebSocketApiIntegrationMessage:
+      Type: 'AWS::ApiGatewayV2::Integration'
+      Properties:
+        ApiId: !Ref WebSocketApi
+        IntegrationType: AWS_PROXY
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:custom.messageLambdaArn}/invocations'
+        PayloadFormatVersion: '2.0'
+
+    WebSocketApiPermissionConnect:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref connect
+        Principal: 'apigateway.amazonaws.com'
+        SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$connect'
+
+    WebSocketApiPermissionDisconnect:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref disconnect
+        Principal: 'apigateway.amazonaws.com'
+        SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$disconnect'
+
+    WebSocketApiPermissionMessage:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref message
+        Principal: 'apigateway.amazonaws.com'
+        SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$default'
 
 plugins:
   - serverless-python-requirements
@@ -128,8 +276,6 @@ custom:
     slim: true
     zip: true
 
-package:
-  individually: true
-  include:
-    - vendor/**
-    - handler.py
+  connectLambdaArn: !GetAtt connect.Arn
+  disconnectLambdaArn: !GetAtt disconnect.Arn
+  messageLambdaArn: !GetAtt message.Arn
