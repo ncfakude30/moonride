@@ -64,12 +64,12 @@ def handler(event, context):
     
             # Prepare the result with pagination information
             result = {
-                'trips': [json.loads(json.dumps(item), object_hook=decimal_to_float) for item in response['Items']]
+                'trips': [json.loads(json.dumps(item, default=decimal_to_float)) for item in response['Items']]
             }
     
             # If there are more items to be fetched, include the LastEvaluatedKey
             if 'LastEvaluatedKey' in response:
-                result['lastEvaluatedKey'] = json.dumps(response['LastEvaluatedKey'])
+                result['lastEvaluatedKey'] = json.dumps(response['LastEvaluatedKey'], default=decimal_to_float)
     
             return {
                 'statusCode': 200,
