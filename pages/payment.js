@@ -14,10 +14,12 @@ function Payment() {
     const [paymentStatus, setPaymentStatus] = useState(null);
 
     useEffect(() => {
-        if(!user) {
+        // Redirect to login page if no loggedUser is found
+        if (!loggedUser) {
             router.push('/login');
         }
 
+        // Set selected car and place names
         if (ride) {
             setSelectedCar(JSON.parse(ride));
         }
@@ -25,7 +27,7 @@ function Payment() {
             fetchPlaceName(pickup, 'pickup');
             fetchPlaceName(dropoff, 'dropoff');
         }
-    }, [ride, pickup, dropoff]);
+    }, [ride, pickup, dropoff, loggedUser, router]);
 
     const fetchPlaceName = async (coordinates, type) => {
         try {
@@ -53,6 +55,13 @@ function Payment() {
     };
 
     const handlePayment = async () => {
+        if (!loggedUser) {
+            // Handle the case where loggedUser is not available
+            console.error('User is not logged in');
+            setPaymentStatus('failure');
+            return;
+        }
+
         try {
             // Mock payment process
             await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate network delay
@@ -65,8 +74,8 @@ function Payment() {
                 time: selectedCar ? selectedCar.time : 0,   // Or other appropriate time
                 rating: selectedCar ? selectedCar.rating : 0,
                 driverProfile: selectedCar ? selectedCar.driverProfile : '',
-                userId: user?.id,
-                ...user,
+                userId: loggedUser.id,
+                ...loggedUser, // Spread loggedUser properties
             };
 
             // Add trip data after successful payment
@@ -76,6 +85,7 @@ function Payment() {
                 router.push('/'); // Redirect to confirmation page
             });
         } catch (error) {
+            console.error('Payment failed:', error);
             setPaymentStatus('failure');
         }
     };
