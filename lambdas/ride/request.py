@@ -9,10 +9,11 @@ dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(TRIP_TABLE)
 
 def handler(event, context):
+    print(f'Received event: {event}')
     headers = {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',  # Allow requests from any origin
-        'Access-Control-Allow-Methods': 'OPTIONS,POST',  # Allow specific HTTP methods
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS,POST',
         'Access-Control-Allow-Headers': 'Content-Type,Authorization',
          'Access-Control-Allow-Credentials': 'true'
     }
