@@ -45,7 +45,7 @@ def handler(event, context):
                 return {
                     'statusCode': 409,
                     'headers': headers,
-                    'body': json.dumps({'message': 'User already exists'})
+                    'body': json.dumps({'message': 'User already exists', 'success': True})
                 }
 
             table.put_item(
@@ -60,7 +60,7 @@ def handler(event, context):
             return {
                 'statusCode': 201,
                 'headers': headers,
-                'body': json.dumps({'message': 'User data stored successfully'})
+                'body': json.dumps({'message': 'User data stored successfully', 'success': True})
             }
 
         except json.JSONDecodeError:
