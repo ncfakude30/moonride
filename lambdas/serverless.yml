@@ -6,6 +6,7 @@ provider:
   name: aws
   runtime: python3.9
   region: us-east-1
+  stage: ${opt:stage, 'dev'}  # Default to 'dev' if stage is not provided
   environment:
     TRIPS_TABLE: TripsTable
     USERS_TABLE: UsersTable
@@ -191,7 +192,7 @@ resources:
       Type: 'AWS::ApiGatewayV2::Stage'
       Properties:
         ApiId: !Ref WebSocketApi
-        StageName: '$default'
+        StageName: '${self:provider.stage}'
         AutoDeploy: true
 
     WebSocketApiRouteConnect:
@@ -265,12 +266,3 @@ resources:
         FunctionName: !GetAtt message.Arn
         Principal: 'apigateway.amazonaws.com'
         SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$default'
-
-plugins:
-  - serverless-python-requirements
-
-custom:
-  pythonRequirements:
-    dockerizePip: true
-  stage: dev
-  region: us-east-1
