@@ -35,10 +35,6 @@ functions:
           path: login
           method: post
           cors:
-            origin:
-              - 'https://www.moonride.co.za'
-              - 'https://moonride.co.za'
-              - 'http://localhost:3000'  # Allow local testing on port 3000
             headers:
               - Content-Type
               - Authorization
@@ -51,10 +47,6 @@ functions:
           path: user/{userId}
           method: get
           cors:
-            origin:
-              - 'https://www.moonride.co.za'
-              - 'https://moonride.co.za'
-              - 'http://localhost:3000'
             headers:
               - Content-Type
               - Authorization
@@ -67,10 +59,6 @@ functions:
           path: trips
           method: get
           cors:
-            origin:
-              - 'https://www.moonride.co.za'
-              - 'https://moonride.co.za'
-              - 'http://localhost:3000'
             headers:
               - Content-Type
               - Authorization
@@ -83,10 +71,6 @@ functions:
           path: request
           method: post
           cors:
-            origin:
-              - 'https://www.moonride.co.za'
-              - 'https://moonride.co.za'
-              - 'http://localhost:3000'
             headers:
               - Content-Type
               - Authorization
@@ -99,10 +83,6 @@ functions:
           path: payment
           method: post
           cors:
-            origin:
-              - 'https://www.moonride.co.za'
-              - 'https://moonride.co.za'
-              - 'http://localhost:3000'
             headers:
               - Content-Type
               - Authorization
