@@ -11,8 +11,8 @@ import { requestTrip } from './api/app.service';
 function Confirm() {
     const router = useRouter();
     let { pickup, dropoff, user } = router.query;
-    user = user ? JSON.parse(user) : null;
 
+    const [loggedUser, setUser] = useState(null);
     const [pickupCoordinates, setPickupCoordinates] = useState([0, 0]);
     const [dropoffCoordinates, setDropoffCoordinates] = useState([0, 0]);
     const [loading, setLoading] = useState(true);
@@ -23,12 +23,14 @@ function Confirm() {
             router.push('/login');
         }
 
+        setUser(JSON.parse(user))
+
         if (pickup && dropoff) {
             setLoading(true);
             getPickupCoordinates(pickup);
             getDropoffCoordinates(dropoff);
         }
-    }, [pickup, dropoff]);
+    }, [pickup, dropoff, user]);
 
     useEffect(() => {
         if (pickupCoordinates.length > 0 && dropoffCoordinates.length > 0) {
@@ -109,7 +111,7 @@ function Confirm() {
                     onSelectRide={handleSelectRide}
                 />
                 <ConfirmButtonContainer>
-                    <ConfirmButton onClick={() => handleSelectRide(selectedCar)}>
+                    <ConfirmButton onClick={() => handleSelectRide(loggedUser, selectedCar)}>
                         Confirm UberX
                     </ConfirmButton>
                 </ConfirmButtonContainer>
