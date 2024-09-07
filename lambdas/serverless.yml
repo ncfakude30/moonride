@@ -61,7 +61,7 @@ functions:
               - Content-Type
               - Authorization
             allowCredentials: true
-
+  
   getRecentTrips:
     handler: ride/ride.handler
     events:
@@ -177,13 +177,6 @@ resources:
         ProtocolType: WEBSOCKET
         RouteSelectionExpression: '$request.body.action'
 
-    WebSocketApiDeployment:
-      Type: 'AWS::ApiGatewayV2::Deployment'
-      Properties:
-        ApiId: !Ref WebSocketApi
-      DependsOn:
-        - WebSocketApiStage
-
     WebSocketApiStage:
       Type: 'AWS::ApiGatewayV2::Stage'
       Properties:
@@ -197,7 +190,7 @@ resources:
         ApiId: !Ref WebSocketApi
         RouteKey: '$connect'
         AuthorizationType: NONE
-        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:service}-${self:provider.stage}-connect/invocations'
+        Target: !Sub 'integrations/${WebSocketApiIntegrationConnect}'
 
     WebSocketApiRouteDisconnect:
       Type: 'AWS::ApiGatewayV2::Route'
@@ -205,7 +198,7 @@ resources:
         ApiId: !Ref WebSocketApi
         RouteKey: '$disconnect'
         AuthorizationType: NONE
-        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:service}-${self:provider.stage}-disconnect/invocations'
+        Target: !Sub 'integrations/${WebSocketApiIntegrationDisconnect}'
 
     WebSocketApiRouteMessage:
       Type: 'AWS::ApiGatewayV2::Route'
@@ -213,37 +206,37 @@ resources:
         ApiId: !Ref WebSocketApi
         RouteKey: '$default'
         AuthorizationType: NONE
-        Target: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:service}-${self:provider.stage}-message/invocations'
+        Target: !Sub 'integrations/${WebSocketApiIntegrationMessage}'
 
     WebSocketApiIntegrationConnect:
       Type: 'AWS::ApiGatewayV2::Integration'
       Properties:
         ApiId: !Ref WebSocketApi
         IntegrationType: AWS_PROXY
-        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:service}-${self:provider.stage}-connect/invocations'
-        PayloadFormatVersion: '2.0'
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${ConnectLambdaFunction.Arn}/invocations'
+        PayloadFormatVersion: '1.0'
 
     WebSocketApiIntegrationDisconnect:
       Type: 'AWS::ApiGatewayV2::Integration'
       Properties:
         ApiId: !Ref WebSocketApi
         IntegrationType: AWS_PROXY
-        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:service}-${self:provider.stage}-disconnect/invocations'
-        PayloadFormatVersion: '2.0'
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${DisconnectLambdaFunction.Arn}/invocations'
+        PayloadFormatVersion: '1.0'
 
     WebSocketApiIntegrationMessage:
       Type: 'AWS::ApiGatewayV2::Integration'
       Properties:
         ApiId: !Ref WebSocketApi
         IntegrationType: AWS_PROXY
-        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:service}-${self:provider.stage}-message/invocations'
-        PayloadFormatVersion: '2.0'
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${MessageLambdaFunction.Arn}/invocations'
+        PayloadFormatVersion: '1.0'
 
     WebSocketApiPermissionConnect:
       Type: 'AWS::Lambda::Permission'
       Properties:
         Action: 'lambda:InvokeFunction'
-        FunctionName: !Ref connect
+        FunctionName: !GetAtt ConnectLambdaFunction.Arn
         Principal: 'apigateway.amazonaws.com'
         SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$connect'
 
@@ -251,7 +244,7 @@ resources:
       Type: 'AWS::Lambda::Permission'
       Properties:
         Action: 'lambda:InvokeFunction'
-        FunctionName: !Ref disconnect
+        FunctionName: !GetAtt DisconnectLambdaFunction.Arn
         Principal: 'apigateway.amazonaws.com'
         SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$disconnect'
 
@@ -259,6 +252,15 @@ resources:
       Type: 'AWS::Lambda::Permission'
       Properties:
         Action: 'lambda:InvokeFunction'
-        FunctionName: !Ref message
+        FunctionName: !GetAtt MessageLambdaFunction.Arn
         Principal: 'apigateway.amazonaws.com'
         SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$default'
+
+    WebSocketApiDeployment:
+      Type: 'AWS::ApiGatewayV2::Deployment'
+      DependsOn:
+        - WebSocketApiRouteConnect
+        - WebSocketApiRouteDisconnect
+        - WebSocketApiRouteMessage
+      Properties:
+        ApiId: !Ref WebSocketApi
