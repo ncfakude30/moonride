@@ -1,6 +1,6 @@
 import os
 import json
-import geohash
+from Geohash import geohash
 import boto3
 from uuid import uuid4
 from datetime import datetime
