@@ -41,7 +41,7 @@ provider:
         - apigateway:POST
         - execute-api:Invoke
       Resource:
-        - !Sub arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/*/*
+        - !Sub arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:*
 
 plugins:
   - serverless-python-requirements
@@ -323,63 +323,3 @@ resources:
         Principal: 'apigateway.amazonaws.com'
         SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$default'
 
-outputs:
-  WebSocketApiId:
-    Description: "WebSocket API ID"
-    Value: !Ref WebSocketApi
-
-  WebSocketApiEndpoint:
-    Description: "WebSocket API endpoint"
-    Value: !Sub 'wss://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/'
-
-  TripsTable:
-    Description: "DynamoDB Trips Table"
-    Value: !Ref TripsTable
-
-  UsersTable:
-    Description: "DynamoDB Users Table"
-    Value: !Ref UsersTable
-
-  ConnectionsTable:
-    Description: "DynamoDB Connections Table"
-    Value: !Ref ConnectionsTable
-
-  MessagesTable:
-    Description: "DynamoDB Messages Table"
-    Value: !Ref MessagesTable
-
-  DriversTable:
-    Description: "DynamoDB Drivers Table"
-    Value: !Ref DriversTable
-
-  LoginFunctionArn:
-    Description: "Login Lambda Function ARN"
-    Value: !GetAtt login.Arn
-
-  GetUserFunctionArn:
-    Description: "GetUser Lambda Function ARN"
-    Value: !GetAtt getUser.Arn
-
-  GetRecentTripsFunctionArn:
-    Description: "GetRecentTrips Lambda Function ARN"
-    Value: !GetAtt getRecentTrips.Arn
-
-  RequestRideFunctionArn:
-    Description: "RequestRide Lambda Function ARN"
-    Value: !GetAtt requestRide.Arn
-
-  ProcessPaymentFunctionArn:
-    Description: "ProcessPayment Lambda Function ARN"
-    Value: !GetAtt processPayment.Arn
-
-  ConnectFunctionArn:
-    Description: "Connect Lambda Function ARN"
-    Value: !GetAtt connect.Arn
-
-  DisconnectFunctionArn:
-    Description: "Disconnect Lambda Function ARN"
-    Value: !GetAtt disconnect.Arn
-
-  MessageFunctionArn:
-    Description: "Message Lambda Function ARN"
-    Value: !GetAtt message.Arn
