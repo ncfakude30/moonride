@@ -37,24 +37,14 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install Python dependencies and prepare Lambda package
+      - name: Install Python dependencies
         working-directory: ./lambdas
         run: |
-          # Set up Python environment
           python -m venv venv
           source venv/bin/activate
-
-          # Install Python dependencies
           pip install --no-cache-dir -r requirements.txt
           find venv/lib/python*/site-packages -type d -name '__pycache__' -exec rm -rf {} +
           find venv/lib/python*/site-packages -type d -name '*.dist-info' -exec rm -rf {} +
-
-          # Prepare Lambda package
-          mkdir -p package
-          cp -r venv/lib/python*/site-packages/* package/
-          cp -r *.py package/
-          cd package
-          zip -r ../lambda-package.zip .
 
       - name: Deploy Moonrides Backend
         working-directory: ./lambdas
