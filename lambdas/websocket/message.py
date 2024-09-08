@@ -31,16 +31,16 @@ apigatewaymanagementapi = boto3.client('apigatewaymanagementapi', endpoint_url=W
 
 # Geohash base32 mapping
 _base32 = '0123456789bcdefghjkmnpqrstuvwxyz'
-_base32_map = {char: index for index, char in enumerate(_base32)}
 
 def handler(event, context):
-    logger.info(f'Received event: {event}')
+    logger.info(f'handler: Entry with event: {event}')
     connection_id = event['requestContext']['connectionId']
     try:
         body = json.loads(event['body'])
     except json.JSONDecodeError as e:
         logger.error(f'Error decoding JSON: {e}')
         send_error_response(connection_id, "Invalid request format.")
+        logger.info('handler: Exit with error response for invalid JSON')
         return
 
     message_type = body.get('type')
@@ -52,12 +52,16 @@ def handler(event, context):
     else:
         logger.warning(f'Unknown message type: {message_type}')
         send_error_response(connection_id, "Unknown message type.")
+    
+    logger.info('handler: Exit')
 
 def handle_ride_request(message, connection_id):
+    logger.info(f'handle_ride_request: Entry with message: {message}, connection_id: {connection_id}')
     pickup_location = message.get('pickup')
     if not pickup_location:
         logger.warning('Pickup location not provided in ride request.')
         send_error_response(connection_id, "Pickup location missing.")
+        logger.info('handle_ride_request: Exit with error response for missing pickup location.')
         return
 
     latitude = pickup_location.get('latitude')
@@ -66,6 +70,7 @@ def handle_ride_request(message, connection_id):
     if latitude is None or longitude is None:
         logger.warning('Latitude or longitude missing in pickup location.')
         send_error_response(connection_id, "Invalid pickup location.")
+        logger.info('handle_ride_request: Exit with error response for invalid pickup location.')
         return
 
     try:
@@ -74,19 +79,17 @@ def handle_ride_request(message, connection_id):
     except Exception as e:
         logger.error(f'Error encoding geohash: {e}')
         send_error_response(connection_id, "Error processing location.")
+        logger.info('handle_ride_request: Exit with error response for geohash encoding error.')
         return
 
     drivers = query_drivers_in_geohash_range(geohash_value)
     drivers = bulk_query_geolocated_driver_connections(drivers)
     notify_drivers(drivers, message)
+    
+    logger.info('handle_ride_request: Exit')
 
 def bulk_query_geolocated_driver_connections(drivers):
-    """
-    Queries the connection IDs for a list of drivers based on their driver IDs using a batch_get_item operation.
-    
-    :param drivers: List of driver records obtained from the DriversTable
-    :return: List of connection IDs
-    """
+    logger.info(f'bulk_query_geolocated_driver_connections: Entry with drivers: {drivers}')
     if not drivers:
         logger.warning('No drivers provided for bulk query.')
         return []
@@ -124,19 +127,25 @@ def bulk_query_geolocated_driver_connections(drivers):
             logger.error(f'Error querying connections in batch: {e}')
 
     logger.info(f'Found connection IDs: {connection_ids}')
+    logger.info('bulk_query_geolocated_driver_connections: Exit')
     return connection_ids
 
 def query_drivers_in_geohash_range(geohash_value):
+    logger.info(f'query_drivers_in_geohash_range: Entry with geohash_value: {geohash_value}')
     try:
         response = drivers_table.query(
             KeyConditionExpression=boto3.dynamodb.conditions.Key('geohash').begins_with(geohash_value)
         )
+        logger.info(f'Query result: {response}')
+        logger.info('query_drivers_in_geohash_range: Exit')
         return response['Items']
     except Exception as e:
         logger.error(f'Error querying drivers table: {e}')
+        logger.info('query_drivers_in_geohash_range: Exit with error')
         return []
 
 def notify_drivers(drivers, message):
+    logger.info(f'notify_drivers: Entry with drivers: {drivers}, message: {message}')
     for driver in drivers:
         connection_id = driver.get('connectionId')
         if not connection_id:
@@ -148,18 +157,23 @@ def notify_drivers(drivers, message):
                 ConnectionId=connection_id,
                 Data=json.dumps(message)
             )
+            logger.info(f'Notification sent to driver {connection_id}')
         except apigatewaymanagementapi.exceptions.GoneException:
             logger.warning(f'Connection {connection_id} is no longer valid.')
         except Exception as e:
             logger.error(f'Error notifying driver {connection_id}: {e}')
+    
+    logger.info('notify_drivers: Exit')
 
 def handle_chat_message(message, connection_id):
+    logger.info(f'handle_chat_message: Entry with message: {message}, connection_id: {connection_id}')
     recipient_id = message.get('recipientId')
     text = message.get('text')
 
     if not recipient_id or not text:
         logger.warning('Recipient ID or message text missing in chat message.')
         send_error_response(connection_id, "Recipient ID or message text missing.")
+        logger.info('handle_chat_message: Exit with error response for missing recipient ID or text.')
         return
 
     recipient_connection_id = get_connection_id_by_user_id(recipient_id)
@@ -179,6 +193,7 @@ def handle_chat_message(message, connection_id):
                 ConnectionId=recipient_connection_id,
                 Data=json.dumps(chat_message)
             )
+            logger.info(f'Chat message sent to recipient {recipient_connection_id}')
         except apigatewaymanagementapi.exceptions.GoneException:
             logger.warning(f'Recipient connection {recipient_connection_id} is no longer valid.')
         except Exception as e:
@@ -186,20 +201,29 @@ def handle_chat_message(message, connection_id):
     else:
         logger.warning(f'No connection found for recipient {recipient_id}.')
         send_error_response(connection_id, "Recipient is not connected.")
+    
+    logger.info('handle_chat_message: Exit')
 
 def get_connection_id_by_user_id(user_id):
+    logger.info(f'get_connection_id_by_user_id: Entry with user_id: {user_id}')
     try:
         response = connections_table.query(
             KeyConditionExpression=boto3.dynamodb.conditions.Key('userId').eq(user_id)
         )
         items = response.get('Items', [])
         if items:
-            return items[0].get('connectionId')
+            connection_id = items[0].get('connectionId')
+            logger.info(f'Found connection ID: {connection_id}')
+            logger.info('get_connection_id_by_user_id: Exit')
+            return connection_id
     except Exception as e:
         logger.error(f'Error querying connections table: {e}')
+    
+    logger.info('get_connection_id_by_user_id: Exit with no connection found')
     return None
 
 def send_error_response(connection_id, error_message):
+    logger.info(f'send_error_response: Entry with connection_id: {connection_id}, error_message: {error_message}')
     error_response = {
         'error': error_message
     }
@@ -208,10 +232,12 @@ def send_error_response(connection_id, error_message):
             ConnectionId=connection_id,
             Data=json.dumps(error_response)
         )
+        logger.info(f'Error response sent to connection {connection_id}')
     except apigatewaymanagementapi.exceptions.GoneException:
         logger.warning(f'Connection {connection_id} is no longer valid.')
     except Exception as e:
         logger.error(f'Error sending error response: {e}')
+    logger.info('send_error_response: Exit')
 
 def encode(latitude, longitude, precision=12):
     if latitude >= 90.0 or latitude < -90.0:
