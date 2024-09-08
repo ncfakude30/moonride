@@ -21,7 +21,7 @@ provider:
         - dynamodb:GetItem
         - dynamodb:Query
         - dynamodb:Scan
-        - dynamodb:DeleteItem # Added this line
+        - dynamodb:DeleteItem
       Resource:
         - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRIPS_TABLE}
         - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}
@@ -37,6 +37,15 @@ provider:
       Action:
         - apigateway:POST
       Resource: "*"
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true  # Ensures compatibility with AWS Lambda runtime
+    zip: true  # Compress the requirements into a zip file
+    layer: true  # Use a Lambda Layer for the dependencies
 
 functions:
   login:
