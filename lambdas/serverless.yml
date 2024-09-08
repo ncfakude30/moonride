@@ -342,7 +342,7 @@ resources:
       Type: "AWS::S3::Bucket"
       Properties:
         BucketName: ${self:provider.environment.IMAGE_BUCKET_NAME}
-        AccessControl: PublicRead
+        ObjectOwnership: BucketOwnerEnforced
         CorsConfiguration:
           CorsRules:
             - AllowedOrigins:
