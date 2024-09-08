@@ -384,3 +384,9 @@ resources:
         CloudFrontOriginAccessIdentityConfig:
           Comment: "Access identity for S3 bucket"
 
+outputs:
+  CloudFrontDistributionUrl:
+    Description: "The URL of the CloudFront distribution."
+    Value: !Sub "https://${CloudFrontDistribution.DomainName}"
+    Export:
+      Name: ${self:service}-CloudFrontDistributionUrl
