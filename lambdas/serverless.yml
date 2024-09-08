@@ -13,7 +13,6 @@ provider:
     CONNECTIONS_TABLE: ConnectionsTable
     MESSAGES_TABLE: MessagesTable
     DRIVERS_TABLE: DriversTable
-    WEBSOCKET_ENDPOINT: !Sub 'https://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/@connections'
     PYTHONPATH: '/var/task:${PYTHONPATH}'
 
   iamRoleStatements:
