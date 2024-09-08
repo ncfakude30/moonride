@@ -29,7 +29,7 @@ jobs:
         run: |
           rm -rf node_modules
           npm ci
-          npm install serverless serverless-python-requirements
+          npm install serverless # Make sure serverless is installed locally if not using globally
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -39,7 +39,7 @@ jobs:
       - name: Clean Python environment
         working-directory: ./lambdas
         run: |
-          rm -rf venv
+          rm -rf venv # Ensure that no old environment exists
 
       - name: Install Python dependencies
         working-directory: ./lambdas
@@ -47,12 +47,11 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt # Install dependencies without cache
 
       - name: Deploy Moonrides Backend
         working-directory: ./lambdas
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: |
-          source venv/bin/activate
-          pip install -r requirements.txt
-          npx serverless deploy --verbose
+          npx serverless deploy --verbose # Deploy with verbose logging to catch errors
