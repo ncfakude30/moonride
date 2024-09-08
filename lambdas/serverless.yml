@@ -12,7 +12,9 @@ provider:
     USERS_TABLE: UsersTable
     CONNECTIONS_TABLE: ConnectionsTable
     MESSAGES_TABLE: MessagesTable
+    DRIVERS_TABLE: DriversTable
     WEBSOCKET_ENDPOINT: !Sub 'https://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/@connections'
+    PYTHONPATH: '/var/task:${PYTHONPATH}'  # Ensure this is globally defined
 
   iamRoleStatements:
     - Effect: "Allow"
@@ -27,6 +29,7 @@ provider:
         - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}
         - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.CONNECTIONS_TABLE}
         - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.MESSAGES_TABLE}
+        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DRIVERS_TABLE}
     - Effect: "Allow"
       Action:
         - logs:CreateLogGroup
@@ -125,13 +128,10 @@ functions:
 
   message:
     handler: websocket/message.handler
-    environment:
-      PYTHONPATH: '/var/task:${PYTHONPATH}'
     events:
       - websocket:
           route: $default
        
-
 resources:
   Resources:
     TripsTable:
@@ -186,6 +186,18 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
+    DriversTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:provider.environment.DRIVERS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: geohash
+            AttributeType: S
+        KeySchema:
+          - AttributeName: geohash
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
     WebSocketApi:
       Type: 'AWS::ApiGatewayV2::Api'
       Properties:
@@ -223,6 +235,15 @@ resources:
         RouteKey: '$default'
         AuthorizationType: NONE
         Target: !Sub 'integrations/${WebSocketApiIntegrationMessage}'
+
+    WebSocketApiDeployment:
+      Type: 'AWS::ApiGatewayV2::Deployment'
+      DependsOn:
+        - WebSocketApiRouteConnect
+        - WebSocketApiRouteDisconnect
+        - WebSocketApiRouteMessage
+      Properties:
+        ApiId: !Ref WebSocketApi
 
     WebSocketApiIntegrationConnect:
       Type: 'AWS::ApiGatewayV2::Integration'
@@ -272,11 +293,10 @@ resources:
         Principal: 'apigateway.amazonaws.com'
         SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$default'
 
-    WebSocketApiDeployment:
-      Type: 'AWS::ApiGatewayV2::Deployment'
-      DependsOn:
-        - WebSocketApiRouteConnect
-        - WebSocketApiRouteDisconnect
-        - WebSocketApiRouteMessage
-      Properties:
-        ApiId: !Ref WebSocketApi
+  Outputs:
+    WebSocketApiUrl:
+      Description: "The URL of the WebSocket API"
+      Value: !Sub 'wss://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}'
+    WebSocketApiConnectionsUrl:
+      Descript: "The url used for communication"
+      Value: !Sub 'https://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/@connections'

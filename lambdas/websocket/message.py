@@ -57,6 +57,7 @@ def handle_ride_request(message, connection_id):
     notify_drivers(drivers, message)
 
 def query_drivers_in_geohash_range(geohash_value):
+	
     response = drivers_table.query(
         KeyConditionExpression=boto3.dynamodb.conditions.Key('geohash').begins_with(geohash_value)
     )
