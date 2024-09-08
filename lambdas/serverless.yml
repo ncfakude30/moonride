@@ -46,6 +46,9 @@ custom:
     dockerizePip: true  # Ensures compatibility with AWS Lambda runtime
     zip: true  # Compress the requirements into a zip file
     layer: true  # Use a Lambda Layer for the dependencies
+    include:
+      - .serverless/**
+      - venv/**
 
 functions:
   login:
