@@ -10,7 +10,7 @@ provider:
   environment:
     TRIPS_TABLE: TripsTable
     USERS_TABLE: UsersTable
-    CONNECTIONS_TABLE: ConnectionsTable_v2
+    CONNECTIONS_TABLE: ConnectionsTable
     MESSAGES_TABLE: MessagesTable
     DRIVERS_TABLE: DriversTable
     PYTHONPATH: '/var/task:${PYTHONPATH}'
