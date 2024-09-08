@@ -1,6 +1,8 @@
 import os
 import json
-import Geohash
+import sys
+sys.path.append('/var/task/venv/lib/python3.9/site-packages')
+import Geohash.geohash as geohash
 import boto3
 from uuid import uuid4
 from datetime import datetime
@@ -16,8 +18,6 @@ drivers_table = dynamodb.Table(DRIVERS_TABLE)
 connections_table = dynamodb.Table(CONNECTIONS_TABLE)
 messages_table = dynamodb.Table(MESSAGES_TABLE)
 apigatewaymanagementapi = boto3.client('apigatewaymanagementapi', endpoint_url=WEBSOCKET_ENDPOINT)
-
-print(Geohash.__file__) 
 
 
 def handler(event, context):

@@ -125,9 +125,12 @@ functions:
 
   message:
     handler: websocket/message.handler
+    environment:
+      - PYTHONPATH: "/var/task:${PYTHONPATH}"
     events:
       - websocket:
           route: $default
+       
 
 resources:
   Resources:
