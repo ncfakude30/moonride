@@ -46,8 +46,6 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install --no-cache-dir setuptools
-          pip install --no-cache-dir Geohash
           pip install --no-cache-dir -r requirements.txt
 
       - name: Deploy Moonrides Backend
