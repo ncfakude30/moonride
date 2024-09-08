@@ -90,7 +90,7 @@ function RecentTrips({ user }) {
                                 </TripDetails>
                                 <DriverProfile>
                                     <Image
-                                        src={trip.driverProfile || 'https://randomuser.me/api/portraits/med/women/1.jpg'}
+                                        src={trip.driverProfile || 'https://moonride-media.s3.amazonaws.com/moonriding.png'}
                                         alt="Driver"
                                         width={50}
                                         height={50}

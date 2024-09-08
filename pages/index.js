@@ -7,7 +7,6 @@ import { auth } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useRouter } from 'next/router';
 import RecentTrips from './components/RecentTrips'; // Import the RecentTrips component
-import MoonRidesImage from '../public/moon-ride.png';
 import Image from 'next/image';
 
 export default function Home() {
@@ -35,7 +34,7 @@ export default function Home() {
             <Map />
             <ActionItems>
                 <Header style={{ backgroundColor: '#1a1a2e' }}> {/* Dark blue color */}
-                    <Image src={MoonRidesImage} alt="MoonRides Logo" height={112} width={112} />
+                    <Image src='https://moonride-media.s3.amazonaws.com/moon-ride.png' alt="MoonRides Logo" height={112} width={112} />
                     <Profile>
                         <Name>{user && user.name}</Name>
                         <UserImage
@@ -58,8 +57,8 @@ export default function Home() {
                     </Link>
                     <ActionButton>
                         <Badge>Coming Soon</Badge>
-                        <ActionButtonImage src='https://i.ibb.co/n776JLm/bike.png' />
-                        Wheels
+                        <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/water.png' />
+                        Buy
                     </ActionButton>
                     <ActionButton>
                         <Badge>Coming Soon</Badge>

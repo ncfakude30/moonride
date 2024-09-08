@@ -79,7 +79,7 @@ const Tracking = () => {
             <InfoContainer>
                 <DriverInfo>
                     <ProfilePicture
-                        src='https://randomuser.me/api/portraits/med/women/1.jpg'
+                        src='https://moonride-media.s3.amazonaws.com/moonriding.png'
                         alt='Driver Profile'
                     />
                     <DriverDetails>
@@ -94,7 +94,7 @@ const Tracking = () => {
                         {messages.map((msg, index) => (
                             <MessageRow key={index} isUser={msg.isUser}>
                                 <ProfilePictureSmall
-                                    src={msg.isUser ? 'https://randomuser.me/api/portraits/med/women/1.jpg' : 'https://randomuser.me/api/portraits/med/women/1.jpg'}
+                                    src={msg.isUser ? 'https://moonride-media.s3.amazonaws.com/default.png' : 'https://moonride-media.s3.amazonaws.com/default.png'}
                                     alt={msg.isUser ? 'User' : 'Driver'}
                                 />
                                 <MessageBubble isUser={msg.isUser}>

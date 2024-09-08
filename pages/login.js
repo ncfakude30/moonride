@@ -6,9 +6,6 @@ import tw from 'tailwind-styled-components';
 import Image from 'next/image';
 import { loginApi } from './api/app.service';
 
-// Import your local images
-import MoonRidesImage from '../public/moon-ride.png'; // Use local MoonRides image
-
 function Login() {
     const router = useRouter();
 
@@ -57,7 +54,7 @@ function Login() {
     return (
         <Wrapper>
             <Content>
-                <Image src={MoonRidesImage} alt='MoonRides Logo' width={200} height={200} />
+                <Image src='https://moonride-media.s3.amazonaws.com/moon-ride.png' alt='MoonRides Logo' width={200} height={200} />
                 <Title>Login to access your account</Title>
                 <HeadImage src='https://i.ibb.co/CsV9RYZ/login-image.png' width={300} height={200} />
                 <SignInButton onClick={handleSignIn}>Sign in with Google</SignInButton>
