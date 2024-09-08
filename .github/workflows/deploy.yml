@@ -27,9 +27,9 @@ jobs:
 
       - name: Set up Python and install dependencies
         run: |
-          python -m ensurepip --upgrade
-          python -m pip install --upgrade pip
-          python -m venv lambdas/venv
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          python3 -m venv lambdas/venv
           source lambdas/venv/bin/activate
           pip install --no-cache-dir -r lambdas/requirements.txt
           find lambdas/venv/lib/python*/site-packages -type d -name '__pycache__' -exec rm -rf {} +
