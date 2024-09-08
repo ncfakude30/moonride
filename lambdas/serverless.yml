@@ -195,6 +195,13 @@ resources:
           - AttributeName: 'userId'
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: ConnectionIndex
+            KeySchema:
+              - AttributeName: 'connectionId'
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
 
     MessagesTable:
       Type: "AWS::DynamoDB::Table"
