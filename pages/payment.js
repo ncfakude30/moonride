@@ -83,10 +83,8 @@ function Payment() {
                 userId: `${user?.userId || user?.id || user?.uuid}`,
                 pickupName: pickupPlace,
                 dropoffName: dropoffPlace,
-                ...user,
+                recipientId: user?.id || user?.uuid,
             };
-
-            console.log(`My trip user: ${JSON.stringify({user})}`);
 
             // Add trip data after successful payment
             await requestTrip(tripData);
@@ -95,8 +93,8 @@ function Payment() {
 
             // Send WebSocket message
             sendMessage({
-                type: 'trip_request', // Ensure the type matches your server's expected message type
-                data: tripData
+                type: 'ride_request', // Ensure the type matches your server's expected message type
+                ...tripData
             });
 
             // Redirect to confirmation page after both operations are complete

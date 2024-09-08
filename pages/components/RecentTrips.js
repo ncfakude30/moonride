@@ -56,7 +56,7 @@ function RecentTrips({ user }) {
                                     pickup: trip?.pickup,
                                     dropoff: trip?.dropoff,
                                     pickupName: trip?.pickupName || trip?.pickup,
-                                    pickupName: trip?.pickupName || trip?.dropoff,
+                                    dropoffName: trip?.dropoffName || trip?.dropoff,
                                     user: JSON.stringify(user),
                                 }
                             }}

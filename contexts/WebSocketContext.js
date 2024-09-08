@@ -37,7 +37,7 @@ export const WebSocketProvider = ({ children }) => {
 
     const sendMessage = (message) => {
         if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({...message, ...user}));
+            ws.send(JSON.stringify({...message, userId: user?.id || user?.uuid}));
         }
     };
 

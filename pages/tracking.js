@@ -8,7 +8,7 @@ import { useWebSocket } from '../contexts/WebSocketContext';
 
 const Tracking = () => {
     const router = useRouter();
-    const { pickup, dropoff } = router.query;
+    const { pickup, dropoff, pickupName, dropoffName, user } = router.query;
     const ws = useWebSocket();
 
     const [pickupCoords, setPickupCoords] = useState(null);
@@ -16,8 +16,16 @@ const Tracking = () => {
     const [loading, setLoading] = useState(true);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [loggedUser, setUser] = useState(null);
 
     useEffect(() => {
+        if(!user) {
+            setUser(null);
+            router.push('/')
+        }
+
+        setUser(user)
+
         if (pickup && dropoff) {
             const pickupArray = pickup.split(',').map(coord => parseFloat(coord));
             const dropoffArray = dropoff.split(',').map(coord => parseFloat(coord));
@@ -26,7 +34,8 @@ const Tracking = () => {
             setDropoffCoords(dropoffArray);
             setLoading(false);
         }
-    }, [pickup, dropoff]);
+        
+    }, [pickup, dropoff, user]);
 
     useEffect(() => {
         if (ws) {
@@ -41,7 +50,7 @@ const Tracking = () => {
 
     const handleSendMessage = () => {
         if (newMessage.trim() && ws) {
-            ws.sendMessage({ type: 'chat_message', text: newMessage, recipientId: 'test' });
+            ws.sendMessage({ type: 'chat_message', text: newMessage, recipientId: loggedUser?.id ||  loggedUser?.uuid });
             setNewMessage('');
         }
     };
@@ -53,7 +62,7 @@ const Tracking = () => {
     return (
         <Container>
             <MapWrapper>
-                <Map pickupCoordinates={pickupCoords} dropoffCoordinates={dropoffCoords} />
+                <Map pickupCoordinates={pickupCoords} dropoffCoordinates={dropoffCoords} user={loggedUser}/>
                 <BackButtonContainer>
                     <Link href='/'>
                         <BackButton>
