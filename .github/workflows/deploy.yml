@@ -41,11 +41,6 @@ jobs:
         working-directory: ./lambdas
         run: |
           rm -rf venv
-          find venv/lib/python*/site-packages -type d -name '__pycache__' -exec rm -rf {} +
-          find venv/lib/python*/site-packages -type d -name '*.dist-info' -exec rm -rf {} +
-          find venv/lib -type d -name '__pycache__' -exec rm -rf {} +
-          find venv/lib -type d -name '*.dist-info' -exec rm -rf {} +
-
       - name: Install Python dependencies
         working-directory: ./lambdas
         run: |
