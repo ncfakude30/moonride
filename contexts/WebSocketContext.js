@@ -25,7 +25,7 @@ export const WebSocketProvider = ({ children }) => {
             };
 
             socket.onmessage = (event) => {
-                console.log('Message received:', event.data);
+                console.log('Message received:', JSON.stringify(event.data));
             };
 
             return () => {

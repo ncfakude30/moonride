@@ -64,13 +64,13 @@ def handle_ride_request(message, connection_id):
         print('handle_ride_request: Exit with error response for missing pickup location.')
         return
 
-    latitude = pickup_location.get('latitude')
-    longitude = pickup_location.get('longitude')
-
-    if latitude is None or longitude is None:
-        print('Latitude or longitude missing in pickup location.')
-        send_error_response(connection_id, "Invalid pickup location.")
-        print('handle_ride_request: Exit with error response for invalid pickup location.')
+    # Split the pickup location string into latitude and longitude
+    try:
+        latitude, longitude = map(float, pickup_location.split(','))
+    except ValueError:
+        print('Invalid pickup location format.')
+        send_error_response(connection_id, "Invalid pickup location format.")
+        print('handle_ride_request: Exit with error response for invalid pickup location format.')
         return
 
     try:

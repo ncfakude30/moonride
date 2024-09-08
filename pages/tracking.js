@@ -40,6 +40,7 @@ const Tracking = () => {
     useEffect(() => {
         if (ws) {
             ws.onmessage = (event) => {
+                console.log(`My received message: ${JSON.stringify(event)}`)
                 const data = JSON.parse(event.data);
                 if (data.type === 'chat_message') {
                     setMessages(prevMessages => [...prevMessages, data.message]);

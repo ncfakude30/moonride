@@ -12,6 +12,8 @@ function Payment() {
     const [loggedUser, setUser] = useState(null);
     const [pickupPlace, setPickupPlace] = useState('');
     const [dropoffPlace, setDropoffPlace] = useState('');
+    const [pickupShortName, setPickupShortName] = useState('');
+    const [dropoffShortName, setDropoffShortName] = useState('');
     const [paymentStatus, setPaymentStatus] = useState(null);
     const [loading, setLoading] = useState(false); // New loading state
     const { sendMessage } = useWebSocket(); // Access WebSocket context
@@ -22,9 +24,9 @@ function Payment() {
             setUser(null);
             router.push('/login');
         }
-
+    
         setUser(JSON.parse(user));
-
+    
         // Set selected car and place names
         if (ride) {
             setSelectedCar(JSON.parse(ride));
@@ -34,7 +36,7 @@ function Payment() {
             fetchPlaceName(dropoff, 'dropoff');
         }
     }, [ride, pickup, dropoff, user, router]);
-
+    
     const fetchPlaceName = async (coordinates, type) => {
         try {
             const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates}.json?` +
@@ -45,21 +47,27 @@ function Payment() {
             );
             const data = await response.json();
             const placeName = data.features.length > 0 ? data.features[0].place_name : 'Unknown location';
+            const shortName = data.features.length > 0 ? data.features[0].text : 'Unknown';
+            
             if (type === 'pickup') {
                 setPickupPlace(placeName);
+                setPickupShortName(shortName); // Add this to set short name
             } else if (type === 'dropoff') {
                 setDropoffPlace(placeName);
+                setDropoffShortName(shortName); // Add this to set short name
             }
         } catch (error) {
             console.error('Error fetching place name:', error);
             if (type === 'pickup') {
                 setPickupPlace('Error fetching location');
+                setPickupShortName('Error');
             } else if (type === 'dropoff') {
                 setDropoffPlace('Error fetching location');
+                setDropoffShortName('Error');
             }
         }
     };
-
+    
     const handlePayment = async (user) => {
         if (!user) {
             console.error('User is not logged in');
@@ -81,6 +89,8 @@ function Payment() {
                 rating: selectedCar ? selectedCar.rating : 0,
                 driverProfile: selectedCar ? selectedCar.driverProfile : '',
                 userId: `${user?.userId || user?.id || user?.uuid}`,
+                pickupName: pickupShortName,
+                dropoffName: dropoffShortName,
                 pickupName: pickupPlace,
                 dropoffName: dropoffPlace,
                 recipientId: user?.id || user?.uuid,
