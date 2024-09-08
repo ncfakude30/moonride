@@ -177,12 +177,13 @@ def handle_chat_message(message, connection_id):
         return
 
     recipient_connection_id = get_connection_id_by_user_id(recipient_id)
+    recipient_connection_id = connection_id
 
     if recipient_connection_id:
         chat_message = {
             'messageId': str(uuid4()),
             'senderConnectionId': connection_id,
-            'recipientConnectionId': recipient_connection_id,
+            'recipientConnectionId': connection_id,
             'message': text,
             'timestamp': datetime.utcnow().isoformat()
         }
