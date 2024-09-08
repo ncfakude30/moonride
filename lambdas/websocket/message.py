@@ -16,7 +16,7 @@ GEOHASH_PRECISION = 5
 DRIVERS_TABLE = os.getenv('DRIVERS_TABLE', 'DriversTable')
 CONNECTIONS_TABLE = os.getenv('CONNECTIONS_TABLE', 'ConnectionsTable')
 MESSAGES_TABLE = os.getenv('MESSAGES_TABLE', 'MessagesTable')
-WEBSOCKET_ENDPOINT = os.getenv('WEBSOCKET_ENDPOINT', 'https://j4a86rv3rd.execute-api.us-east-1.amazonaws.com/dev/@connections')
+WEBSOCKET_ENDPOINT = os.getenv('WEBSOCKET_ENDPOINT', 'https://j4a86rv3rd.execute-api.us-east-1.amazonaws.com/dev')
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

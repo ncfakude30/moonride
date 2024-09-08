@@ -10,7 +10,7 @@ provider:
   environment:
     TRIPS_TABLE: TripsTable
     USERS_TABLE: UsersTable
-    CONNECTIONS_TABLE: ConnectionsTable
+    CONNECTIONS_TABLE: ConnectionsTable_v1
     MESSAGES_TABLE: MessagesTable
     DRIVERS_TABLE: DriversTable
     PYTHONPATH: '/var/task:${PYTHONPATH}'
@@ -187,18 +187,18 @@ resources:
       Properties:
         TableName: ${self:provider.environment.CONNECTIONS_TABLE}
         AttributeDefinitions:
-          - AttributeName: 'connectionId'
-            AttributeType: S
           - AttributeName: 'userId'
+            AttributeType: S
+          - AttributeName: 'connectionId'
             AttributeType: S
         KeySchema:
           - AttributeName: 'connectionId'
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         GlobalSecondaryIndexes:
-          - IndexName: UserIdIndex
+          - IndexName: ConnectionIdIndex
             KeySchema:
-              - AttributeName: 'userId'
+              - AttributeName: 'connectionId'
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
