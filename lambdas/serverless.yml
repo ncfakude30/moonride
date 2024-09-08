@@ -187,18 +187,18 @@ resources:
       Properties:
         TableName: ${self:provider.environment.CONNECTIONS_TABLE}
         AttributeDefinitions:
-          - AttributeName: 'userId'
-            AttributeType: S
           - AttributeName: 'connectionId'
             AttributeType: S
-        KeySchema:
           - AttributeName: 'userId'
+            AttributeType: S
+        KeySchema:
+          - AttributeName: 'connectionId'
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         GlobalSecondaryIndexes:
-          - IndexName: ConnectionIndex
+          - IndexName: UserIdIndex
             KeySchema:
-              - AttributeName: 'connectionId'
+              - AttributeName: 'userId'
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
