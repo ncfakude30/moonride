@@ -1,6 +1,9 @@
 # Use the official AWS Lambda base image for Python
 FROM public.ecr.aws/lambda/python:3.9
 
+# Install pip if it's not available
+RUN apt-get update && apt-get install -y python3-pip
+
 # Set the working directory inside the container
 WORKDIR /var/task
 
