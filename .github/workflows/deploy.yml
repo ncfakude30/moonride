@@ -21,24 +21,19 @@ jobs:
       - name: Install dependencies for the root project
         run: |
           npm install
+          npm install -g serverless
+          npm install -g serverless-python-requirements
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # or the version your Lambda functions use
+          python-version: '3.9'
 
-      - name: Install Python dependencies
+      - name: Install Python dependencies globally
         working-directory: ./lambdas
         run: |
-          python -m venv venv
-          source venv/bin/activate
           pip install -r requirements.txt
 
-      - name: Install Serverless Framework and plugins
-        run: |
-          npm install -g serverless
-          # Make sure to install serverless-python-requirements globally if needed
-          npm install -g serverless-python-requirements
 
       - name: Set up AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
