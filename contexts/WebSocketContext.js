@@ -11,7 +11,8 @@ export const WebSocketProvider = ({ children }) => {
         if (user) {
             //https://ufqmmf6blc.execute-api.us-east-1.amazonaws.com/dev
             // Create WebSocket connection if the user is authenticated
-            const socket = new WebSocket(process.env.WEBSOCKET_URL || 'wss://j4a86rv3rd.execute-api.us-east-1.amazonaws.com/dev/');
+            // Create WebSocket connection with userId as a query parameter
+            const socket = new WebSocket(`${process.env.WEBSOCKET_URL || 'wss://j4a86rv3rd.execute-api.us-east-1.amazonaws.com/dev/'}?userId=${user?.id || user?.uuid}`);
             setWs(socket);
 
             socket.onopen = () => {
