@@ -45,8 +45,8 @@ jobs:
           pip install --no-cache-dir -r requirements.txt
           find venv/lib/python*/site-packages -type d -name '__pycache__' -exec rm -rf {} +
           find venv/lib/python*/site-packages -type d -name '*.dist-info' -exec rm -rf {} +
-          find venv/*
-          find .serverless/**
+          find venv/lib
+          find .serverless
 
       - name: Deploy Moonrides Backend
         working-directory: ./lambdas
