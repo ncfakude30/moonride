@@ -214,7 +214,6 @@ resources:
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
-            
 
     DriversTable:
       Type: "AWS::DynamoDB::Table"
@@ -280,7 +279,7 @@ resources:
       Properties:
         ApiId: !Ref WebSocketApi
         IntegrationType: AWS_PROXY
-        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${ConnectLambdaFunction.Arn}/invocations'
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:resources.Resources.ConnectLambdaFunction.Arn}/invocations'
         PayloadFormatVersion: '1.0'
 
     WebSocketApiIntegrationDisconnect:
@@ -288,7 +287,7 @@ resources:
       Properties:
         ApiId: !Ref WebSocketApi
         IntegrationType: AWS_PROXY
-        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${DisconnectLambdaFunction.Arn}/invocations'
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:resources.Resources.DisconnectLambdaFunction.Arn}/invocations'
         PayloadFormatVersion: '1.0'
 
     WebSocketApiIntegrationMessage:
@@ -296,7 +295,7 @@ resources:
       Properties:
         ApiId: !Ref WebSocketApi
         IntegrationType: AWS_PROXY
-        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${MessageLambdaFunction.Arn}/invocations'
+        IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${self:resources.Resources.MessageLambdaFunction.Arn}/invocations'
         PayloadFormatVersion: '1.0'
 
     WebSocketApiPermission:

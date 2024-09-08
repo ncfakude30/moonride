@@ -32,7 +32,7 @@ const Tracking = () => {
         if (ws) {
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                if (data.action === 'chat_message') {
+                if (data.type === 'chat_message') {
                     setMessages(prevMessages => [...prevMessages, data.message]);
                 }
             };
@@ -41,7 +41,7 @@ const Tracking = () => {
 
     const handleSendMessage = () => {
         if (newMessage.trim() && ws) {
-            ws.sendMessage({ action: 'chat_message', message: newMessage });
+            ws.sendMessage({ type: 'chat_message', text: newMessage, recipientId: 'test' });
             setNewMessage('');
         }
     };
