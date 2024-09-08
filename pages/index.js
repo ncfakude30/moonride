@@ -57,13 +57,19 @@ export default function Home() {
                     </Link>
                     <ActionButton>
                         <Badge>Coming Soon</Badge>
-                        <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/water.png' />
+                        <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/water.png'/>
                         Water
                     </ActionButton>
                     <ActionButton>
                         <Badge>Coming Soon</Badge>
-                        <ActionButtonImage src='https://i.ibb.co/5RjchBg/uberschedule.png' />
-                        Reserve
+                        <ActionButtonImage src='https://i.ibb.co/n776JLm/bike.png'/>
+                        Order
+                    </ActionButton>
+
+                    <ActionButton>
+                        <Badge>Coming Soon</Badge>
+                        <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/helper.png'/>
+                        Helper
                     </ActionButton>
                 </ActionButtons>
                 <RecentTrips user={user} />
@@ -99,7 +105,7 @@ const UserImage = tw.img`
 `;
 
 const ActionButtons = tw.div`
-    flex
+    flex overflow-x-auto no-scrollbar
 `;
 
 const ActionButton = tw.div`
@@ -117,4 +123,13 @@ const Badge = tw.div`
 
 const InputButton = tw.div`
     h-20 bg-gray-200 text-2xl p-4 flex items-center mt-8
+`;
+
+// Hide scrollbar in WebKit browsers
+const noScrollbar = `
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    &::-webkit-scrollbar {
+        display: none;  /* Chrome, Safari, and Opera */
+    }
 `;
