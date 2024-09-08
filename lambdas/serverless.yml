@@ -43,12 +43,12 @@ plugins:
 
 custom:
   pythonRequirements:
-    dockerizePip: true
     zip: true  # Compress the requirements into a zip file
     layer: true  # Use a Lambda Layer for the dependencies
     include:
       - .serverless/**
-      - venv/**
+      - venv
+      - .venv
 
 functions:
   login:
