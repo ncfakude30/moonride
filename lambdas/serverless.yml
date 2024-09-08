@@ -336,7 +336,8 @@ resources:
         Action: 'lambda:InvokeFunction'
         FunctionName: !Ref MessageLambdaFunction
         Principal: 'apigateway.amazonaws.com'
-            SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$default'
+        SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$default'
+
     ImageBucket:
       Type: "AWS::S3::Bucket"
       Properties:
@@ -350,13 +351,19 @@ resources:
               AllowedHeaders:
                 - "*"
 
+    CloudFrontOriginAccessIdentity:
+      Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: "Access identity for S3 bucket"
+
     CloudFrontDistribution:
       Type: "AWS::CloudFront::Distribution"
       Properties:
         DistributionConfig:
           Origins:
             - Id: S3Origin
-              DomainName: !Sub "${ImageBucket}.s3.amazonaws.com"
+              DomainName: !Sub '${ImageBucket}.s3.amazonaws.com'
               S3OriginConfig:
                 OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
           Enabled: true
@@ -375,13 +382,6 @@ resources:
             AcmCertificateArn: ${self:provider.environment.ACM_CERTIFICATE_ARN}
             SslSupportMethod: sni-only
           HttpVersion: http2
-
-    CloudFrontOriginAccessIdentity:
-      Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
-      Properties:
-        CloudFrontOriginAccessIdentityConfig:
-          Comment: "Access identity for S3 bucket"
-
 outputs:
   CloudFrontDistributionUrl:
     Description: "The URL of the CloudFront distribution."

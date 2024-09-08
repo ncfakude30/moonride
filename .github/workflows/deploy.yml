@@ -40,6 +40,7 @@ jobs:
         working-directory: ./lambdas
         run: |
           rm -rf venv # Ensure that no old environment exists
+          rm -rf .serverless
 
       - name: Install Python dependencies
         working-directory: ./lambdas
@@ -47,11 +48,11 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
-          pip install --no-cache-dir -r requirements.txt # Install dependencies without cache
+          pip install -r requirements.txt
 
       - name: Deploy Moonrides Backend
         working-directory: ./lambdas
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: |
-          npx serverless deploy --verbose # Deploy with verbose logging to catch errors
+          npx serverless deploy --verbose
