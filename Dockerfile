@@ -17,25 +17,27 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Python build stage
-FROM python:3.9 AS python-builder
+# Use the official AWS Lambda base image for Python
+FROM public.ecr.aws/lambda/python:3.9
 
-# Set the working directory
-WORKDIR /lambdas
+# Set the working directory inside the container
+WORKDIR /var/task
 
-# Copy the Python requirements
-COPY lambdas/requirements.txt .
+# Install pip if it's not available and upgrade it
+RUN python -m ensurepip --upgrade || true
+RUN python -m pip install --upgrade pip
+
+# Copy the requirements file and install dependencies
+COPY lambdas/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Install Python dependencies with cleanup
 RUN pip install --no-cache-dir -r requirements.txt -t /lambda/python \
     && find /lambda/python -type d -name '__pycache__' -exec rm -rf {} + \
     && find /lambda/python -type d -name '*.dist-info' -exec rm -rf {} +
 
-# Copy the Lambda functions
-COPY lambdas /lambda
-
-# Create a zip file with the dependencies and functions
-RUN cd /lambda && zip -r /lambda/lambda-package.zip .
+# Copy the Lambda function code into the container
+COPY lambdas /var/task
 
 # Production image
 FROM node:18-alpine
@@ -58,4 +60,4 @@ COPY --from=python-builder /lambda/lambda-package.zip /lambda/lambda-package.zip
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["npm", "start", "lambda_function.handler"]
