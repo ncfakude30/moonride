@@ -37,15 +37,22 @@ jobs:
         with:
           python-version: '3.9'
 
+      - name: Clean Python environment
+        working-directory: ./lambdas
+        run: |
+          rm -rf venv
+          find venv/lib/python*/site-packages -type d -name '__pycache__' -exec rm -rf {} +
+          find venv/lib/python*/site-packages -type d -name '*.dist-info' -exec rm -rf {} +
+          find venv/lib -type d -name '__pycache__' -exec rm -rf {} +
+          find venv/lib -type d -name '*.dist-info' -exec rm -rf {} +
+
       - name: Install Python dependencies
         working-directory: ./lambdas
         run: |
           python -m venv venv
           source venv/bin/activate
-          find venv/lib/python*/site-packages -type d -name '__pycache__' -exec rm -rf {} +
-          find venv/lib/python*/site-packages -type d -name '*.dist-info' -exec rm -rf {} +
-          find venv/lib -type d -name '__pycache__' -exec rm -rf {} +
-          find venv/lib -type d -name '*.dist-info' -exec rm -rf {} +
+          pip install --no-cache-dir setuptools
+          pip install --no-cache-dir python-geohash
           pip install --no-cache-dir -r requirements.txt
 
       - name: Deploy Moonrides Backend
