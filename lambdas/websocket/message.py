@@ -79,6 +79,52 @@ def handle_ride_request(message, connection_id):
     drivers = query_drivers_in_geohash_range(geohash_value)
     notify_drivers(drivers, message)
 
+def bulk_query_geolocated_driver_connections(drivers):
+    """
+    Queries the connection IDs for a list of drivers based on their driver IDs using a batch_get_item operation.
+    
+    :param drivers: List of driver records obtained from the DriversTable
+    :return: List of connection IDs
+    """
+    if not drivers:
+        logger.warning('No drivers provided for bulk query.')
+        return []
+
+    driver_ids = [driver['driverId'] for driver in drivers if 'driverId' in driver]
+    if not driver_ids:
+        logger.warning('No valid driver IDs found.')
+        return []
+
+    # Prepare the request for batch_get_item
+    keys = [{'userId': driver_id} for driver_id in driver_ids]
+    
+    # DynamoDB requires a maximum of 100 items per batch request
+    MAX_BATCH_SIZE = 100
+    connection_ids = []
+    
+    # Batch processing in chunks of 100
+    for i in range(0, len(keys), MAX_BATCH_SIZE):
+        batch_keys = keys[i:i + MAX_BATCH_SIZE]
+        
+        try:
+            response = dynamodb.batch_get_item(
+                RequestItems={
+                    CONNECTIONS_TABLE: {
+                        'Keys': batch_keys,
+                        'ProjectionExpression': 'connectionId'
+                    }
+                }
+            )
+            
+            items = response.get('Responses', {}).get(CONNECTIONS_TABLE, [])
+            connection_ids.extend([item['connectionId'] for item in items if 'connectionId' in item])
+            
+        except Exception as e:
+            logger.error(f'Error querying connections in batch: {e}')
+
+    logger.info(f'Found connection IDs: {connection_ids}')
+    return connection_ids
+
 def query_drivers_in_geohash_range(geohash_value):
     try:
         response = drivers_table.query(

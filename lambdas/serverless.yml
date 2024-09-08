@@ -14,7 +14,7 @@ provider:
     MESSAGES_TABLE: MessagesTable
     DRIVERS_TABLE: DriversTable
     WEBSOCKET_ENDPOINT: !Sub 'https://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/@connections'
-    PYTHONPATH: '/var/task:${PYTHONPATH}'  # Ensure this is globally defined
+    PYTHONPATH: '/var/task:${PYTHONPATH}'
 
   iamRoleStatements:
     - Effect: "Allow"
@@ -24,6 +24,7 @@ provider:
         - dynamodb:Query
         - dynamodb:Scan
         - dynamodb:DeleteItem
+        - dynamodb:BatchGetItem
       Resource:
         - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRIPS_TABLE}
         - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}
@@ -46,8 +47,8 @@ plugins:
 
 custom:
   pythonRequirements:
-    zip: true  # Compress the requirements into a zip file
-    layer: true  # Use a Lambda Layer for the dependencies
+    zip: true
+    layer: true
     include:
       - .serverless/**
       - venv
@@ -77,7 +78,7 @@ functions:
               - Content-Type
               - Authorization
             allowCredentials: true
-  
+
   getRecentTrips:
     handler: ride/ride.handler
     events:
@@ -131,7 +132,7 @@ functions:
     events:
       - websocket:
           route: $default
-       
+
 resources:
   Resources:
     TripsTable:
@@ -139,9 +140,11 @@ resources:
       Properties:
         TableName: ${self:provider.environment.TRIPS_TABLE}
         AttributeDefinitions:
-          - AttributeName: userId
+          - AttributeName: 'userId'
             AttributeType: S
-          - AttributeName: tripDate
+          - AttributeName: 'tripDate'
+            AttributeType: S
+          - AttributeName: 'tripId'
             AttributeType: S
         KeySchema:
           - AttributeName: userId
@@ -149,28 +152,50 @@ resources:
           - AttributeName: tripDate
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: TripIdIndex
+            KeySchema:
+              - AttributeName: tripId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
 
     UsersTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
         TableName: ${self:provider.environment.USERS_TABLE}
         AttributeDefinitions:
-          - AttributeName: userId
+          - AttributeName: 'userId'
             AttributeType: S
+          - AttributeName: 'isOnline'
+            AttributeType: B
         KeySchema:
-          - AttributeName: userId
+          - AttributeName: 'userId'
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: IsOnlineIndex
+            KeySchema:
+              - AttributeName: 'isOnline'
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
 
     ConnectionsTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
         TableName: ${self:provider.environment.CONNECTIONS_TABLE}
         AttributeDefinitions:
-          - AttributeName: connectionId
+          - AttributeName: 'connectionId'
             AttributeType: S
         KeySchema:
-          - AttributeName: connectionId
+          - AttributeName: 'connectionId'
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
@@ -179,12 +204,24 @@ resources:
       Properties:
         TableName: ${self:provider.environment.MESSAGES_TABLE}
         AttributeDefinitions:
-          - AttributeName: messageId
+          - AttributeName: 'messageId'
+            AttributeType: S
+          - AttributeName: 'senderId'
             AttributeType: S
         KeySchema:
           - AttributeName: messageId
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: SenderIndex
+            KeySchema:
+              - AttributeName: 'senderId'
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
 
     DriversTable:
       Type: "AWS::DynamoDB::Table"
@@ -269,11 +306,11 @@ resources:
         IntegrationUri: !Sub 'arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/${MessageLambdaFunction.Arn}/invocations'
         PayloadFormatVersion: '1.0'
 
-    WebSocketApiPermissionConnect:
+    WebSocketApiPermission:
       Type: 'AWS::Lambda::Permission'
       Properties:
         Action: 'lambda:InvokeFunction'
-        FunctionName: !GetAtt ConnectLambdaFunction.Arn
+        FunctionName: !Ref ConnectLambdaFunction
         Principal: 'apigateway.amazonaws.com'
         SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$connect'
 
@@ -281,7 +318,7 @@ resources:
       Type: 'AWS::Lambda::Permission'
       Properties:
         Action: 'lambda:InvokeFunction'
-        FunctionName: !GetAtt DisconnectLambdaFunction.Arn
+        FunctionName: !Ref DisconnectLambdaFunction
         Principal: 'apigateway.amazonaws.com'
         SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$disconnect'
 
@@ -289,14 +326,67 @@ resources:
       Type: 'AWS::Lambda::Permission'
       Properties:
         Action: 'lambda:InvokeFunction'
-        FunctionName: !GetAtt MessageLambdaFunction.Arn
+        FunctionName: !Ref MessageLambdaFunction
         Principal: 'apigateway.amazonaws.com'
         SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$default'
 
-  Outputs:
-    WebSocketApiUrl:
-      Description: "The URL of the WebSocket API"
-      Value: !Sub 'wss://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}'
-    WebSocketApiConnectionsUrl:
-      Description: "The url used for communication"
-      Value: !Sub 'https://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/@connections'
+outputs:
+  WebSocketApiId:
+    Description: "WebSocket API ID"
+    Value: !Ref WebSocketApi
+
+  WebSocketApiEndpoint:
+    Description: "WebSocket API endpoint"
+    Value: !Sub 'wss://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/'
+
+  TripsTable:
+    Description: "DynamoDB Trips Table"
+    Value: !Ref TripsTable
+
+  UsersTable:
+    Description: "DynamoDB Users Table"
+    Value: !Ref UsersTable
+
+  ConnectionsTable:
+    Description: "DynamoDB Connections Table"
+    Value: !Ref ConnectionsTable
+
+  MessagesTable:
+    Description: "DynamoDB Messages Table"
+    Value: !Ref MessagesTable
+
+  DriversTable:
+    Description: "DynamoDB Drivers Table"
+    Value: !Ref DriversTable
+
+  LoginFunctionArn:
+    Description: "Login Lambda Function ARN"
+    Value: !GetAtt login.Arn
+
+  GetUserFunctionArn:
+    Description: "GetUser Lambda Function ARN"
+    Value: !GetAtt getUser.Arn
+
+  GetRecentTripsFunctionArn:
+    Description: "GetRecentTrips Lambda Function ARN"
+    Value: !GetAtt getRecentTrips.Arn
+
+  RequestRideFunctionArn:
+    Description: "RequestRide Lambda Function ARN"
+    Value: !GetAtt requestRide.Arn
+
+  ProcessPaymentFunctionArn:
+    Description: "ProcessPayment Lambda Function ARN"
+    Value: !GetAtt processPayment.Arn
+
+  ConnectFunctionArn:
+    Description: "Connect Lambda Function ARN"
+    Value: !GetAtt connect.Arn
+
+  DisconnectFunctionArn:
+    Description: "Disconnect Lambda Function ARN"
+    Value: !GetAtt disconnect.Arn
+
+  MessageFunctionArn:
+    Description: "Message Lambda Function ARN"
+    Value: !GetAtt message.Arn
