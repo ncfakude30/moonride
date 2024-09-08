@@ -58,7 +58,7 @@ export default function Home() {
                     <ActionButton>
                         <Badge>Coming Soon</Badge>
                         <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/water.png' />
-                        Buy
+                        Water
                     </ActionButton>
                     <ActionButton>
                         <Badge>Coming Soon</Badge>
