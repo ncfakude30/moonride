@@ -39,7 +39,7 @@ function Payment() {
         try {
             const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates}.json?` +
                 new URLSearchParams({
-                    access_token: 'YOUR_MAPBOX_ACCESS_TOKEN',
+                    access_token: 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ',
                     limit: 1
                 })
             );

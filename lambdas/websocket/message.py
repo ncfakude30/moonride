@@ -35,7 +35,8 @@ def handler(event, context):
 
 def handle_ride_request(message, connection_id):
     pickup_location = message['pickup']
-    geohash_value = geohash.encode(pickup_location['latitude'], pickup_location['longitude'], precision=GEOHASH_PRECISION)
+    # Use python-geohash to encode the latitude and longitude
+    geohash_value = geohash.encode(pickup_location['latitude'], pickup_location['longitude'], GEOHASH_PRECISION)
 
     # Query DynamoDB for drivers in the geohash range
     drivers = query_drivers_in_geohash_range(geohash_value)
