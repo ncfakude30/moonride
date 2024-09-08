@@ -15,7 +15,7 @@ provider:
     DRIVERS_TABLE: DriversTable
     PYTHONPATH: '/var/task:${PYTHONPATH}'
     IMAGE_BUCKET_NAME: moonride-media
-    ACM_CERTIFICATE_ARN: arn:aws:acm-pca:us-east-1:535002855362:certificate-authority/9ccf0bef-a1e0-481b-a015-37dd15f9da60
+    ACM_CERTIFICATE_ARN: arn:aws:acm:us-east-1:535002855362:certificate/ce06f91b-8929-4bdf-b955-18f5a77910c8
 
   iamRoleStatements:
     - Effect: "Allow"
