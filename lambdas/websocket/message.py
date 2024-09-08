@@ -50,7 +50,7 @@ def handler(event, context):
     elif message_type == 'chat_message':
         handle_chat_message(body, connection_id)
     else:
-       print(f'Unknown message type: {message_type}')
+        print(f'Unknown message type: {message_type}')
         send_error_response(connection_id, "Unknown message type.")
     
     print('handler: Exit')
@@ -59,7 +59,7 @@ def handle_ride_request(message, connection_id):
     print(f'handle_ride_request: Entry with message: {message}, connection_id: {connection_id}')
     pickup_location = message.get('pickup')
     if not pickup_location:
-       print('Pickup location not provided in ride request.')
+        print('Pickup location not provided in ride request.')
         send_error_response(connection_id, "Pickup location missing.")
         print('handle_ride_request: Exit with error response for missing pickup location.')
         return
@@ -68,7 +68,7 @@ def handle_ride_request(message, connection_id):
     longitude = pickup_location.get('longitude')
 
     if latitude is None or longitude is None:
-       print('Latitude or longitude missing in pickup location.')
+        print('Latitude or longitude missing in pickup location.')
         send_error_response(connection_id, "Invalid pickup location.")
         print('handle_ride_request: Exit with error response for invalid pickup location.')
         return
@@ -91,12 +91,12 @@ def handle_ride_request(message, connection_id):
 def bulk_query_geolocated_driver_connections(drivers):
     print(f'bulk_query_geolocated_driver_connections: Entry with drivers: {drivers}')
     if not drivers:
-       print('No drivers provided for bulk query.')
+        print('No drivers provided for bulk query.')
         return []
 
     driver_ids = [driver['driverId'] for driver in drivers if 'driverId' in driver]
     if not driver_ids:
-       print('No valid driver IDs found.')
+        print('No valid driver IDs found.')
         return []
 
     # Prepare the request for batch_get_item
@@ -150,7 +150,7 @@ def notify_drivers(drivers, message):
         connection_id = driver.get('connectionId')
         if not connection_id:
            print('Driver missing connectionId.')
-            continue
+           continue
 
         try:
             apigatewaymanagementapi.post_to_connection(
@@ -171,7 +171,7 @@ def handle_chat_message(message, connection_id):
     text = message.get('text')
 
     if not recipient_id or not text:
-       print('Recipient ID or message text missing in chat message.')
+        print('Recipient ID or message text missing in chat message.')
         send_error_response(connection_id, "Recipient ID or message text missing.")
         print('handle_chat_message: Exit with error response for missing recipient ID or text.')
         return
