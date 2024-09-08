@@ -45,31 +45,35 @@ export default function Home() {
                 </Header>
                 <ActionButtons>
                     <Link
-                    href={{
-                        pathname: '/search',
-                        query: { user: JSON.stringify(user) }
-                    }}
+                        href={{
+                            pathname: '/search',
+                            query: { user: JSON.stringify(user) }
+                        }}
                     >
-                    <ActionButton>
-                        <ActionButtonImage src='https://i.ibb.co/cyvcpfF/uberx.png' />
-                        Ride
-                    </ActionButton>
+                        <ActionButton>
+                            <ActionButtonImage src='https://i.ibb.co/cyvcpfF/uberx.png' />
+                            <Label>Ride</Label>
+                        </ActionButton>
                     </Link>
                     <ActionButton>
                         <Badge>Coming Soon</Badge>
                         <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/water.png'/>
-                        Water
+                        <Label>Water</Label>
                     </ActionButton>
                     <ActionButton>
                         <Badge>Coming Soon</Badge>
                         <ActionButtonImage src='https://i.ibb.co/n776JLm/bike.png'/>
-                        Order
+                        <Label>Order</Label>
                     </ActionButton>
-
                     <ActionButton>
                         <Badge>Coming Soon</Badge>
                         <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/helper.png'/>
-                        Helper
+                        <Label>Helper</Label>
+                    </ActionButton>
+                    <ActionButton>
+                        <Badge>Coming Soon</Badge>
+                        <ActionButtonImage src='https://i.ibb.co/5RjchBg/uberschedule.png' />
+                        <Label>Reserve</Label>
                     </ActionButton>
                 </ActionButtons>
                 <RecentTrips user={user} />
@@ -105,31 +109,35 @@ const UserImage = tw.img`
 `;
 
 const ActionButtons = tw.div`
-    flex overflow-x-auto no-scrollbar
+    flex overflow-x-auto no-scrollbar whitespace-nowrap
+    space-x-1.5
+    mt-2 // Adds 2px space at the top
 `;
 
-const ActionButton = tw.div`
-    relative flex flex-col flex-1 bg-gray-200 m-1 h-32 items-center justify-center rounded-lg overflow-hidden transform hover:scale-105 transition text-xl
+const ActionButton = tw.button`
+    relative flex flex-col items-center justify-center bg-gradient-to-r from-gray-600 to-gray-400 text-white rounded-lg p-4 font-semibold shadow-lg
+    hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
+    focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50
+    flex-none // Prevent stretching
+    w-32 h-32 // Adjust size as needed
+    max-w-xs // Ensures button doesn’t exceed max width
+    overflow-hidden // Ensures content doesn’t overflow
 `;
 
 const ActionButtonImage = tw.img`
-    h-3/5
+    h-24 w-24 // Adjust the size of the image if needed
+    object-cover // Ensure the image covers its container
+    mb-2 // Margin bottom to add more space between the image and the label
+    z-10 // Ensures the image is above other elements if needed
 `;
 
 const Badge = tw.div`
     absolute top-1 left-1 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full
-    whitespace-nowrap
 `;
 
-const InputButton = tw.div`
-    h-20 bg-gray-200 text-2xl p-4 flex items-center mt-8
-`;
-
-// Hide scrollbar in WebKit browsers
-const noScrollbar = `
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-    &::-webkit-scrollbar {
-        display: none;  /* Chrome, Safari, and Opera */
-    }
+const Label = tw.div`
+    absolute bottom-2 // Position the label at the bottom with some padding
+    text-base // Slightly larger font size
+    text-white // Change label text color to white
+    z-20 // Ensure the label is above the image
 `;

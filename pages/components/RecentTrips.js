@@ -63,31 +63,35 @@ function RecentTrips({ user }) {
                             passHref
                         >
                             <TripCard>
-                                <StatusBadge status={trip?.status || 'complete'}>
-                                    {trip.status || 'Completed'}
-                                </StatusBadge>
-                                {hasNotifications && (
-                                    <NotificationWrapper>
-                                        <NotificationLabel>Notifications</NotificationLabel>
-                                        <NotificationBadge>
-                                            5
-                                        </NotificationBadge>
-                                    </NotificationWrapper>
-                                )}
+                                <BadgeWrapper>
+                                    <StatusBadge status={trip?.status || 'complete'}>
+                                        {trip.status || 'Completed'}
+                                    </StatusBadge>
+                                    {hasNotifications && (
+                                        <NotificationWrapper>
+                                            <NotificationLabel>Notifications</NotificationLabel>
+                                            <NotificationBadge>
+                                                5
+                                            </NotificationBadge>
+                                        </NotificationWrapper>
+                                    )}
+                                </BadgeWrapper>
+                                
                                 <TripDetails>
                                     <Detail>
                                         <Label>Pickup:</Label>
-                                        <Value>{trip?.pickupName || trip?.pickup}</Value>
+                                        <Value>{truncateText(trip?.pickupName || trip?.pickup)}</Value>
                                     </Detail>
                                     <Detail>
                                         <Label>Dropoff:</Label>
-                                        <Value>{trip?.dropoffName || trip?.dropoff}</Value>
+                                        <Value>{truncateText(trip?.dropoffName || trip?.dropoff)}</Value>
                                     </Detail>
                                     <Detail>
                                         <Label>Price:</Label>
                                         <Value>R{trip?.price}</Value>
                                     </Detail>
                                 </TripDetails>
+                                
                                 <DriverProfile>
                                     <Image
                                         src={trip.driverProfile || 'https://moonride-media.s3.amazonaws.com/moonriding.png'}
@@ -111,6 +115,11 @@ function RecentTrips({ user }) {
     );
 }
 
+const truncateText = (text) => {
+    if (!text) return '';
+    return text.length > 25 ? `${text.substring(0, 23)}...` : text;
+};
+
 export default RecentTrips;
 
 const RecentTripsWrapper = tw.div`
@@ -122,18 +131,30 @@ const Title = tw.h2`
 `;
 
 const TripCard = tw.div`
-    flex items-center bg-gray-200 shadow-lg rounded-lg p-4 relative transition-transform transform hover:scale-105 cursor-pointer
+    flex relative bg-white shadow-md rounded-lg p-4 transition-transform transform hover:scale-105 cursor-pointer
+    border border-gray-200
+    space-y-2
+    pt-6 pb-4
+    // Ensure space for driver profile
+    min-h-[150px] 
+    // Add padding for right alignment of driver profile
+    pr-16
+`;
+
+const BadgeWrapper = tw.div`
+    absolute top-4 left-2 right-2 flex justify-between items-center
 `;
 
 const StatusBadge = tw.div`
-    absolute top-2 left-2 px-3 py-1 text-white text-xs font-semibold rounded-full
+    w-20 h-6 px-2 py-1 text-white text-xs font-bold rounded-full
+    flex items-center justify-center
     ${props => props.status === 'complete' && 'bg-green-500'}
     ${props => props.status === 'cancelled' && 'bg-blue-500'}
     ${props => props.status === 'failed' && 'bg-red-500'}
 `;
 
 const NotificationWrapper = tw.div`
-    absolute top-2 right-2 flex items-center space-x-2
+    flex items-center space-x-1
 `;
 
 const NotificationLabel = tw.span`
@@ -145,11 +166,12 @@ const NotificationBadge = tw.div`
 `;
 
 const TripDetails = tw.div`
-    flex-1 pr-16 pt-4
+    flex-1 pr-4 pt-4 flex flex-col space-y-2
+    mb-12
 `;
 
 const Detail = tw.div`
-    flex justify-between py-2
+    flex items-center
 `;
 
 const Label = tw.span`
@@ -157,11 +179,11 @@ const Label = tw.span`
 `;
 
 const Value = tw.span`
-    text-gray-800
+    text-gray-800 ml-2
 `;
 
 const DriverProfile = tw.div`
-    flex-shrink-0 absolute right-4 top-1/2 transform -translate-y-1/2
+    absolute right-4 bottom-4 flex items-center justify-center
 `;
 
 const LoadingMessage = tw.div`
@@ -173,5 +195,10 @@ const NoTripsMessage = tw.div`
 `;
 
 const LoadMoreButton = tw.button`
-    mt-4 bg-blue-600 text-white rounded-lg p-3 font-semibold shadow-lg hover:bg-blue-700 transition-colors
+    mt-4 bg-gradient-to-r from-gray-600 to-gray-400 text-white rounded-full p-4 font-semibold shadow-lg
+    hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
+    focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50
+    flex items-center justify-center
+    w-full
+    max-w-xs
 `;
