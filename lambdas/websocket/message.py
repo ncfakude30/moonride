@@ -1,7 +1,12 @@
 import os
 import json
 import boto3
-import geohash
+try:
+	import geohash
+except ImportError:
+    print('Using custom geo hashing.')
+    geohash = None
+
 from uuid import uuid4
 from datetime import datetime
 
@@ -17,6 +22,11 @@ connections_table = dynamodb.Table(CONNECTIONS_TABLE)
 messages_table = dynamodb.Table(MESSAGES_TABLE)
 apigatewaymanagementapi = boto3.client('apigatewaymanagementapi', endpoint_url=WEBSOCKET_ENDPOINT)
 
+_base32 = '0123456789bcdefghjkmnpqrstuvwxyz'
+_base32_map = {}
+for i in range(len(_base32)):
+    _base32_map[_base32[i]] = i
+del i
 
 def handler(event, context):
     print(f'Received event: {event}')
@@ -111,3 +121,108 @@ def send_error_response(connection_id, error_message):
         )
     except apigatewaymanagementapi.exceptions.GoneException:
         print(f'Connection {connection_id} is no longer valid.')
+
+def encode(latitude, longitude, precision=12):
+	if latitude >= 90.0 or latitude < -90.0:
+		raise Exception("invalid latitude.")
+	while longitude < -180.0:
+		longitude += 360.0
+	while longitude >= 180.0:
+		longitude -= 360.0
+	
+	if geohash:
+		basecode= geohash.encode(latitude,longitude)
+		if len(basecode)>precision:
+			return basecode[0:precision]
+		return basecode+'0'*(precision-len(basecode))
+	
+	xprecision=precision+1
+	lat_length = lon_length = int(xprecision*5/2)
+	if xprecision%2==1:
+		lon_length+=1
+	
+	if hasattr(float, "fromhex"):
+		a = _float_hex_to_int(latitude/90.0)
+		o = _float_hex_to_int(longitude/180.0)
+		if a[1] > lat_length:
+			ai = a[0]>>(a[1]-lat_length)
+		else:
+			ai = a[0]<<(lat_length-a[1])
+		
+		if o[1] > lon_length:
+			oi = o[0]>>(o[1]-lon_length)
+		else:
+			oi = o[0]<<(lon_length-o[1])
+		
+		return _encode_i2c(ai, oi, lat_length, lon_length)[:precision]
+	
+	lat = latitude/180.0
+	lon = longitude/360.0
+	
+	if lat>0:
+		lat = int((1<<lat_length)*lat)+(1<<(lat_length-1))
+	else:
+		lat = (1<<lat_length-1)-int((1<<lat_length)*(-lat))
+	
+	if lon>0:
+		lon = int((1<<lon_length)*lon)+(1<<(lon_length-1))
+	else:
+		lon = (1<<lon_length-1)-int((1<<lon_length)*(-lon))
+	
+	return _encode_i2c(lat,lon,lat_length,lon_length)[:precision]
+
+
+def _float_hex_to_int(f):
+	if f<-1.0 or f>=1.0:
+		return None
+	
+	if f==0.0:
+		return 1,1
+	
+	h = f.hex()
+	x = h.find("0x1.")
+	assert(x>=0)
+	p = h.find("p")
+	assert(p>0)
+	
+	half_len = len(h[x+4:p])*4-int(h[p+1:])
+	if x==0:
+		r = (1<<half_len) + ((1<<(len(h[x+4:p])*4)) + int(h[x+4:p],16))
+	else:
+		r = (1<<half_len) - ((1<<(len(h[x+4:p])*4)) + int(h[x+4:p],16))
+	
+	return r, half_len+1
+
+def _int_to_float_hex(i, l):
+	if l==0:
+		return -1.0
+	
+	half = 1<<(l-1)
+	s = int((l+3)/4)
+	if i >= half:
+		i = i-half
+		return float.fromhex(("0x0.%0"+str(s)+"xp1") % (i<<(s*4-l),))
+	else:
+		i = half-i
+		return float.fromhex(("-0x0.%0"+str(s)+"xp1") % (i<<(s*4-l),))
+
+def _encode_i2c(lat,lon,lat_length,lon_length):
+	
+	precision = int((lat_length+lon_length)/5)
+	if lat_length < lon_length:
+		a = lon
+		b = lat
+	else:
+		a = lat
+		b = lon
+	
+	boost = (0,1,4,5,16,17,20,21)
+	ret = ''
+	for i in range(precision):
+		ret+=_base32[(boost[a&7]+(boost[b&3]<<1))&0x1F]
+		t = a>>3
+		a = b>>2
+		b = t
+	
+	return ret[::-1]
+
