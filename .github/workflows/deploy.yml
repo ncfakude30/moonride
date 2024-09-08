@@ -13,6 +13,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies for the root project
+        run: |
+          npm install
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -28,6 +37,7 @@ jobs:
       - name: Install Serverless Framework and plugins
         run: |
           npm install -g serverless
+          # Make sure to install serverless-python-requirements globally if needed
           npm install -g serverless-python-requirements
 
       - name: Set up AWS credentials
