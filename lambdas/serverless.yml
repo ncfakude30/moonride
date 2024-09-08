@@ -40,7 +40,9 @@ provider:
     - Effect: "Allow"
       Action:
         - apigateway:POST
-      Resource: "*"
+        - execute-api:Invoke
+      Resource:
+        - arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/*/*
 
 plugins:
   - serverless-python-requirements
