@@ -1,4 +1,3 @@
 boto3
 requests
-geohash
-boto3
+python-geohash

@@ -1,4 +1,3 @@
 boto3
 requests
-geohash
-python-geohash
+python-geohash==0.8.5

@@ -9,7 +9,7 @@ GEOHASH_PRECISION = 5
 DRIVERS_TABLE = os.getenv('DRIVERS_TABLE', 'DriversTable')
 CONNECTIONS_TABLE = os.getenv('CONNECTIONS_TABLE', 'ConnectionsTable')
 MESSAGES_TABLE = os.getenv('MESSAGES_TABLE', 'MessagesTable')
-WEBSOCKET_ENDPOINT = os.getenv('WEBSOCKET_ENDPOINT', 'YOUR_WEBSOCKET_ENDPOINT')
+WEBSOCKET_ENDPOINT = os.getenv('WEBSOCKET_ENDPOINT', 'wss://j4a86rv3rd.execute-api.us-east-1.amazonaws.com/dev')
 
 dynamodb = boto3.resource('dynamodb')
 drivers_table = dynamodb.Table(DRIVERS_TABLE)
@@ -35,7 +35,7 @@ def handler(event, context):
 
 def handle_ride_request(message, connection_id):
     pickup_location = message['pickup']
-    # Use python-geohash to encode the latitude and longitude
+    # Use geohash to encode the latitude and longitude
     geohash_value = geohash.encode(pickup_location['latitude'], pickup_location['longitude'], GEOHASH_PRECISION)
 
     # Query DynamoDB for drivers in the geohash range

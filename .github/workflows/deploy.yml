@@ -13,14 +13,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          node-version: '18'
+          python-version: '3.9'  # or the version your Lambda functions use
 
-      - name: Install dependencies for Serverless Framework
+      - name: Install Python dependencies
         working-directory: ./lambdas
-        run: npm install
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
 
       - name: Install Serverless Framework
         run: npm install -g serverless
