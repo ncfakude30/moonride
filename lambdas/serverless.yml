@@ -363,7 +363,7 @@ resources:
         DistributionConfig:
           Origins:
             - Id: S3Origin
-              DomainName: !Sub '${ImageBucket}.s3.amazonaws.com'
+              DomainName: !Sub "${ImageBucket}.s3.amazonaws.com"
               S3OriginConfig:
                 OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
           Enabled: true
@@ -376,12 +376,19 @@ resources:
             CachedMethods:
               - GET
               - HEAD
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+              Headers:
+                - Host
           DefaultRootObject: index.html
           PriceClass: PriceClass_100
           ViewerCertificate:
             AcmCertificateArn: ${self:provider.environment.ACM_CERTIFICATE_ARN}
             SslSupportMethod: sni-only
           HttpVersion: http2
+
 outputs:
   CloudFrontDistributionUrl:
     Description: "The URL of the CloudFront distribution."
