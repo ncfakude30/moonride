@@ -1,7 +1,7 @@
 import os
 import json
 import boto3
-from geohash import encode
+import geohash
 from uuid import uuid4
 from datetime import datetime
 
@@ -37,8 +37,9 @@ def handler(event, context):
 def handle_ride_request(message, connection_id):
     pickup_location = message['pickup']
     # Use geohash to encode the latitude and longitude
-    geohash_value = encode(pickup_location['latitude'], pickup_location['longitude'], GEOHASH_PRECISION)
+    geohash_value = geohash.encode(pickup_location['latitude'], pickup_location['longitude'], GEOHASH_PRECISION)
 
+    print(geohash_value)
     # Query DynamoDB for drivers in the geohash range
     drivers = query_drivers_in_geohash_range(geohash_value)
 
