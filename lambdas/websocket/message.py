@@ -2,6 +2,7 @@ import os
 import json
 import sys
 sys.path.append('/var/task/venv/lib/python3.9/site-packages')
+from Geohash.geohash import encode
 import Geohash as geohash
 import boto3
 from uuid import uuid4
