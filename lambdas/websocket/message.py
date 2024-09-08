@@ -167,7 +167,7 @@ def notify_drivers(drivers, message):
 
 def handle_chat_message(message, connection_id):
     print(f'handle_chat_message: Entry with message: {message}, connection_id: {connection_id}')
-    recipient_id = message.get('recipientId')
+    recipient_id = message.get('recipientId') or message.get('userId')
     text = message.get('text')
 
     if not recipient_id or not text:
