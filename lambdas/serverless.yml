@@ -338,7 +338,7 @@ resources:
         Principal: 'apigateway.amazonaws.com'
         SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$default'
 
-        ImageBucket:
+    ImageBucket:
       Type: "AWS::S3::Bucket"
       Properties:
         BucketName: ${self:provider.environment.IMAGE_BUCKET_NAME}
@@ -383,7 +383,6 @@ resources:
       Properties:
         CloudFrontOriginAccessIdentityConfig:
           Comment: "Access identity for S3 bucket"
-
 outputs:
   CloudFrontDistributionUrl:
     Description: "The URL of the CloudFront distribution."
