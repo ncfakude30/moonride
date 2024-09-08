@@ -298,5 +298,5 @@ resources:
       Description: "The URL of the WebSocket API"
       Value: !Sub 'wss://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}'
     WebSocketApiConnectionsUrl:
-      Descript: "The url used for communication"
+      Description: "The url used for communication"
       Value: !Sub 'https://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/@connections'
