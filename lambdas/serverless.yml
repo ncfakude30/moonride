@@ -126,7 +126,7 @@ functions:
   message:
     handler: websocket/message.handler
     environment:
-      - PYTHONPATH: "/var/task/venv/lib/python3.9/site-packages"
+      PYTHONPATH: '/var/task:${PYTHONPATH}'
     events:
       - websocket:
           route: $default
