@@ -14,6 +14,8 @@ provider:
     MESSAGES_TABLE: MessagesTable
     DRIVERS_TABLE: DriversTable
     PYTHONPATH: '/var/task:${PYTHONPATH}'
+    IMAGE_BUCKET_NAME: moonride-media
+    ACM_CERTIFICATE_ARN: arn:aws:acm-pca:us-east-1:535002855362:certificate-authority/9ccf0bef-a1e0-481b-a015-37dd15f9da60
 
   iamRoleStatements:
     - Effect: "Allow"
@@ -42,6 +44,11 @@ provider:
         - execute-api:Invoke
       Resource:
         - !Sub arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:*
+    - Effect: "Allow"
+      Action:
+        - s3:GetObject
+      Resource:
+        - !Sub arn:aws:s3:::${self:provider.environment.IMAGE_BUCKET_NAME}/*
 
 plugins:
   - serverless-python-requirements
@@ -330,4 +337,50 @@ resources:
         FunctionName: !Ref MessageLambdaFunction
         Principal: 'apigateway.amazonaws.com'
         SourceArn: !Sub 'arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/$default'
+
+        ImageBucket:
+      Type: "AWS::S3::Bucket"
+      Properties:
+        BucketName: ${self:provider.environment.IMAGE_BUCKET_NAME}
+        AccessControl: PublicRead
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - "*"
+              AllowedMethods:
+                - GET
+              AllowedHeaders:
+                - "*"
+
+    CloudFrontDistribution:
+      Type: "AWS::CloudFront::Distribution"
+      Properties:
+        DistributionConfig:
+          Origins:
+            - Id: S3Origin
+              DomainName: !GetAtt ImageBucket.WebsiteURL
+              S3OriginConfig:
+                OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
+          Enabled: true
+          DefaultCacheBehavior:
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+          DefaultRootObject: index.html
+          PriceClass: PriceClass_100
+          ViewerCertificate:
+            AcmCertificateArn: ${self:provider.environment.ACM_CERTIFICATE_ARN}
+            SslSupportMethod: sni-only
+          HttpVersion: http2
+          
+    CloudFrontOriginAccessIdentity:
+      Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: "Access identity for S3 bucket"
 
