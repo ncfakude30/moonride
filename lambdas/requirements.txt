@@ -1,4 +1,4 @@
 boto3
 requests
 setuptools
-Geohash>=1.0
+python-geohash
