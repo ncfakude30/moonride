@@ -25,11 +25,11 @@ provider:
         - dynamodb:DeleteItem
         - dynamodb:BatchGetItem
       Resource:
-        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRIPS_TABLE}
-        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}
-        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.CONNECTIONS_TABLE}
-        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.MESSAGES_TABLE}
-        - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DRIVERS_TABLE}
+        - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.TRIPS_TABLE}
+        - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.USERS_TABLE}
+        - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.CONNECTIONS_TABLE}
+        - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.MESSAGES_TABLE}
+        - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.DRIVERS_TABLE}
     - Effect: "Allow"
       Action:
         - logs:CreateLogGroup
@@ -41,7 +41,7 @@ provider:
         - apigateway:POST
         - execute-api:Invoke
       Resource:
-        - arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/*/*
+        - !Sub arn:aws:execute-api:${self:provider.region}:${AWS::AccountId}:${WebSocketApi}/*/*/*
 
 plugins:
   - serverless-python-requirements
