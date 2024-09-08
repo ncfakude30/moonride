@@ -84,6 +84,7 @@ def handle_ride_request(message, connection_id):
 
     drivers = query_drivers_in_geohash_range(geohash_value)
     drivers = bulk_query_geolocated_driver_connections(drivers)
+    drivers.append({'connectionId': connection_id})
     notify_drivers(drivers, message)
     
     print('handle_ride_request: Exit')
