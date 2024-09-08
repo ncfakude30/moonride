@@ -159,9 +159,6 @@ resources:
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 5
-              WriteCapacityUnits: 5
 
     UsersTable:
       Type: "AWS::DynamoDB::Table"
@@ -183,9 +180,6 @@ resources:
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 5
-              WriteCapacityUnits: 5
 
     ConnectionsTable:
       Type: "AWS::DynamoDB::Table"
@@ -219,9 +213,7 @@ resources:
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 5
-              WriteCapacityUnits: 5
+            
 
     DriversTable:
       Type: "AWS::DynamoDB::Table"
