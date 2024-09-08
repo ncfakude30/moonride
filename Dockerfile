@@ -9,7 +9,7 @@ WORKDIR /app
 
 # Install Node.js dependencies
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm ci --no-audit --prefer-offline --production
 
 # Copy the application code
 COPY . .
@@ -26,8 +26,10 @@ WORKDIR /lambdas
 # Copy the Python requirements
 COPY lambdas/requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt -t /lambda/python
+# Install Python dependencies with cleanup
+RUN pip install --no-cache-dir -r requirements.txt -t /lambda/python \
+    && find /lambda/python -type d -name '__pycache__' -exec rm -rf {} + \
+    && find /lambda/python -type d -name '*.dist-info' -exec rm -rf {} +
 
 # Copy the Lambda functions
 COPY lambdas /lambda
@@ -47,7 +49,7 @@ COPY --from=builder /app/public /app/public
 COPY --from=builder /app/package.json /app/package-lock.json /app/
 
 # Install production dependencies
-RUN npm install --only=production
+RUN npm ci --production --no-audit --prefer-offline --no-optional
 
 # Copy Lambda package
 COPY --from=python-builder /lambda/lambda-package.zip /lambda/lambda-package.zip

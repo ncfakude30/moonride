@@ -18,9 +18,10 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies for the root project
+      - name: Clean and install Node.js dependencies
         run: |
-          npm install
+          rm -rf node_modules
+          npm ci
           npm install -g serverless
           npm install -g serverless-python-requirements
 
@@ -29,12 +30,14 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install Python dependencies globally
+      - name: Clean and install Python dependencies
         working-directory: ./lambdas
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -r requirements.txt
+          pip install --no-cache-dir -r requirements.txt
+          find venv/lib/python*/site-packages -type d -name '__pycache__' -exec rm -rf {} +
+          find venv/lib/python*/site-packages -type d -name '*.dist-info' -exec rm -rf {} +
 
       - name: Set up AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
