@@ -29,8 +29,7 @@ jobs:
         run: |
           rm -rf node_modules
           npm ci
-          npm install -g serverless
-          npm install -g serverless-python-requirements
+          npm install serverless serverless-python-requirements
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -41,6 +40,7 @@ jobs:
         working-directory: ./lambdas
         run: |
           rm -rf venv
+
       - name: Install Python dependencies
         working-directory: ./lambdas
         run: |
@@ -52,4 +52,6 @@ jobs:
         working-directory: ./lambdas
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-        run: serverless deploy --verbose
+        run: |
+          source venv/bin/activate
+          npx serverless deploy --verbose
