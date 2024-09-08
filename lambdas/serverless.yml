@@ -12,7 +12,7 @@ provider:
     USERS_TABLE: UsersTable
     CONNECTIONS_TABLE: ConnectionsTable
     MESSAGES_TABLE: MessagesTable
-    WEBSOCKET_ENDPOINT: !Sub 'wss://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/'
+    WEBSOCKET_ENDPOINT: !Sub 'https://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/@connections'
 
   iamRoleStatements:
     - Effect: "Allow"

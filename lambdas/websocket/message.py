@@ -14,7 +14,7 @@ GEOHASH_PRECISION = 5
 DRIVERS_TABLE = os.getenv('DRIVERS_TABLE', 'DriversTable')
 CONNECTIONS_TABLE = os.getenv('CONNECTIONS_TABLE', 'ConnectionsTable')
 MESSAGES_TABLE = os.getenv('MESSAGES_TABLE', 'MessagesTable')
-WEBSOCKET_ENDPOINT = os.getenv('WEBSOCKET_ENDPOINT', 'wss://j4a86rv3rd.execute-api.us-east-1.amazonaws.com/dev')
+WEBSOCKET_ENDPOINT = os.getenv('WEBSOCKET_ENDPOINT', 'https://j4a86rv3rd.execute-api.us-east-1.amazonaws.com/dev/@connections')
 
 dynamodb = boto3.resource('dynamodb')
 drivers_table = dynamodb.Table(DRIVERS_TABLE)
