@@ -1,6 +1,6 @@
 import os
 import json
-from Geohash.geohash import encode
+import Geohash
 import boto3
 from uuid import uuid4
 from datetime import datetime
@@ -16,6 +16,9 @@ drivers_table = dynamodb.Table(DRIVERS_TABLE)
 connections_table = dynamodb.Table(CONNECTIONS_TABLE)
 messages_table = dynamodb.Table(MESSAGES_TABLE)
 apigatewaymanagementapi = boto3.client('apigatewaymanagementapi', endpoint_url=WEBSOCKET_ENDPOINT)
+
+print(Geohash.__file__) 
+
 
 def handler(event, context):
     print(f'Received event: {event}')
@@ -36,7 +39,7 @@ def handler(event, context):
 def handle_ride_request(message, connection_id):
     pickup_location = message['pickup']
     # Use geohash to encode the latitude and longitude
-    geohash_value = encodeencode(pickup_location['latitude'], pickup_location['longitude'], GEOHASH_PRECISION)
+    geohash_value = Geohash.encode(pickup_location['latitude'], pickup_location['longitude'], GEOHASH_PRECISION)
 
     # Query DynamoDB for drivers in the geohash range
     drivers = query_drivers_in_geohash_range(geohash_value)
