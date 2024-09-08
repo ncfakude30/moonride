@@ -4,7 +4,7 @@ service: moonrides
 
 provider:
   name: aws
-  runtime: provided.al2  # Using Amazon Linux 2 for Docker runtime
+  runtime: python3.9
   region: us-east-1
   stage: ${opt:stage, 'dev'}
   environment:
@@ -13,10 +13,6 @@ provider:
     CONNECTIONS_TABLE: ConnectionsTable
     MESSAGES_TABLE: MessagesTable
     WEBSOCKET_ENDPOINT: !Sub 'wss://${WebSocketApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}/'
-  ecr:
-    images:
-      baseImage:
-        path: ./lambdas  # Path to the Dockerfile in the lambdas directory
 
   iamRoleStatements:
     - Effect: "Allow"
@@ -47,19 +43,16 @@ plugins:
 
 custom:
   pythonRequirements:
-    dockerizePip: true
-    zip: true
-    layer: true
+    dockerizePip: true  # Ensures compatibility with AWS Lambda runtime
+    zip: true  # Compress the requirements into a zip file
+    layer: true  # Use a Lambda Layer for the dependencies
     include:
       - .serverless/**
       - venv/**
 
 functions:
   login:
-    image:
-      name: baseImage
-      command:
-        - lambdas/user/login.handler
+    handler: user/login.handler
     events:
       - http:
           path: login
@@ -71,10 +64,7 @@ functions:
             allowCredentials: true
 
   getUser:
-    image:
-      name: baseImage
-      command:
-        - lambdas/user/getUser.handler
+    handler: user/getUser.handler
     events:
       - http:
           path: user/{userId}
@@ -84,12 +74,9 @@ functions:
               - Content-Type
               - Authorization
             allowCredentials: true
-
+  
   getRecentTrips:
-    image:
-      name: baseImage
-      command:
-        - lambdas/ride/ride.handler
+    handler: ride/ride.handler
     events:
       - http:
           path: trips
@@ -101,10 +88,7 @@ functions:
             allowCredentials: true
 
   requestRide:
-    image:
-      name: baseImage
-      command:
-        - lambdas/ride/request.handler
+    handler: ride/request.handler
     events:
       - http:
           path: request
@@ -116,10 +100,7 @@ functions:
             allowCredentials: true
 
   processPayment:
-    image:
-      name: baseImage
-      command:
-        - lambdas/process_payment.handler
+    handler: process_payment.handler
     events:
       - http:
           path: payment
@@ -131,28 +112,19 @@ functions:
             allowCredentials: true
 
   connect:
-    image:
-      name: baseImage
-      command:
-        - lambdas/websocket/connect.handler
+    handler: websocket/connect.handler
     events:
       - websocket:
           route: $connect
 
   disconnect:
-    image:
-      name: baseImage
-      command:
-        - lambdas/websocket/disconnect.handler
+    handler: websocket/disconnect.handler
     events:
       - websocket:
           route: $disconnect
 
   message:
-    image:
-      name: baseImage
-      command:
-        - lambdas/websocket/message.handler
+    handler: websocket/message.handler
     events:
       - websocket:
           route: $default

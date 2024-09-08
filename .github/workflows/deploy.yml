@@ -13,6 +13,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -25,26 +32,26 @@ jobs:
           npm install -g serverless
           npm install -g serverless-python-requirements
 
-      - name: Set up Python
+      - name: Set up Python and prepare Lambda package
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-
-      - name: Install Python dependencies
-        working-directory: ./lambdas
         run: |
+          # Set up Python environment
           python -m venv venv
           source venv/bin/activate
+
+          # Install Python dependencies
           pip install --no-cache-dir -r requirements.txt
           find venv/lib/python*/site-packages -type d -name '__pycache__' -exec rm -rf {} +
           find venv/lib/python*/site-packages -type d -name '*.dist-info' -exec rm -rf {} +
 
-      - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          # Prepare Lambda package
+          mkdir -p package
+          cp -r venv/lib/python*/site-packages/* package/
+          cp -r *.py package/
+          cd package
+          zip -r ../lambda-package.zip .
 
       - name: Deploy Moonrides Backend
         working-directory: ./lambdas
