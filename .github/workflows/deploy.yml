@@ -25,19 +25,15 @@ jobs:
           npm install -g serverless
           npm install -g serverless-python-requirements
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Clean and install Python dependencies
-        working-directory: ./lambdas
+      - name: Set up Python and install dependencies
         run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install --no-cache-dir -r requirements.txt
-          find venv/lib/python*/site-packages -type d -name '__pycache__' -exec rm -rf {} +
-          find venv/lib/python*/site-packages -type d -name '*.dist-info' -exec rm -rf {} +
+          python -m ensurepip --upgrade
+          python -m pip install --upgrade pip
+          python -m venv lambdas/venv
+          source lambdas/venv/bin/activate
+          pip install --no-cache-dir -r lambdas/requirements.txt
+          find lambdas/venv/lib/python*/site-packages -type d -name '__pycache__' -exec rm -rf {} +
+          find lambdas/venv/lib/python*/site-packages -type d -name '*.dist-info' -exec rm -rf {} +
 
       - name: Set up AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
