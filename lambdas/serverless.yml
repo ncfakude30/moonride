@@ -213,7 +213,7 @@ resources:
               - AttributeName: 'senderId'
                 KeyType: HASH
             Projection:
-              ProjectionType: ALL     
+              ProjectionType: ALL
 
     DriversTable:
       Type: "AWS::DynamoDB::Table"
