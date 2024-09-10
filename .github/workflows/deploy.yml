@@ -28,8 +28,8 @@ jobs:
       - name: Clean and install Node.js dependencies
         run: |
           rm -rf node_modules
-          npm ci
-          npm install serverless # Make sure serverless is installed locally if not using globally
+          npm ci --legacy-peer-deps
+          npm install serverless --legacy-peer-deps
 
       - name: Set up Python
         uses: actions/setup-python@v4
