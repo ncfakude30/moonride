@@ -12,54 +12,6 @@ const apiClient = axios.create({
     }
 });
 
-// WebSocket class for handling WebSocket connection and messages
-class WebSocketService {
-    constructor(url) {
-        this.url = url;
-        this.ws = null;
-    }
-
-    connect() {
-        if (this.ws) return; // Already connected
-
-        this.ws = new WebSocket(this.url);
-
-        this.ws.onopen = () => {
-            console.log('WebSocket connected');
-        };
-
-        this.ws.onmessage = (event) => {
-            console.log('WebSocket message received:', event.data);
-        };
-
-        this.ws.onclose = () => {
-            console.log('WebSocket disconnected');
-        };
-
-        this.ws.onerror = (error) => {
-            console.error('WebSocket error', error);
-        };
-    }
-
-    sendMessage(message) {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify(message));
-        } else {
-            console.error('WebSocket is not connected');
-        }
-    }
-
-    close() {
-        if (this.ws) {
-            this.ws.close();
-            this.ws = null;
-        }
-    }
-}
-
-// Initialize WebSocketService
-const webSocketService = new WebSocketService('wss://your-websocket-url');
-
 // API functions
 export const loginApi = async (dto) => {
     try {
@@ -79,7 +31,7 @@ export async function fetchRecentTrips(userId, lastEvaluatedKey = null, limit = 
         }
 
         const response = await apiClient.get('/trips', { params });
-        return response.data;
+        return response.data; // Ensure this matches the expected response structure
     } catch (error) {
         console.error('Error fetching recent trips:', error);
         return {
@@ -92,8 +44,8 @@ export async function fetchRecentTrips(userId, lastEvaluatedKey = null, limit = 
 
 export const requestTrip = async (dto) => {
     try {
-        const response = await axios.post(`${apiEndpoint}/request`, dto);
-        return response.data;
+        const response = await apiClient.post('/request', dto);
+        return response.data; // Ensure this matches the expected response structure
     } catch (error) {
         console.error('Error requesting trip:', error);
         throw error;
@@ -102,6 +54,5 @@ export const requestTrip = async (dto) => {
 
 // Export the WebSocket service instance
 export default {
-    apiClient,
-    webSocketService
+    apiClient
 };

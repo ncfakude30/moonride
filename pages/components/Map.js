@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import tw from 'tailwind-styled-components';
 import mapboxgl from '!mapbox-gl';
+import { useSelector } from 'react-redux';
 import { useWebSocket } from '../../contexts/WebSocketContext';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ';
 
-const Map = ({ pickupCoordinates, dropoffCoordinates }) => {
+const Map = () => {
+    const pickupCoordinates = useSelector((state) => state.ride.pickupCoordinates);
+    const dropoffCoordinates = useSelector((state) => state.ride.dropoffCoordinates);
     const [userLocation, setUserLocation] = useState(null);
     const [map, setMap] = useState(null);
-    const { ws } = useWebSocket(); // Use the WebSocket context
+    const {sendMessage, status, messages} = useSelector((state) => state.webSocket);
 
     useEffect(() => {
         // Function to get user's location
@@ -64,30 +67,37 @@ const Map = ({ pickupCoordinates, dropoffCoordinates }) => {
                 ], { padding: 60 });
             }
 
-            if (ws) {
-                ws.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-                    if (data.action === 'new_trip') {
-                        if (data.pickup) {
-                            addMarker(data.pickup);
-                        }
-                        if (data.dropoff) {
-                            addMarker(data.dropoff);
-                        }
-                        if (data.pickup && data.dropoff) {
-                            mapInstance.fitBounds([
-                                data.pickup, data.dropoff
-                            ], { padding: 60 });
-                        }
+            const handleWebSocketMessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.action === 'new_trip') {
+                    if (data.pickup) {
+                        addMarker(data.pickup);
                     }
-                };
-            }
+                    if (data.dropoff) {
+                        addMarker(data.dropoff);
+                    }
+                    if (data.pickup && data.dropoff) {
+                        mapInstance.fitBounds([
+                            data.pickup, data.dropoff
+                        ], { padding: 60 });
+                    }
+                }
+            };
 
+            if(messages && messages?.length > 0) {
+                messages.map((message) => {
+                    handleWebSocketMessage(message)
+                })
+                
+            }
+           
             return () => {
-                // No need to manually close WebSocket here, it's handled by WebSocketContext
+                if (mapInstance) {
+                    mapInstance.remove(); // Clean up map instance
+                }
             };
         }
-    }, [userLocation, pickupCoordinates, dropoffCoordinates, ws]);
+    }, [userLocation, pickupCoordinates, dropoffCoordinates, messages]);
 
     return <MapWrapper id='map' />;
 };

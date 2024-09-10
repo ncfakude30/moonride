@@ -1,34 +1,43 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import tw from 'tailwind-styled-components';
 import Image from 'next/image';
-import { fetchRecentTrips } from '../api/app.service';
 import Link from 'next/link';
+import { fetchRecentTrips } from '../api/app.service';
+import { setTrips, appendTrips, setLoading, setError } from '../../store/reducers/tripSlice';
 
-function RecentTrips({ user }) {
-    const [trips, setTrips] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [lastEvaluatedKey, setLastEvaluatedKey] = useState(null);
-    const [hasMore, setHasMore] = useState(true);
-    const [hasNotifications, setHasNotifications] = useState(true);
+function RecentTrips() {
+    const dispatch = useDispatch();
+    const { trips, lastEvaluatedKey, hasMore, loading, hasNotifications } = useSelector((state) => state.trips);
+    const user = useSelector((state) => state.auth.user);
 
     const loadTrips = async (append = false) => {
         if (user) {
             try {
-                setLoading(true);
-                const fetchedTrips = await fetchRecentTrips(user?.id, lastEvaluatedKey);
+                dispatch(setLoading(true));
+                const fetchedTrips = await fetchRecentTrips(user.id, lastEvaluatedKey);
                 if (fetchedTrips.trips.length > 0) {
-                    setTrips(prevTrips => append ? [...prevTrips, ...fetchedTrips.trips] : fetchedTrips.trips);
+                    if (append) {
+                        dispatch(appendTrips({
+                            trips: fetchedTrips.trips,
+                            lastEvaluatedKey: fetchedTrips.lastEvaluatedKey,
+                            hasMore: !!fetchedTrips.lastEvaluatedKey,
+                        }));
+                    } else {
+                        dispatch(setTrips({
+                            trips: fetchedTrips.trips,
+                            lastEvaluatedKey: fetchedTrips.lastEvaluatedKey,
+                            hasMore: !!fetchedTrips.lastEvaluatedKey,
+                        }));
+                    }
                 }
-                setLastEvaluatedKey(fetchedTrips.lastEvaluatedKey || null);
-                setHasMore(!!fetchedTrips.lastEvaluatedKey);
             } catch (e) {
-                setError('Failed to load trips');
+                dispatch(setError('Failed to load trips'));
             } finally {
-                setLoading(false);
+                dispatch(setLoading(false));
             }
         } else {
-            setLoading(false);
+            dispatch(setLoading(false));
         }
     };
 
@@ -55,9 +64,6 @@ function RecentTrips({ user }) {
                                 query: {
                                     pickup: trip?.pickup,
                                     dropoff: trip?.dropoff,
-                                    pickupName: trip?.pickupName || trip?.pickup,
-                                    dropoffName: trip?.dropoffName || trip?.dropoff,
-                                    user: JSON.stringify(user),
                                 }
                             }}
                             passHref
@@ -67,14 +73,13 @@ function RecentTrips({ user }) {
                                     <StatusBadge status={trip?.status || 'complete'}>
                                         {trip.status || 'Completed'}
                                     </StatusBadge>
-                                    {hasNotifications && (
-                                        <NotificationWrapper>
+                                    {true ? 
+                                    <NotificationWrapper>
                                             <NotificationLabel>Notifications</NotificationLabel>
                                             <NotificationBadge>
                                                 5
                                             </NotificationBadge>
-                                        </NotificationWrapper>
-                                    )}
+                                        </NotificationWrapper>: '' }
                                 </BadgeWrapper>
                                 
                                 <TripDetails>

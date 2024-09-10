@@ -1,33 +1,53 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import tw from 'tailwind-styled-components';
 import Map from './components/Map';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import RecentTrips from './components/RecentTrips';
+import Image from 'next/image';
+import { useDispatch, useSelector } from 'react-redux';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { useRouter } from 'next/router';
-import RecentTrips from './components/RecentTrips'; // Import the RecentTrips component
-import Image from 'next/image';
+import { setUser, clearUser } from '../store/reducers/authSlice';
 
 export default function Home() {
-    const [user, setUser] = useState(null);
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.auth.user);
     const router = useRouter();
+    const [isPopupOpen, setIsPopupOpen] = useState(false); // State for popup visibility
 
     useEffect(() => {
-        return onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
-                setUser({
+                dispatch(setUser({
                     name: user.displayName,
                     photoUrl: user.photoURL,
                     id: user?.id || user.uid,
-                    ...user,
-                });
+                }));
             } else {
-                setUser(null);
+                dispatch(clearUser());
                 router.push('/login');
             }
         });
-    }, [router]);
+
+        return () => unsubscribe();
+    }, [dispatch, router]);
+
+    const handleSignOut = () => {
+        signOut(auth).then(() => {
+            dispatch(clearUser());
+            router.push('/login');
+        });
+    };
+
+    const handlePopupOpen = () => {
+        setIsPopupOpen(true);
+    };
+
+    const handlePopupClose = () => {
+        setIsPopupOpen(false);
+    };
 
     return (
         <Wrapper>
@@ -39,15 +59,14 @@ export default function Home() {
                         <Name>{user && user.name}</Name>
                         <UserImage
                             src={user && user.photoUrl}
-                            onClick={() => signOut(auth)}
+                            onClick={handleSignOut}
                         />
                     </Profile>
                 </Header>
                 <ActionButtons>
                     <Link
                         href={{
-                            pathname: '/search',
-                            query: { user: JSON.stringify(user) }
+                            pathname: '/search'
                         }}
                     >
                         <ActionButton>
@@ -55,22 +74,22 @@ export default function Home() {
                             <Label>Ride</Label>
                         </ActionButton>
                     </Link>
-                    <ActionButton>
+                    <ActionButton onClick={handlePopupOpen}>
                         <Badge>Coming Soon</Badge>
                         <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/water.png'/>
                         <Label>Water</Label>
                     </ActionButton>
-                    <ActionButton>
+                    <ActionButton onClick={handlePopupOpen}>
                         <Badge>Coming Soon</Badge>
                         <ActionButtonImage src='https://i.ibb.co/n776JLm/bike.png'/>
                         <Label>Order</Label>
                     </ActionButton>
-                    <ActionButton>
+                    <ActionButton onClick={handlePopupOpen}>
                         <Badge>Coming Soon</Badge>
                         <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/helper.png'/>
                         <Label>Helper</Label>
                     </ActionButton>
-                    <ActionButton>
+                    <ActionButton onClick={handlePopupOpen}> 
                         <Badge>Coming Soon</Badge>
                         <ActionButtonImage src='https://i.ibb.co/5RjchBg/uberschedule.png' />
                         <Label>Reserve</Label>
@@ -78,6 +97,17 @@ export default function Home() {
                 </ActionButtons>
                 <RecentTrips user={user} />
             </ActionItems>
+            {isPopupOpen && (
+                <PopupOverlay>
+                    <PopupCard>
+                        <PopupTitle>Coming Soon</PopupTitle>
+                        <PopupContent>
+                            We’re working hard to bring you this feature. Stay tuned for updates!
+                        </PopupContent>
+                        <CloseButton onClick={handlePopupClose}>Close</CloseButton>
+                    </PopupCard>
+                </PopupOverlay>
+            )}
         </Wrapper>
     );
 }
@@ -140,4 +170,28 @@ const Label = tw.div`
     text-base // Slightly larger font size
     text-white // Change label text color to white
     z-20 // Ensure the label is above the image
+`;
+
+
+const PopupOverlay = tw.div`
+    fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20
+`;
+
+const PopupCard = tw.div`
+    bg-white rounded-lg shadow-lg p-6 w-80 max-w-full text-center
+`;
+
+const PopupTitle = tw.h2`
+    text-xl font-bold mb-4
+`;
+
+const PopupContent = tw.p`
+    text-gray-700 mb-6
+`;
+
+const CloseButton = tw.button`
+    bg-gradient-to-r from-gray-600 to-gray-400 text-white rounded-full p-2 font-semibold shadow-lg
+    hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
+    focus:outline-none focus:ring-1 focus:ring-gray-500
+    w-full max-w-xs
 `;

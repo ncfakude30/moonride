@@ -1,47 +1,45 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import tw from 'tailwind-styled-components';
+import { useSelector, useDispatch } from 'react-redux';
 import { requestTrip } from './api/app.service'; // Import the requestTrip function
+import { setPaymentStatus } from '../store/reducers/paymentSlice'; // Import payment status action
 import { useWebSocket } from '../contexts/WebSocketContext'; // Import the useWebSocket hook
 
 function Payment() {
     const router = useRouter();
-    const { pickup, dropoff, ride, user } = router.query;
-    const [selectedCar, setSelectedCar] = useState(null);
+    const dispatch = useDispatch();
+    const user = useSelector(state => state.user); // Get user from Redux
+    const ride = useSelector(state => state.ride); // Get ride info from Redux
+    const paymentStatus = useSelector(state => state.payment.status); // Get payment status from Redux
+    const { selectedCar}= useSelector((state) => state.confirmation);
+    const {pickupCoordinates, dropoffCoordinates}= useSelector((state) => state.search);
+    
+    const { sendMessage } = useWebSocket(); // Use the WebSocket hook
 
-    const [loggedUser, setUser] = useState(null);
     const [pickupPlace, setPickupPlace] = useState('');
     const [dropoffPlace, setDropoffPlace] = useState('');
     const [pickupShortName, setPickupShortName] = useState('');
     const [dropoffShortName, setDropoffShortName] = useState('');
-    const [paymentStatus, setPaymentStatus] = useState(null);
     const [loading, setLoading] = useState(false); // New loading state
-    const { sendMessage } = useWebSocket(); // Access WebSocket context
 
     useEffect(() => {
-        // Redirect to login page if no loggedUser is found
         if (!user) {
-            setUser(null);
             router.push('/login');
+            return;
         }
-    
-        setUser(JSON.parse(user));
-    
-        // Set selected car and place names
-        if (ride) {
-            setSelectedCar(JSON.parse(ride));
+
+        if (pickupCoordinates && dropoffCoordinates) {
+            fetchPlaceName(pickupCoordinates, 'pickup');
+            fetchPlaceName(dropoffCoordinates, 'dropoff');
         }
-        if (pickup && dropoff) {
-            fetchPlaceName(pickup, 'pickup');
-            fetchPlaceName(dropoff, 'dropoff');
-        }
-    }, [ride, pickup, dropoff, user, router]);
-    
+    }, [ pickupCoordinates, dropoffCoordinates, user, router]);
+
     const fetchPlaceName = async (coordinates, type) => {
         try {
             const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates}.json?` +
                 new URLSearchParams({
-                    access_token: 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ',
+                    access_token: process.env.MAPBOX_ACCESS_TOKEN, // Use environment variable for access token
                     limit: 1
                 })
             );
@@ -51,10 +49,10 @@ function Payment() {
             
             if (type === 'pickup') {
                 setPickupPlace(placeName);
-                setPickupShortName(shortName); // Add this to set short name
+                setPickupShortName(shortName);
             } else if (type === 'dropoff') {
                 setDropoffPlace(placeName);
-                setDropoffShortName(shortName); // Add this to set short name
+                setDropoffShortName(shortName);
             }
         } catch (error) {
             console.error('Error fetching place name:', error);
@@ -67,11 +65,11 @@ function Payment() {
             }
         }
     };
-    
-    const handlePayment = async (user) => {
+
+    const handlePayment = async () => {
         if (!user) {
             console.error('User is not logged in');
-            setPaymentStatus('failure');
+            dispatch(setPaymentStatus('failure'));
             return;
         }
 
@@ -82,36 +80,37 @@ function Payment() {
             await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate network delay
 
             const tripData = {
-                pickup: pickup,
-                dropoff: dropoff,
-                price: selectedCar ? selectedCar.price : 0,
-                time: selectedCar ? selectedCar.time : 0,
-                rating: selectedCar ? selectedCar.rating : 0,
-                driverProfile: selectedCar ? selectedCar.driverProfile : '',
-                userId: `${user?.userId || user?.id || user?.uuid}`,
-                pickupName: pickupShortName,
-                dropoffName: dropoffShortName,
-                pickupName: pickupPlace,
-                dropoffName: dropoffPlace,
-                recipientId: user?.id || user?.uuid,
+                pickup: pickupPlace,
+                dropoff: dropoffPlace,
+                price: ride?.selectedCar ?  ride?.selectedCar.price : selectedCar.price,
+                time:  ride?.selectedCar ?  ride?.selectedCar.time : selectedCar.time,
+                rating:  ride?.selectedCar ?  ride?.selectedCar.rating : selectedCar.rating,
+                driverProfile:  ride?.selectedCar ?  ride?.selectedCar.driverProfile : selectedCar.driverProfile,
+                userId: user?.id || user?.uuid,
+                pickupName: pickupPlace || pickupShortName,
+                dropoffName: dropoffPlace || dropoffShortName,
             };
 
             // Add trip data after successful payment
             await requestTrip(tripData);
             console.log('Trip request successful');
-            setPaymentStatus('success');
+            dispatch(setPaymentStatus('success'));
 
             // Send WebSocket message
-            sendMessage({
-                type: 'ride_request', // Ensure the type matches your server's expected message type
-                ...tripData
-            });
+            if (sendMessage) {
+                sendMessage({
+                    type: 'ride_request', // Ensure the type matches your server's expected message type
+                    ...tripData
+                });
+            } else {
+                console.log(`WebSocket is not available, skip sending message for now: ${JSON.stringify(tripData)}`);
+            }
 
             // Redirect to confirmation page after both operations are complete
             router.push('/');
         } catch (error) {
             console.error('Payment failed:', error);
-            setPaymentStatus('failure');
+            dispatch(setPaymentStatus('failure'));
         } finally {
             setLoading(false); // Set loading to false once operations are complete
         }
@@ -127,7 +126,7 @@ function Payment() {
                     <div>
                         <img src={selectedCar.imgUrl} alt={selectedCar.service} />
                         <p><strong>Service:</strong> {selectedCar.service}</p>
-                        <p><strong>Price:</strong> {selectedCar.multiplier * 10}</p> {/* Replace with actual price calculation */}
+                        <p><strong>Price:</strong> {selectedCar.price}</p> {/* Adjusted to use selectedCar.price */}
                     </div>
                 )}
                 {paymentStatus === 'success' && <SuccessMessage>Payment successful! Redirecting to confirmation...</SuccessMessage>}
@@ -136,7 +135,7 @@ function Payment() {
             {loading ? (
                 <LoadingMessage>Processing payment, please wait...</LoadingMessage>
             ) : (
-                <Button onClick={() => handlePayment(loggedUser)} disabled={loading}>
+                <Button onClick={handlePayment} disabled={loading}>
                     {loading ? 'Processing...' : 'Confirm Payment'}
                 </Button>
             )}

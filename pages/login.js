@@ -5,43 +5,46 @@ import { auth, provider } from '../firebase';
 import tw from 'tailwind-styled-components';
 import Image from 'next/image';
 import { loginApi } from './api/app.service';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../store/reducers/authSlice';
 
 function Login() {
     const router = useRouter();
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const handleAuthStateChanged = async (user) => {
             if (user) {
-                // Store user data in the database
                 try {
-                    
-                    await loginApi({
+                    const response = await loginApi({
                         email: user.email,
                         displayName: user.displayName,
                         photoURL: user.photoURL,
                         id: user?.id || user.uid,
-                        ...user
-                    }).then((response) => {
-                        console.log(`Login response: ${JSON.stringify({response})}`);
-                        if (response.success) {
-                            router.push('/');
-                        } else {
-                            console.error('Failed to store user data');
-                            router.push('/login');
-                        }
-                    }).catch((error) => {
-                        console.error('Oops, something went wrong', error);
-                        router.push('/login');
-                    })
+                    });
 
+                    console.log(`Login response: ${JSON.stringify(response)}`);
+                    if (response.success) {
+                        dispatch(setUser({
+                            name: user.displayName,
+                            photoUrl: user.photoURL,
+                            id: user?.id || user.uid
+                        }));
+                        router.push('/');
+                    } else {
+                        console.error('Failed to store user data');
+                        router.push('/login');
+                    }
                 } catch (error) {
-                    console.error('Error storing user data:', error);
+                    console.error('Oops, something went wrong', error);
+                    router.push('/login');
                 }
             }
         };
 
-        onAuthStateChanged(auth, handleAuthStateChanged);
-    }, []);
+        const unsubscribe = onAuthStateChanged(auth, handleAuthStateChanged);
+        return () => unsubscribe();
+    }, [dispatch, router]);
 
     const handleSignIn = async () => {
         try {

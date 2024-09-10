@@ -1,49 +1,69 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useAuth } from './AuthContext'; // Import the auth context
+// contexts/WebSocketContext.js
+import React, { createContext, useContext, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setStatus, addMessage, setError, clearMessages } from '../store/reducers/webSocketSlice';
 
 const WebSocketContext = createContext(null);
 
 export const WebSocketProvider = ({ children }) => {
-    const user = useAuth(); // Get the current user
-    const [ws, setWs] = useState(null);
+    const dispatch = useDispatch();
+    const status = useSelector((state) => state.webSocket.status);
+    const messages = useSelector((state) => state.webSocket.messages);
+    const user = useSelector((state) => state.auth.user);
+
+    // Use ref to store the WebSocket instance
+    const socketRef = useRef(null);
 
     useEffect(() => {
-        if (user) {
-            //https://ufqmmf6blc.execute-api.us-east-1.amazonaws.com/dev
-            // Create WebSocket connection if the user is authenticated
-            // Create WebSocket connection with userId as a query parameter
-            const socket = new WebSocket(`${process.env.WEBSOCKET_URL || 'wss://j4a86rv3rd.execute-api.us-east-1.amazonaws.com/dev/'}?userId=${user?.id || user?.uuid}`);
-            setWs(socket);
+        if (user && (user?.id || user?.uuid)) {
+            // Initialize WebSocket connection
+            socketRef.current = new WebSocket(
+                `${process.env.WEBSOCKET_URL || 'wss://j4a86rv3rd.execute-api.us-east-1.amazonaws.com/dev/'}?userId=${user?.id || user?.uuid}`
+            );
+
+            const socket = socketRef.current;
 
             socket.onopen = () => {
                 console.log('WebSocket connected');
+                dispatch(setStatus('connected'));
             };
 
             socket.onclose = () => {
                 console.log('WebSocket disconnected');
-                setWs(null);
+                dispatch(setStatus('disconnected'));
             };
 
             socket.onmessage = (event) => {
                 console.log('Message received:', JSON.stringify(event.data));
+                dispatch(addMessage(event.data));
             };
 
-            return () => {
-                socket.close();
+            socket.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                dispatch(setError(error.message));
             };
-        } else {
-            setWs(null);
         }
-    }, [user]);
+
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.close();
+            }
+            dispatch(setStatus('disconnected'));
+            //dispatch(clearMessages());
+        };
+    }, [user, dispatch]);
 
     const sendMessage = (message) => {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({...message, userId: user?.id || user?.uuid}));
+        const socket = socketRef.current;
+        if (socket && status === 'connected') {
+            socket.send(JSON.stringify({ ...message, userId: user?.id || user?.uuid }));
+        } else {
+            console.error('WebSocket is not connected');
         }
     };
 
     return (
-        <WebSocketContext.Provider value={{ ws, sendMessage }}>
+        <WebSocketContext.Provider value={{ sendMessage, status, messages }}>
             {children}
         </WebSocketContext.Provider>
     );

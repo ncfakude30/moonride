@@ -1,39 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import tw from 'tailwind-styled-components';
 import Map from './components/Map';
 import { useRouter } from 'next/router';
 import RideSelector from './components/RideSelector';
 import Link from 'next/link';
 import Image from 'next/image';
-
+import { setPickupCoordinates, setDropoffCoordinates, setSelectedCar, setLoggedUser } from '../store/reducers/confirmationSlice';
+import { setLoading } from '../store/reducers/tripSlice';
 
 function Confirm() {
     const router = useRouter();
-    let { pickup, dropoff, user } = router.query;
-
-  
-    const [pickupCoordinates, setPickupCoordinates] = useState([0, 0]);
-    const [dropoffCoordinates, setDropoffCoordinates] = useState([0, 0]);
-    const [loading, setLoading] = useState(true);
-    const [selectedCar, setSelectedCar] = useState(null);
-    const [loggedUser, setUser] = useState(null);
+    const dispatch = useDispatch();
+    
+    const { pickupCoordinates, dropoffCoordinates, selectedCar, } = useSelector(state => state.confirmation);
+    const loading = !pickupCoordinates.length || !dropoffCoordinates.length;
+    const user = useSelector((state) => state.auth.user);
+    const { pickup, dropoff } = useSelector(state => state.search);
 
     useEffect(() => {
-        if(!user) {
-            setUser(null)
+        if (!user) {
             router.push('/login');
+        } 
+        if (!pickupCoordinates && !dropoffCoordinates) {
+            getPickupCoordinates(pickupCoordinates);
+            getDropoffCoordinates(pickupCoordinates);
         }
-
-        setUser(JSON.parse(user || loggedUser))
-
-        console.log(`User in confirm intially: ${JSON.stringify(user)}`)
-
-        if (pickup && dropoff) {
-            setLoading(true);
-            getPickupCoordinates(pickup);
-            getDropoffCoordinates(dropoff);
-        }
-    }, [pickup, dropoff, user, router]);
+    }, );
 
     useEffect(() => {
         if (pickupCoordinates.length > 0 && dropoffCoordinates.length > 0) {
@@ -51,7 +44,7 @@ function Confirm() {
             );
             const data = await response.json();
             if (data.features.length > 0) {
-                setPickupCoordinates(data.features[0].center);
+                dispatch(setPickupCoordinates(data.features[0].center));
             } else {
                 console.error('No results found for pickup location');
             }
@@ -70,7 +63,7 @@ function Confirm() {
             );
             const data = await response.json();
             if (data.features.length > 0) {
-                setDropoffCoordinates(data.features[0].center);
+                dispatch(setDropoffCoordinates(data.features[0].center));
             } else {
                 console.error('No results found for dropoff location');
             }
@@ -80,18 +73,9 @@ function Confirm() {
     };
 
     const handleSelectRide = (car) => {
-        setSelectedCar(car);
-
-        console.log(`User in confirm button: ${JSON.stringify({loggedUser})}`)
-
+        dispatch(setSelectedCar(car));
         router.push({
             pathname: '/payment',
-            query: {
-                pickup: `${pickupCoordinates[0]},${pickupCoordinates[1]}`,
-                dropoff: `${dropoffCoordinates[0]},${dropoffCoordinates[1]}`,
-                ride: JSON.stringify(car),
-                user: JSON.stringify({userId: loggedUser?.id || loggedUser?.uuid,...loggedUser}),
-            }
         });
     };
 
@@ -115,10 +99,10 @@ function Confirm() {
                     pickupCoordinates={pickupCoordinates}
                     dropoffCoordinates={dropoffCoordinates}
                     onSelectRide={handleSelectRide}
-                    loggedUser={loggedUser}
+                    loggedUser={user}
                 />
                 <ConfirmButtonContainer>
-                    <ConfirmButton onClick={() => handleSelectRide(loggedUser, selectedCar)}>
+                    <ConfirmButton onClick={() => handleSelectRide(selectedCar)}>
                         Confirm UberX
                     </ConfirmButton>
                 </ConfirmButtonContainer>

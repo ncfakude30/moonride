@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import tw from 'tailwind-styled-components';
 import { carList } from '../../data/carList';
+import { setSelectedCar, setCurrency } from '../../store/actions/rideActions';
 
 const countryToCurrency = {
     'ZA': 'ZAR',
@@ -15,6 +17,9 @@ const getCurrencyCode = (countryCode) => {
 const getUserCountryCode = async () => {
     try {
         const response = await fetch('https://ipapi.co/country_code/');
+        if (!response.ok) {
+            throw new Error('Failed to fetch country code');
+        }
         const countryCode = await response.text();
         return countryCode;
     } catch (error) {
@@ -23,45 +28,46 @@ const getUserCountryCode = async () => {
     }
 };
 
-function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, loggedUser }) {
+function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide }) {
+    const dispatch = useDispatch();
+    const selectedCar = useSelector((state) => state.ride.selectedCar);
+    const currency = useSelector((state) => state.ride.currency);
     const [rideDuration, setRideDuration] = useState(0);
-    const [selectedCar, setSelectedCar] = useState(null);
-    const [currency, setCurrency] = useState('ZAR');
-    const [user, setUser] = useState(loggedUser);
 
     useEffect(() => {
-        if(loggedUser) {
-            setUser(user);
-        }
-
-        const fetchData = async () => {
+        const fetchCurrency = async () => {
             const countryCode = await getUserCountryCode();
-            setCurrency(getCurrencyCode(countryCode));
+            dispatch(setCurrency(getCurrencyCode(countryCode)));
         };
 
-
-        fetchData();
-    }, []);
+        fetchCurrency();
+    }, [dispatch]);
 
     useEffect(() => {
-        fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${pickupCoordinates[0]},${pickupCoordinates[1]};${dropoffCoordinates[0]},${dropoffCoordinates[1]}?access_token=pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ`)
-            .then(res => {
-                if (!res.ok) {
+        if (pickupCoordinates.length === 0 || dropoffCoordinates.length === 0) {
+            return;
+        }
+
+        const fetchRideDuration = async () => {
+            try {
+                const response = await fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${pickupCoordinates[0]},${pickupCoordinates[1]};${dropoffCoordinates[0]},${dropoffCoordinates[1]}?access_token=pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ`);
+                if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-                return res.json();
-            })
-            .then(data => {
+                const data = await response.json();
                 if (data.routes && data.routes.length > 0) {
                     setRideDuration(data.routes[0]?.duration / 60); // Convert duration from seconds to minutes
                 }
-            })
-            .catch(err => console.error('Fetch error:', err));
+            } catch (err) {
+                console.error('Fetch error:', err);
+            }
+        };
+
+        fetchRideDuration();
     }, [pickupCoordinates, dropoffCoordinates]);
 
-    const handleCarClick = (user, car) => {
-        setUser(user)
-        setSelectedCar(car);
+    const handleCarClick = (car) => {
+        dispatch(setSelectedCar(car));
         onSelectRide(car); // Notify parent component about the selected car
     };
 
@@ -72,7 +78,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
                 {carList.map((car, index) => (
                     <Car 
                         key={index} 
-                        onClick={() => handleCarClick(loggedUser, car)}
+                        onClick={() => handleCarClick(car)}
                         isSelected={selectedCar?.service === car.service}
                     >
                         <CarImage src={car.imgUrl} />

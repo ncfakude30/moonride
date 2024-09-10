@@ -1,16 +1,21 @@
+// components/Search.js
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import tw from 'tailwind-styled-components';
 import Link from 'next/link';
 import { loadGoogleMaps } from '../src/util/loadGoogleMaps'; // Import the utility
+import { useSelector, useDispatch } from 'react-redux';
+import { setPickup, setDropoff } from '../store/reducers/searchSlice'; // Adjust import according to your actions
+import { setPickupCoordinates, setDropoffCoordinates } from '../store/reducers/confirmationSlice'; // Adjust import according to your actions
 
 function Search() {
     const router = useRouter();
-    const { user } = router.query;
 
-    const [loggedUser, setUser] = useState(null);
-    const [pickup, setPickup] = useState('');
-    const [dropoff, setDropoff] = useState('');
+    const dispatch = useDispatch();
+    const pickup = useSelector((state) => state.search.pickup);
+    const dropoff = useSelector((state) => state.search.dropoff);
+    const user = useSelector((state) => state.auth.user);
+
     const [map, setMap] = useState(null);
     const [pickupMarker, setPickupMarker] = useState(null);
     const [dropoffMarker, setDropoffMarker] = useState(null);
@@ -24,10 +29,8 @@ function Search() {
             return;
         }
 
-        setUser(JSON.parse(user));
-
         const initializeMap = async () => {
-            const googleMaps = await loadGoogleMaps('AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU');
+            const googleMaps = await loadGoogleMaps('AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU'); // Replace with your Google Maps API Key
             const mapContainer = document.getElementById('map');
             if (mapContainer) {
                 const newMap = new googleMaps.Map(mapContainer, {
@@ -46,7 +49,7 @@ function Search() {
                 autocompletePickup.addListener('place_changed', () => {
                     const place = autocompletePickup.getPlace();
                     if (place.geometry) {
-                        setPickup(place.formatted_address);
+                        dispatch(setPickup(place.formatted_address)); // Update Redux state
                         const marker = new googleMaps.Marker({
                             position: place.geometry.location,
                             map: newMap,
@@ -61,7 +64,7 @@ function Search() {
                 autocompleteDropoff.addListener('place_changed', () => {
                     const place = autocompleteDropoff.getPlace();
                     if (place.geometry) {
-                        setDropoff(place.formatted_address);
+                        dispatch(setDropoff(place.formatted_address)); // Update Redux state
                         const marker = new googleMaps.Marker({
                             position: place.geometry.location,
                             map: newMap,
@@ -114,7 +117,7 @@ function Search() {
         if (!map) {
             initializeMap();
         }
-    }, [map, pickupMarker, dropoffMarker, user, router, userLocationMarker]);
+    }, [map, pickupMarker, dropoffMarker, user, router, userLocationMarker, dispatch]);
 
     const updatePolyline = () => {
         const googleMaps = window.google.maps;
@@ -139,14 +142,6 @@ function Search() {
         }
     };
 
-    const handlePickupChange = (e) => {
-        setPickup(e.target.value);
-    };
-
-    const handleDropoffChange = (e) => {
-        setDropoff(e.target.value);
-    };
-
     const handlePopupOpen = () => {
         setIsPopupOpen(true);
     };
@@ -158,6 +153,9 @@ function Search() {
     // Extract coordinates for query parameters
     const pickupLocation = pickupMarker ? pickupMarker.getPosition() : null;
     const dropoffLocation = dropoffMarker ? dropoffMarker.getPosition() : null;
+
+    dispatch(setPickupCoordinates([pickupLocation ? pickupLocation.lat() : '', pickupLocation ? pickupLocation.lng() : '']))
+    dispatch(setDropoffCoordinates([dropoffLocation ? dropoffLocation.lat() : '', dropoffLocation ? dropoffLocation.lng() : '']))
 
     return (
         <Wrapper>
@@ -174,29 +172,20 @@ function Search() {
                             id="pickup"
                             placeholder="Pickup location"
                             value={pickup}
-                            onChange={handlePickupChange}
+                            onChange={(e) => dispatch(setPickup(e.target.value))}
                         />
                         <Input
                             id="dropoff"
                             placeholder="Dropoff location"
                             value={dropoff}
-                            onChange={handleDropoffChange}
+                            onChange={(e) => dispatch(setDropoff(e.target.value))}
                         />
                     </InputBoxes>
                     <PlusIcon src="https://img.icons8.com/ios/50/000000/plus-math.png" onClick={handlePopupOpen} />
                 </InputContainer>
                 <Link
                     href={{
-                        pathname: '/confirm',
-                        query: {
-                            pickupAddress: pickup || '',
-                            pickupLat: pickupLocation ? pickupLocation.lat() : '',
-                            pickupLng: pickupLocation ? pickupLocation.lng() : '',
-                            dropoffAddress: dropoff || '',
-                            dropoffLat: dropoffLocation ? dropoffLocation.lat() : '',
-                            dropoffLng: dropoffLocation ? dropoffLocation.lng() : '',
-                            user: JSON.stringify(loggedUser) || '',
-                        },
+                        pathname: '/confirm'
                     }}
                 >
                     <ConfirmContainer>
@@ -267,14 +256,6 @@ const PlusIcon = tw.img`
     w-12 h-12 bg-gray-200 rounded-full ml-3 p-2 cursor-pointer
 `;
 
-const SavedPlaces = tw.div`
-    flex items-center mt-2
-`;
-
-const StartIcon = tw.img`
-    h-6 mr-2
-`;
-
 const ConfirmContainer = tw.div`
     flex justify-center items-center mt-2
 `;
@@ -282,24 +263,23 @@ const ConfirmContainer = tw.div`
 const ConfirmButton = tw.button`
     bg-gradient-to-r from-gray-600 to-gray-400 text-white rounded-full p-4 font-semibold shadow-lg
     hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
-    focus:outline-none focus:ring-1 focus:ring-gray-500
-    w-full max-w-xs
+    focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500
 `;
 
 const PopupOverlay = tw.div`
-    fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-20
+    fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20
 `;
 
 const PopupCard = tw.div`
-    bg-white p-6 rounded-lg shadow-lg
+    bg-white rounded-lg shadow-lg p-6 w-80 max-w-full text-center
 `;
 
 const PopupTitle = tw.h2`
-    text-xl font-semibold mb-2
+    text-xl font-bold mb-4
 `;
 
 const PopupContent = tw.p`
-    text-gray-700 mb-4
+    text-gray-700 mb-6
 `;
 
 const CloseButton = tw.button`

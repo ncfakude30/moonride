@@ -2,8 +2,8 @@
   "name": "moonrides",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS=--openssl-legacy-provider next dev",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider next build",
+    "dev": "next dev",
+    "build": "next build",
     "start": "NODE_OPTIONS=--openssl-legacy-provider nodemon server.js",
     "lint": "NODE_OPTIONS=--openssl-legacy-provider next lint",
     "deploy": "serverless deploy"
@@ -11,12 +11,15 @@
   "dependencies": {
     "@mapbox/mapbox-gl-geocoder": "^5.0.2",
     "@react-google-maps/api": "^2.19.3",
+    "@reduxjs/toolkit": "^2.2.7",
     "axios": "^1.7.7",
     "firebase": "^9.3.0",
     "mapbox-gl": "^2.15.0",
     "next": "12.0.2",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^9.1.2",
+    "redux": "^5.0.1",
     "serverless-next.js": "^1.15.0-alpha.2",
     "tailwind-styled-components": "^2.2.0",
     "webpack": "^5.94.0",

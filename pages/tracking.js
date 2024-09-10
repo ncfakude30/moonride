@@ -1,69 +1,74 @@
-import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import tw from 'tailwind-styled-components';
 import Map from './components/Map'; // Adjust the import path as needed
 import Image from 'next/image';
 import Link from 'next/link';
-import { useWebSocket } from '../contexts/WebSocketContext';
+import { useSelector, useDispatch } from 'react-redux';
+import { setTrackingDetails, updateMessages } from '../store/actions/trackingActions';
+import { useRouter } from 'next/router';
 
 const Tracking = () => {
     const router = useRouter();
-    const { pickup, dropoff, pickupName, dropoffName, user } = router.query;
-    const ws = useWebSocket();
+    const dispatch = useDispatch();
+    const { pickup, dropoff, messages, loading } = useSelector(state => state.tracking);
+    const { sendMessage } = useSelector(state => state.webSocket);
 
     const [pickupCoords, setPickupCoords] = useState(null);
     const [dropoffCoords, setDropoffCoords] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
-    const [loggedUser, setUser] = useState(null);
+    const user = useSelector((state) => state.auth.user);
+
 
     useEffect(() => {
-        if(!user) {
-            setUser(null);
-            router.push('/')
+        if (!user) {
+            router.push('/');
         }
-
-        setUser(user)
-
         if (pickup && dropoff) {
             const pickupArray = pickup.split(',').map(coord => parseFloat(coord));
             const dropoffArray = dropoff.split(',').map(coord => parseFloat(coord));
 
             setPickupCoords(pickupArray);
             setDropoffCoords(dropoffArray);
-            setLoading(false);
+            dispatch(setTrackingDetails({
+                pickup: pickupArray,
+                dropoff: dropoffArray,
+                user,
+                loading: false
+            }));
         }
-        
-    }, [pickup, dropoff, user]);
+    }, [pickup, dropoff, newMessage, user]);
 
     useEffect(() => {
-        if (ws) {
-            ws.onmessage = (event) => {
-                console.log(`My received message: ${JSON.stringify(event)}`)
-                const data = JSON.parse(event.data);
+        if (messages.length > 0) {
+            messages.map((message) => {
+                const data = JSON.parse(message);
                 if (data.type === 'chat_message') {
-                    setMessages(prevMessages => [...prevMessages, data.message]);
+                    dispatch(updateMessages(data.message));
                 }
-            };
+            })
+            
         }
-    }, [ws]);
+    }, []);
 
     const handleSendMessage = () => {
-        if (newMessage.trim() && ws) {
-            ws.sendMessage({ type: 'chat_message', text: newMessage, recipientId: loggedUser?.id ||  loggedUser?.uuid });
+        if (newMessage.trim() && sendMessage) {
+            sendMessage({
+                type: 'chat_message',
+                text: newMessage,
+                recipientId: user?.id || user?.uuid
+            });
             setNewMessage('');
         }
     };
 
-    if (loading) {
+    if (false && loading) {
         return <LoadingMessage>Loading map...</LoadingMessage>;
     }
 
     return (
         <Container>
             <MapWrapper>
-                <Map pickupCoordinates={pickupCoords} dropoffCoordinates={dropoffCoords} user={loggedUser}/>
+                <Map pickupCoordinates={pickupCoords} dropoffCoordinates={dropoffCoords} user={user}/>
                 <BackButtonContainer>
                     <Link href='/'>
                         <BackButton>
