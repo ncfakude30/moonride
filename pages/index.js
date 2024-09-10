@@ -19,13 +19,7 @@ export default function Home() {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                dispatch(setUser({
-                    name: user.displayName,
-                    photoUrl: user.photoURL,
-                    id: user?.id || user.uid,
-                }));
-            } else {
+            if (!user) {
                 dispatch(clearUser());
                 router.push('/login');
             }
