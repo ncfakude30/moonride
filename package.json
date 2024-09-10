@@ -2,8 +2,8 @@
   "name": "moonrides",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider next dev",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider next build",
     "start": "NODE_OPTIONS=--openssl-legacy-provider nodemon server.js",
     "lint": "NODE_OPTIONS=--openssl-legacy-provider next lint",
     "deploy": "serverless deploy"
