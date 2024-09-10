@@ -28,7 +28,7 @@ jobs:
       - name: Clean and install Node.js dependencies
         run: |
           rm -rf node_modules
-          npm ci --legacy-peer-deps
+          npm install --legacy-peer-deps
           npm install serverless --legacy-peer-deps
 
       - name: Set up Python
