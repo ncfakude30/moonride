@@ -18,7 +18,7 @@ export const loginApi = async (dto) => {
         const response = await axios.post(`${apiEndpoint}/login`, dto);
         return response.data;
     } catch (error) {
-        console.error('Error logging trip:', error);
+        console.error('Error logging in:', error);
         throw error;
     }
 };
@@ -48,6 +48,27 @@ export const requestTrip = async (dto) => {
         return response.data; // Ensure this matches the expected response structure
     } catch (error) {
         console.error('Error requesting trip:', error);
+        throw error;
+    }
+};
+
+// Payment API functions
+export const initiatePayment = async (paymentDetails) => {
+    try {
+        const response = await apiClient.post('/payment/initiate', paymentDetails);
+        return response?.data; // Expecting { paymentUrl: string, paymentId: string }
+    } catch (error) {
+        console.error('Error initiating payment:', error);
+        throw error;
+    }
+};
+
+export const handlePaymentNotification = async (notificationDetails) => {
+    try {
+        const response = await apiClient.post('/payment/notify', notificationDetails);
+        return response.data; // Expecting { success: boolean, message: string }
+    } catch (error) {
+        console.error('Error handling payment notification:', error);
         throw error;
     }
 };

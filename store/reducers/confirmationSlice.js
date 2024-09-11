@@ -7,6 +7,7 @@ const confirmationSlice = createSlice({
         dropoffCoordinates: [0, 0],
         selectedCar: null,
         loggedUser: null,
+        loading: false,
     },
     reducers: {
         setPickupCoordinates(state, action) {
@@ -20,9 +21,12 @@ const confirmationSlice = createSlice({
         },
         setLoggedUser(state, action) {
             state.loggedUser = action.payload;
+        },
+        setLoading(state, action)  {
+            state.loading = action.payload;
         }
     },
 });
 
-export const { setPickupCoordinates, setDropoffCoordinates, setSelectedCar, setLoggedUser } = confirmationSlice.actions;
+export const { setPickupCoordinates, setDropoffCoordinates, setSelectedCar, setLoggedUser, setLoading } = confirmationSlice.actions;
 export default confirmationSlice.reducer;

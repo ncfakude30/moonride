@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import tw from 'tailwind-styled-components';
 import Map from './components/Map';
@@ -6,36 +6,35 @@ import { useRouter } from 'next/router';
 import RideSelector from './components/RideSelector';
 import Link from 'next/link';
 import Image from 'next/image';
-import { setPickupCoordinates, setDropoffCoordinates, setSelectedCar, setLoggedUser } from '../store/reducers/confirmationSlice';
-import { setLoading } from '../store/reducers/tripSlice';
+import { setPickupCoordinates, setDropoffCoordinates, setSelectedCar, setLoading } from '../store/reducers/confirmationSlice';
 
 function Confirm() {
     const router = useRouter();
     const dispatch = useDispatch();
     
-    const { pickupCoordinates, dropoffCoordinates, selectedCar, } = useSelector(state => state.confirmation);
-    const loading = !pickupCoordinates.length || !dropoffCoordinates.length;
+    const { selectedCar, loading, pickupCoordinates, dropoffCoordinates} = useSelector(state => state.confirmation);
     const user = useSelector((state) => state.auth.user);
-    const { pickup, dropoff } = useSelector(state => state.search);
+    const { pickup, dropoff} = useSelector(state => state.search);
 
     useEffect(() => {
         if (!user) {
             router.push('/login');
         } 
         if (!pickupCoordinates && !dropoffCoordinates) {
-            getPickupCoordinates(pickupCoordinates);
-            getDropoffCoordinates(pickupCoordinates);
+            getPickupCoordinates(pickup);
+            getDropoffCoordinates(dropoff);
         }
     }, );
 
     useEffect(() => {
-        if (pickupCoordinates.length > 0 && dropoffCoordinates.length > 0) {
+        if (pickupCoordinates?.length > 0 && dropoffCoordinates?.length > 0) {
             setLoading(false);
         }
-    }, [pickupCoordinates, dropoffCoordinates]);
+    }, [pickupCoordinates, dropoffCoordinates, loading, selectedCar]);
 
     const getPickupCoordinates = async (pickup) => {
         try {
+            dispatch(setLoading(true))
             const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${pickup}.json?` + 
                 new URLSearchParams({
                     access_token: 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ',
@@ -50,11 +49,14 @@ function Confirm() {
             }
         } catch (error) {
             console.error('Error fetching pickup coordinates:', error);
+        } finally{
+            dispatch(setLoading(false))
         }
     };
 
     const getDropoffCoordinates = async (dropoff) => {
         try {
+            dispatch(setLoading(true))
             const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${dropoff}.json?` + 
                 new URLSearchParams({
                     access_token: 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ',
@@ -69,6 +71,9 @@ function Confirm() {
             }
         } catch (error) {
             console.error('Error fetching dropoff coordinates:', error);
+        }
+        finally{
+            dispatch(setLoading(false))
         }
     };
 

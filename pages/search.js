@@ -117,7 +117,7 @@ function Search() {
         if (!map) {
             initializeMap();
         }
-    }, [map, pickupMarker, dropoffMarker, user, router, userLocationMarker, dispatch]);
+    }, [user, pickup, dropoff, pickupMarker, ]);
 
     const updatePolyline = () => {
         const googleMaps = window.google.maps;
@@ -154,8 +154,8 @@ function Search() {
     const pickupLocation = pickupMarker ? pickupMarker.getPosition() : null;
     const dropoffLocation = dropoffMarker ? dropoffMarker.getPosition() : null;
 
-    dispatch(setPickupCoordinates([pickupLocation ? pickupLocation.lat() : '', pickupLocation ? pickupLocation.lng() : '']))
-    dispatch(setDropoffCoordinates([dropoffLocation ? dropoffLocation.lat() : '', dropoffLocation ? dropoffLocation.lng() : '']))
+    dispatch(setPickupCoordinates([pickupLocation ? pickupLocation.lat() : 0, pickupLocation ? pickupLocation.lng() : 0]))
+    dispatch(setDropoffCoordinates([dropoffLocation ? dropoffLocation.lat() : 0, dropoffLocation ? dropoffLocation.lng() : 0]))
 
     return (
         <Wrapper>
