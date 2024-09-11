@@ -6,7 +6,7 @@ import json
 from uuid import uuid4
 from datetime import datetime, timedelta
 
-PAYMENT_TABLE = os.getenv('PAYMENT_TABLE', 'PaymentsTable')
+PAYMENT_TABLE = os.getenv('TRANSACTIONS_TABLE', 'TransactionsTable')
 OZOW_API_URL = os.getenv('OZOW_API_URL', 'https://api.ozow.com/payments/create')
 OZOW_SITE_CODE = os.getenv('OZOW_SITE_CODE', 'your_site_code')
 OZOW_API_KEY = os.getenv('OZOW_API_KEY', 'your_api_key')
