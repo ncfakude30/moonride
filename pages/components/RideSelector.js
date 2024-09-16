@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import tw from 'tailwind-styled-components';
 import { carList } from '../../data/carList';
-import { setSelectedCar, setCurrency } from '../../store/actions/rideActions';
+import { setCurrency } from '../../store/actions/rideActions';
+import { setSelectedCar } from '../../store/reducers/confirmationSlice';
 
 const countryToCurrency = {
     'ZA': 'ZAR',
@@ -30,7 +31,7 @@ const getUserCountryCode = async () => {
 
 function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide }) {
     const dispatch = useDispatch();
-    const selectedCar = useSelector((state) => state.ride.selectedCar);
+    const selectedCar = useSelector((state) => state.confirmation.selectedCar);
     const currency = useSelector((state) => state.ride.currency);
     const [rideDuration, setRideDuration] = useState(0);
 
@@ -79,14 +80,14 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide }) {
                     <Car 
                         key={index} 
                         onClick={() => handleCarClick(car)}
-                        isSelected={selectedCar?.service === car.service}
+                        isSelected={selectedCar?.service === car?.service}
                     >
-                        <CarImage src={car.imgUrl} />
+                        <CarImage src={car?.imgUrl} />
                         <CarDetails>
-                            <Service>{car.service}</Service>
+                            <Service>{car?.service}</Service>
                             <Time>5 min away</Time>
                         </CarDetails>
-                        <Price>{currency === 'ZAR' ? 'R' : 'R'}{(rideDuration * car.multiplier).toFixed(2)}</Price>
+                        <Price>{currency === 'ZAR' ? 'R' : 'R'}{(rideDuration * car?.multiplier).toFixed(2)}</Price>
                     </Car>
                 ))}
             </CarList>

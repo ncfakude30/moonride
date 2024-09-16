@@ -2,30 +2,26 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import tw from 'tailwind-styled-components';
 import { useSelector, useDispatch } from 'react-redux';
-import { requestTrip, initiatePayment, handlePaymentNotification } from './api/app.service'; 
-import { setPaymentStatus, setPaymentResponse, setPaymentCallback } from '../store/reducers/paymentSlice';
-import { useWebSocket } from '../contexts/WebSocketContext';
+import { requestTrip, initiatePayment } from './api/app.service';
+import { setPaymentStatus, setPaymentResponse } from '../store/reducers/paymentSlice';
+import Image from 'next/image';
 
 function Payment() {
     const router = useRouter();
     const dispatch = useDispatch();
-    const user = useSelector(state => state.user);
+    const user = useSelector(state => state.auth.user);
     const ride = useSelector(state => state.ride);
     const paymentStatus = useSelector(state => state.payment.status);
-    const { selectedCar,  } = useSelector((state) => state.confirmation);
-    const { pickupCoordinates, dropoffCoordinates } = useSelector((state) => state.search);
-    const { paymentUrl, paymentId } = useSelector((state) => state.payment.paymentResponse);
-    const callback = useSelector((state) => state.payment);
-
-    const { sendMessage } = useWebSocket();
-
+    const { selectedCar } = useSelector(state => state.confirmation);
+    const { pickupCoordinates, dropoffCoordinates } = useSelector(state => state.search);
+    const { paymentUrl, paymentId } = useSelector(state => state.payment.paymentResponse);
     const [pickupPlace, setPickupPlace] = useState('');
     const [dropoffPlace, setDropoffPlace] = useState('');
     const [pickupShortName, setPickupShortName] = useState('');
     const [dropoffShortName, setDropoffShortName] = useState('');
     const [loading, setLoading] = useState(false);
-    const pickup = useSelector((state) => state.search.pickup);
-    const dropoff = useSelector((state) => state.search.dropoff);
+    const [selectedGateway, setSelectedGateway] = useState('');
+    const { pickup, dropoff } = useSelector(state => state.search);
 
     useEffect(() => {
         if (!user) {
@@ -34,8 +30,8 @@ function Payment() {
         }
 
         if (!pickupCoordinates && !dropoffCoordinates) {
-            fetchPlaceName(pickupCoordinates, 'pickup');
-            fetchPlaceName(dropoffCoordinates, 'dropoff');
+            fetchPlaceName(pickup, 'pickup');
+            fetchPlaceName(dropoff, 'dropoff');
         }
     }, [pickup, dropoff, pickupCoordinates, dropoffCoordinates, user, router]);
 
@@ -52,11 +48,11 @@ function Payment() {
             const shortName = data.features.length > 0 ? data.features[0].text : 'Unknown';
 
             if (type === 'pickup') {
-                setPickupPlace(pickup);
+                setPickupPlace(placeName);
                 setPickupShortName(shortName);
             } else if (type === 'dropoff') {
-                setDropoffPlace(dropoff);
-                setDropoffShortName(dropoffShortName);
+                setDropoffPlace(placeName);
+                setDropoffShortName(shortName);
             }
         } catch (error) {
             console.error('Error fetching place name:', error);
@@ -71,6 +67,11 @@ function Payment() {
     };
 
     const handlePayment = async () => {
+        if (!selectedGateway) {
+            alert('Please select a payment gateway.');
+            return;
+        }
+
         if (!user) {
             console.error('User is not logged in');
             dispatch(setPaymentStatus('failure'));
@@ -81,53 +82,44 @@ function Payment() {
 
         try {
             const request = {
-                pickup: pickupPlace,
-                dropoff: dropoffPlace,
+                pickup,
+                dropoff,
                 price: (ride?.selectedCar ? ride?.selectedCar.price : selectedCar?.price) || 10,
-                time: ride?.selectedCar ? ride?.selectedCar.time : selectedCar.time,
-                rating: ride?.selectedCar ? ride?.selectedCar.rating : selectedCar.rating,
-                driverProfile: ride?.selectedCar ? ride?.selectedCar.driverProfile : selectedCar.driverProfile,
+                time: ride?.selectedCar ? ride?.selectedCar?.time : selectedCar?.time,
+                rating: ride?.selectedCar ? ride?.selectedCar?.rating : selectedCar?.rating,
+                driverProfile: ride?.selectedCar ? ride?.selectedCar?.driverProfile : selectedCar?.driverProfile,
                 userId: user?.id || user?.uuid,
                 pickupName: pickupPlace || pickupShortName,
                 dropoffName: dropoffPlace || dropoffShortName,
-                amount: (ride?.selectedCar ? ride?.selectedCar.price : selectedCar.price) || 10,
+                amount: (ride?.selectedCar ? ride?.selectedCar?.price : selectedCar?.price) || 10,
                 firstName: 'TestName',
                 lastName: 'LastTestName',
                 email: 'email@gmail.com',
-
+                paymentGateway: selectedGateway
             };
 
             const paymentResponse = await initiatePayment(request).catch((error) => {
                 console.log(`Failed to make a payment request: ${JSON.stringify(error)}`);
-                dispatch(setPaymentStatus(error))
+                dispatch(setPaymentStatus(error));
                 return;
             });
 
-            /*
-            // Request the trip (pre-payment)
             const tripResponse = await requestTrip(request).catch((error) => {
                 console.log(error);
-                //call refund function.
                 dispatch(setPaymentStatus('failure'));
                 router.push('/payment');
             });
-            */
 
-            //console.log(`Trip response: ${JSON.stringify(tripResponse)}`);
-
-            if (!(paymentResponse && paymentResponse?.paymentUrl 
-                && paymentResponse?.paymentId)) {
-                //call refund function.
+            if (paymentResponse?.paymentUrl && paymentResponse?.paymentId) {
+                dispatch(setPaymentResponse({
+                    paymentUrl: paymentResponse.paymentUrl,
+                    paymentId: paymentResponse.paymentId,
+                }));
+                window.location.href = paymentResponse.paymentUrl;
+            } else {
                 dispatch(setPaymentStatus('failure'));
                 router.push('/payment');
             }
-
-            console.log(`Continue right ?: ${JSON.stringify(paymentResponse)}`);
-            dispatch(setPaymentResponse({
-                paymentUrl: paymentResponse?.paymentUrl,
-                paymentId: paymentResponse?.paymentId,
-            }));
-            router.push(paymentResponse?.paymentId);
         } catch (error) {
             console.error('Payment failed:', error);
             dispatch(setPaymentStatus('failure'));
@@ -138,58 +130,177 @@ function Payment() {
 
     return (
         <Wrapper>
-            <Title>Payment</Title>
-            <Details>
-                <p><strong>Pickup:</strong> {pickupPlace}</p>
-                <p><strong>Dropoff:</strong> {dropoffPlace}</p>
-                {selectedCar && (
-                    <div>
-                        <img src={selectedCar.imgUrl} alt={selectedCar.service} />
-                        <p><strong>Service:</strong> {selectedCar.service}</p>
-                        <p><strong>Price:</strong> {selectedCar.price}</p>
-                    </div>
-                )}
-                {paymentStatus === 'success' && <SuccessMessage>Payment successful! Redirecting to confirmation...</SuccessMessage>}
-                {paymentStatus === 'failure' && <ErrorMessage>Payment failed. Please try again.</ErrorMessage>}
-            </Details>
-            {loading ? (
-                <LoadingMessage>Processing payment, please wait...</LoadingMessage>
-            ) : (
-                <Button onClick={handlePayment} disabled={loading}>
-                    {loading ? 'Processing...' : 'Confirm Payment'}
-                </Button>
-            )}
+            <BackButtonContainer>
+                <BackButton onClick={() => router.back()}>
+                    <Image
+                        src='https://img.icons8.com/ios-filled/50/000000/left.png'
+                        alt='Back'
+                        className='w-6 h-6'
+                        width={50} height={50}
+                    />
+                </BackButton>
+            </BackButtonContainer>
+            <Content>
+                <Card>
+                    <DriverProfile
+                        driverName={selectedCar?.driverName || 'Unknown Driver'}
+                        driverRating={selectedCar?.rating || 'N/A'}
+                        driverImage={selectedCar?.driverProfile || 'https://moonride-media.s3.amazonaws.com/moonriding.png'}
+                    />
+                    <Details>
+                        <p><strong>Pickup:</strong> {pickupPlace}</p>
+                        <p><strong>Dropoff:</strong> {dropoffPlace}</p>
+                        {selectedCar && (
+                            <CarDetails>
+                                <Image
+                                    src={selectedCar.imgUrl || 'https://moonride-media.s3.amazonaws.com/moonriding.png'}
+                                    alt={selectedCar.service || 'yes'}
+                                    width={200} height={200}
+                                    className='object-cover'
+                                />
+                                <p><strong>Service:</strong> {selectedCar.service}</p>
+                                <p><strong>Price:</strong> {selectedCar.price}</p>
+                            </CarDetails>
+                        )}
+                    </Details>
+
+                    <PaymentGatewaySelection>
+                        <p><strong>Select Payment Gateway:</strong></p>
+                        <ScrollableGatewayList>
+                            <GatewayOption
+                                isSelected={selectedGateway === 'ozow'}
+                                onClick={() => setSelectedGateway('ozow')}
+                            >
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonriding.png' alt='Ozow' width={40} height={40} />
+                                <span>Ozow</span>
+                            </GatewayOption>
+                            <GatewayOption
+                                isSelected={selectedGateway === 'stripe'}
+                                onClick={() => setSelectedGateway('stripe')}
+                            >
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonriding.png' alt='Stripe' width={40} height={40} />
+                                <span>Stripe</span>
+                            </GatewayOption>
+                            <GatewayOption
+                                isSelected={selectedGateway === 'paypal'}
+                                onClick={() => setSelectedGateway('paypal')}
+                            >
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonriding.png' alt='PayPal' width={40} height={40} />
+                                <span>PayPal</span>
+                            </GatewayOption>
+                            <GatewayOption
+                                isSelected={selectedGateway === 'razorpay'}
+                                onClick={() => setSelectedGateway('razorpay')}
+                            >
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonriding.png' alt='Razorpay' width={40} height={40} />
+                                <span>Razorpay</span>
+                            </GatewayOption>
+                        </ScrollableGatewayList>
+                    </PaymentGatewaySelection>
+
+                    {paymentStatus === 'success' && <SuccessMessage>Payment successful! Redirecting...</SuccessMessage>}
+                    {paymentStatus === 'failure' && <ErrorMessage>Payment failed. Please try again.</ErrorMessage>}
+                    {loading ? (
+                        <LoadingMessage>Processing payment, please wait...</LoadingMessage>
+                    ) : (
+                        <Button onClick={handlePayment} disabled={loading}>
+                            {loading ? 'Processing...' : 'Confirm Payment'}
+                        </Button>
+                    )}
+                </Card>
+            </Content>
         </Wrapper>
     );
 }
 
 export default Payment;
 
+// New DriverProfile Component
+const DriverProfile = ({ driverName, driverRating, driverImage }) => (
+    <ProfileWrapper>
+        <DriverImage src={driverImage} alt={`${driverName} Profile`} width={100} height={100} />
+        <DriverInfo>
+            <DriverName>{driverName}</DriverName>
+            <DriverRating>⭐ {driverRating}</DriverRating>
+        </DriverInfo>
+    </ProfileWrapper>
+);
+
 const Wrapper = tw.div`
     flex flex-col items-center justify-center h-screen p-4
 `;
 
-const Title = tw.h1`
-    text-2xl font-bold mb-4
+
+const Content = tw.div`
+    flex-1 p-6
+`;
+
+const Card = tw.div`
+    bg-white rounded-lg shadow-lg p-4
 `;
 
 const Details = tw.div`
     mb-4
 `;
 
+const CarDetails = tw.div`
+    flex items-center space-x-4
+`;
+
+const PaymentGatewaySelection = tw.div`
+    mb-4
+`;
+
+const ScrollableGatewayList = tw.div`
+    flex overflow-x-scroll
+`;
+
+const GatewayOption = tw.div`
+    flex items-center space-x-2 p-2 cursor-pointer
+    ${(props) => props.isSelected && 'bg-blue-100'}
+`;
+
+const DriverImage = tw(Image)`
+    rounded-full
+`;
+
+const ProfileWrapper = tw.div`
+    flex items-center space-x-4 mb-4
+`;
+
+const DriverInfo = tw.div`
+    flex flex-col
+`;
+
+const DriverName = tw.p`
+    text-lg font-semibold
+`;
+
+const DriverRating = tw.p`
+    text-sm text-gray-600
+`;
+
 const Button = tw.button`
-    bg-black text-white py-2 px-4 rounded
-    ${({ disabled }) => disabled && 'opacity-50 cursor-not-allowed'}
+    bg-gradient-to-r from-gray-600 to-gray-400 text-white rounded-full py-3 px-6 font-bold w-full mt-4 disabled:opacity-50
 `;
 
 const SuccessMessage = tw.p`
-    text-green-500 mt-4
+    text-green-600 mt-4
 `;
 
 const ErrorMessage = tw.p`
-    text-red-500 mt-4
+    text-red-600 mt-4
 `;
 
 const LoadingMessage = tw.p`
-    text-yellow-500 mt-4
+    text-blue-600 mt-4
 `;
+
+const BackButtonContainer = tw.div`
+    flex flex-row items-center justify-start p-3 w-full
+`;
+
+const BackButton = tw.div`
+    relative w-10 h-10 cursor-pointer
+`;
+

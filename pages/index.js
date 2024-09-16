@@ -166,7 +166,6 @@ const Label = tw.div`
     z-20 // Ensure the label is above the image
 `;
 
-
 const PopupOverlay = tw.div`
     fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20
 `;
