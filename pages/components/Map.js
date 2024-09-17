@@ -1,35 +1,38 @@
 import { useEffect, useState } from 'react';
 import tw from 'tailwind-styled-components';
-import mapboxgl from '!mapbox-gl';
 import { useSelector } from 'react-redux';
-import { useWebSocket } from '../../contexts/WebSocketContext';
-
-mapboxgl.accessToken = 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ';
 
 const Map = () => {
-    const pickupCoordinates = useSelector((state) => state.ride.pickupCoordinates);
-    const dropoffCoordinates = useSelector((state) => state.ride.dropoffCoordinates);
+    const [pickupCoordinates, setPickupCoordinates] = useState(null);
+    const [dropoffCoordinates, setDropoffCoordinates] = useState(null);
+    const { pickup, dropoff } = useSelector(state => state.search);
     const [userLocation, setUserLocation] = useState(null);
     const [map, setMap] = useState(null);
-    const {sendMessage, status, messages} = useSelector((state) => state.webSocket);
+    const [directionsService, setDirectionsService] = useState(null);
+    const [directionsRenderer, setDirectionsRenderer] = useState(null);
 
     useEffect(() => {
-        // Function to get user's location
         const getUserLocation = () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        setUserLocation([
-                            position.coords.longitude,
-                            position.coords.latitude
-                        ]);
+                        setUserLocation({
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        });
                     },
                     () => {
-                        setUserLocation([-99.29011, 39.39172]); // Default to a central location
+                        setUserLocation({
+                            lat: 39.39172,
+                            lng: -99.29011
+                        }); // Default to a central location
                     }
                 );
             } else {
-                setUserLocation([-99.29011, 39.39172]); // Default to a central location
+                setUserLocation({
+                    lat: 39.39172,
+                    lng: -99.29011
+                }); // Default to a central location
             }
         };
 
@@ -37,69 +40,80 @@ const Map = () => {
     }, []);
 
     useEffect(() => {
-        if (userLocation) {
-            const mapInstance = new mapboxgl.Map({
-                container: 'map',
-                style: 'mapbox://styles/drakosi/ckvcwq3rwdw4314o3i2ho8tph',
-                center: userLocation,
-                zoom: 12,
-            });
-
-            setMap(mapInstance);
-
-            const addMarker = (coordinates) => {
-                new mapboxgl.Marker()
-                    .setLngLat(coordinates)
-                    .addTo(mapInstance);
-            };
-
-            if (pickupCoordinates) {
-                addMarker(pickupCoordinates);
-            }
-
-            if (dropoffCoordinates) {
-                addMarker(dropoffCoordinates);
-            }
-
-            if (pickupCoordinates && dropoffCoordinates) {
-                mapInstance.fitBounds([
-                    pickupCoordinates, dropoffCoordinates
-                ], { padding: 60 });
-            }
-
-            const handleWebSocketMessage = (event) => {
-                const data = JSON.parse(event.data);
-                if (data.action === 'new_trip') {
-                    if (data.pickup) {
-                        addMarker(data.pickup);
-                    }
-                    if (data.dropoff) {
-                        addMarker(data.dropoff);
-                    }
-                    if (data.pickup && data.dropoff) {
-                        mapInstance.fitBounds([
-                            data.pickup, data.dropoff
-                        ], { padding: 60 });
-                    }
+        const fetchCoordinates = async (address, setter) => {
+            if (!address) return;
+            try {
+                const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${process.env.GOOGLE_API_KEY || 'AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU'}`);
+                const data = await response.json();
+                if (data.results.length > 0) {
+                    const { lat, lng } = data.results[0].geometry.location;
+                    setter({ lat, lng });
                 }
-            };
-
-            if(messages && messages?.length > 0) {
-                messages.map((message) => {
-                    handleWebSocketMessage(message)
-                })
-                
+            } catch (error) {
+                console.error('Error fetching coordinates:', error);
             }
-           
-            return () => {
-                if (mapInstance) {
-                    mapInstance.remove(); // Clean up map instance
-                }
-            };
+        };
+
+        if (!pickupCoordinates && pickup) {
+            fetchCoordinates(pickup, setPickupCoordinates);
         }
-    }, [userLocation, pickupCoordinates, dropoffCoordinates, messages]);
 
-    return <MapWrapper id='map' />;
+        if (!dropoffCoordinates && dropoff) {
+            fetchCoordinates(dropoff, setDropoffCoordinates);
+        }
+    }, [pickup, dropoff, pickupCoordinates, dropoffCoordinates]);
+
+    useEffect(() => {
+        if (userLocation && pickupCoordinates && dropoffCoordinates) {
+            if (typeof google !== 'undefined') {
+                const mapInstance = new google.maps.Map(document.getElementById('map'), {
+                    center: userLocation,
+                    zoom: 12
+                });
+
+                const service = new google.maps.DirectionsService();
+                const renderer = new google.maps.DirectionsRenderer();
+                renderer.setMap(mapInstance);
+                setDirectionsService(service);
+                setDirectionsRenderer(renderer);
+
+                // Add markers for pickup and dropoff
+                const addMarker = (position, title) => {
+                    new google.maps.marker.AdvancedMarkerElement({
+                        position,
+                        map: mapInstance,
+                        title
+                    });
+                };
+
+                addMarker(pickupCoordinates, 'Pickup Location');
+                addMarker(dropoffCoordinates, 'Dropoff Location');
+
+                const request = {
+                    origin: new google.maps.LatLng(pickupCoordinates.lat, pickupCoordinates.lng),
+                    destination: new google.maps.LatLng(dropoffCoordinates.lat, dropoffCoordinates.lng),
+                    travelMode: 'DRIVING'
+                };
+
+                service.route(request, (result, status) => {
+                    if (status === 'OK') {
+                        renderer.setDirections(result);
+                        mapInstance.fitBounds(result.routes[0].bounds);
+                    } else {
+                        console.error('Error fetching directions:', status);
+                    }
+                });
+
+                return () => {
+                    if (mapInstance) {
+                        mapInstance.remove(); // Clean up map instance
+                    }
+                };
+            }
+        }
+    }, [userLocation, pickupCoordinates, dropoffCoordinates]);
+
+    return <MapWrapper id="map" />;
 };
 
 export default Map;

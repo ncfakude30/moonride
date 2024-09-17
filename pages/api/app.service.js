@@ -73,6 +73,16 @@ export const handlePaymentNotification = async (notificationDetails) => {
     }
 };
 
+export const getDirections = async (payload) => {
+    try {
+        const response = await apiClient.post('/directions', payload);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting directions:', error);
+        throw error;
+    }
+};
+
 // Export the WebSocket service instance
 export default {
     apiClient

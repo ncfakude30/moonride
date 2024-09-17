@@ -145,7 +145,7 @@ function Payment() {
                     <DriverProfile
                         driverName={selectedCar?.driverName || 'Unknown Driver'}
                         driverRating={selectedCar?.rating || 'N/A'}
-                        driverImage={selectedCar?.driverProfile || 'https://moonride-media.s3.amazonaws.com/moonriding.png'}
+                        driverImage={selectedCar?.driverProfile || 'https://moonride-media.s3.amazonaws.com/moonrides.png'}
                     />
                     <Details>
                         <p><strong>Pickup:</strong> {pickupPlace}</p>
@@ -153,7 +153,7 @@ function Payment() {
                         {selectedCar && (
                             <CarDetails>
                                 <Image
-                                    src={selectedCar.imgUrl || 'https://moonride-media.s3.amazonaws.com/moonriding.png'}
+                                    src={selectedCar.imgUrl || 'https://moonride-media.s3.amazonaws.com/moonrides.png'}
                                     alt={selectedCar.service || 'yes'}
                                     width={200} height={200}
                                     className='object-cover'
@@ -171,28 +171,28 @@ function Payment() {
                                 isSelected={selectedGateway === 'ozow'}
                                 onClick={() => setSelectedGateway('ozow')}
                             >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonriding.png' alt='Ozow' width={40} height={40} />
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Ozow' width={100} height={100} />
                                 <span>Ozow</span>
                             </GatewayOption>
                             <GatewayOption
                                 isSelected={selectedGateway === 'stripe'}
                                 onClick={() => setSelectedGateway('stripe')}
                             >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonriding.png' alt='Stripe' width={40} height={40} />
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Stripe' width={100} height={100} />
                                 <span>Stripe</span>
                             </GatewayOption>
                             <GatewayOption
                                 isSelected={selectedGateway === 'paypal'}
                                 onClick={() => setSelectedGateway('paypal')}
                             >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonriding.png' alt='PayPal' width={40} height={40} />
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='PayPal' width={100} height={100} />
                                 <span>PayPal</span>
                             </GatewayOption>
                             <GatewayOption
                                 isSelected={selectedGateway === 'razorpay'}
                                 onClick={() => setSelectedGateway('razorpay')}
                             >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonriding.png' alt='Razorpay' width={40} height={40} />
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Razorpay' width={100} height={100} />
                                 <span>Razorpay</span>
                             </GatewayOption>
                         </ScrollableGatewayList>

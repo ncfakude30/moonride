@@ -10,18 +10,22 @@ import { useDispatch, useSelector } from 'react-redux';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { setUser, clearUser } from '../store/reducers/authSlice';
+import Skeleton from 'react-loading-skeleton'; // Import Skeleton loader
 
 export default function Home() {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
     const router = useRouter();
-    const [isPopupOpen, setIsPopupOpen] = useState(false); // State for popup visibility
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true); // Loading state
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (!user) {
                 dispatch(clearUser());
                 router.push('/login');
+            } else {
+                setIsLoading(false); // Set loading to false once user is authenticated
             }
         });
 
@@ -45,62 +49,71 @@ export default function Home() {
 
     return (
         <Wrapper>
-            <Map />
-            <ActionItems>
-                <Header style={{ backgroundColor: '#1a1a2e' }}> {/* Dark blue color */}
-                    <Image src='https://moonride-media.s3.amazonaws.com/moon-ride.png' alt="MoonRides Logo" height={112} width={112} />
-                    <Profile>
-                        <Name>{user && user.name}</Name>
-                        <UserImage
-                            src={user && user.photoUrl}
-                            onClick={handleSignOut}
-                        />
-                    </Profile>
-                </Header>
-                <ActionButtons>
-                    <Link
-                        href={{
-                            pathname: '/search'
-                        }}
-                    >
-                        <ActionButton>
-                            <ActionButtonImage src='https://i.ibb.co/cyvcpfF/uberx.png' />
-                            <Label>Ride</Label>
-                        </ActionButton>
-                    </Link>
-                    <ActionButton onClick={handlePopupOpen}>
-                        <Badge>Coming Soon</Badge>
-                        <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/water.png'/>
-                        <Label>Water</Label>
-                    </ActionButton>
-                    <ActionButton onClick={handlePopupOpen}>
-                        <Badge>Coming Soon</Badge>
-                        <ActionButtonImage src='https://i.ibb.co/n776JLm/bike.png'/>
-                        <Label>Order</Label>
-                    </ActionButton>
-                    <ActionButton onClick={handlePopupOpen}>
-                        <Badge>Coming Soon</Badge>
-                        <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/helper.png'/>
-                        <Label>Helper</Label>
-                    </ActionButton>
-                    <ActionButton onClick={handlePopupOpen}> 
-                        <Badge>Coming Soon</Badge>
-                        <ActionButtonImage src='https://i.ibb.co/5RjchBg/uberschedule.png' />
-                        <Label>Reserve</Label>
-                    </ActionButton>
-                </ActionButtons>
-                <RecentTrips user={user} />
-            </ActionItems>
-            {isPopupOpen && (
-                <PopupOverlay>
-                    <PopupCard>
-                        <PopupTitle>Coming Soon</PopupTitle>
-                        <PopupContent>
-                            We’re working hard to bring you this feature. Stay tuned for updates!
-                        </PopupContent>
-                        <CloseButton onClick={handlePopupClose}>Close</CloseButton>
-                    </PopupCard>
-                </PopupOverlay>
+            {isLoading ? (
+                <SkeletonWrapper>
+                    <Skeleton height={300} /> {/* Adjust height as needed */}
+                    <Skeleton count={5} height={50} /> {/* Adjust count and height */}
+                </SkeletonWrapper>
+            ) : (
+                <>
+                    <Map />
+                    <ActionItems>
+                        <Header style={{ backgroundColor: '#1a1a2e' }}>
+                            <Image src='https://moonride-media.s3.amazonaws.com/moon-ride.png' alt="MoonRides Logo" height={112} width={112} />
+                            <Profile>
+                                <Name>{user && user.name}</Name>
+                                <UserImage
+                                    src={user && user.photoUrl}
+                                    onClick={handleSignOut}
+                                />
+                            </Profile>
+                        </Header>
+                        <ActionButtons>
+                            <Link
+                                href={{
+                                    pathname: '/search'
+                                }}
+                            >
+                                <ActionButton>
+                                    <ActionButtonImage src='https://i.ibb.co/cyvcpfF/uberx.png' />
+                                    <Label>Ride</Label>
+                                </ActionButton>
+                            </Link>
+                            <ActionButton onClick={handlePopupOpen}>
+                                <Badge>Coming Soon</Badge>
+                                <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/water.png'/>
+                                <Label>Water</Label>
+                            </ActionButton>
+                            <ActionButton onClick={handlePopupOpen}>
+                                <Badge>Coming Soon</Badge>
+                                <ActionButtonImage src='https://i.ibb.co/n776JLm/bike.png'/>
+                                <Label>Order</Label>
+                            </ActionButton>
+                            <ActionButton onClick={handlePopupOpen}>
+                                <Badge>Coming Soon</Badge>
+                                <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/helper.png'/>
+                                <Label>Helper</Label>
+                            </ActionButton>
+                            <ActionButton onClick={handlePopupOpen}> 
+                                <Badge>Coming Soon</Badge>
+                                <ActionButtonImage src='https://i.ibb.co/5RjchBg/uberschedule.png' />
+                                <Label>Reserve</Label>
+                            </ActionButton>
+                        </ActionButtons>
+                        <RecentTrips user={user} />
+                    </ActionItems>
+                    {isPopupOpen && (
+                        <PopupOverlay>
+                            <PopupCard>
+                                <PopupTitle>Coming Soon</PopupTitle>
+                                <PopupContent>
+                                    We’re working hard to bring you this feature. Stay tuned for updates!
+                                </PopupContent>
+                                <CloseButton onClick={handlePopupClose}>Close</CloseButton>
+                            </PopupCard>
+                        </PopupOverlay>
+                    )}
+                </>
             )}
         </Wrapper>
     );
@@ -109,6 +122,10 @@ export default function Home() {
 const Wrapper = tw.div`
     flex flex-col h-screen
     bg-gradient-to-b from-[#0f0f3f] to-[#0a0a1a] // Night sky gradient with dark blue tones
+`;
+
+const SkeletonWrapper = tw.div`
+    flex flex-col items-center justify-center h-full
 `;
 
 const ActionItems = tw.div`

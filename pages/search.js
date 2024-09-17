@@ -1,16 +1,14 @@
-// components/Search.js
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import tw from 'tailwind-styled-components';
 import Link from 'next/link';
 import { loadGoogleMaps } from '../src/util/loadGoogleMaps'; // Import the utility
 import { useSelector, useDispatch } from 'react-redux';
-import { setPickup, setDropoff } from '../store/reducers/searchSlice'; // Adjust import according to your actions
-import { setPickupCoordinates, setDropoffCoordinates } from '../store/reducers/confirmationSlice'; // Adjust import according to your actions
+import { setPickup, setDropoff } from '../store/reducers/searchSlice';
+import { setPickupCoordinates, setDropoffCoordinates } from '../store/reducers/confirmationSlice';
 
 function Search() {
     const router = useRouter();
-
     const dispatch = useDispatch();
     const pickup = useSelector((state) => state.search.pickup);
     const dropoff = useSelector((state) => state.search.dropoff);
@@ -19,9 +17,9 @@ function Search() {
     const [map, setMap] = useState(null);
     const [pickupMarker, setPickupMarker] = useState(null);
     const [dropoffMarker, setDropoffMarker] = useState(null);
-    const [userLocationMarker, setUserLocationMarker] = useState(null); // State for user's real-time location marker
-    const [polyline, setPolyline] = useState(null); // State for polyline
-    const [isPopupOpen, setIsPopupOpen] = useState(false); // State for popup visibility
+    const [userLocationMarker, setUserLocationMarker] = useState(null);
+    const [polyline, setPolyline] = useState(null);
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
 
     useEffect(() => {
         if (!user) {
@@ -30,18 +28,17 @@ function Search() {
         }
 
         const initializeMap = async () => {
-            const googleMaps = await loadGoogleMaps('AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU'); // Replace with your Google Maps API Key
+            const googleMaps = await loadGoogleMaps('AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU');
             const mapContainer = document.getElementById('map');
             if (mapContainer) {
                 const newMap = new googleMaps.Map(mapContainer, {
                     center: { lat: -34.397, lng: 150.644 },
-                    zoom: 15, // Adjusted zoom level for better visibility
+                    zoom: 15,
                 });
 
                 const autocompletePickup = new googleMaps.places.Autocomplete(
                     document.getElementById('pickup')
                 );
-
                 const autocompleteDropoff = new googleMaps.places.Autocomplete(
                     document.getElementById('dropoff')
                 );
@@ -49,7 +46,7 @@ function Search() {
                 autocompletePickup.addListener('place_changed', () => {
                     const place = autocompletePickup.getPlace();
                     if (place.geometry) {
-                        dispatch(setPickup(place.formatted_address)); // Update Redux state
+                        dispatch(setPickup(place.formatted_address));
                         const marker = new googleMaps.Marker({
                             position: place.geometry.location,
                             map: newMap,
@@ -64,7 +61,7 @@ function Search() {
                 autocompleteDropoff.addListener('place_changed', () => {
                     const place = autocompleteDropoff.getPlace();
                     if (place.geometry) {
-                        dispatch(setDropoff(place.formatted_address)); // Update Redux state
+                        dispatch(setDropoff(place.formatted_address));
                         const marker = new googleMaps.Marker({
                             position: place.geometry.location,
                             map: newMap,
@@ -78,7 +75,6 @@ function Search() {
 
                 setMap(newMap);
 
-                // Check if the Geolocation API is available
                 if (navigator.geolocation) {
                     navigator.geolocation.watchPosition(
                         (position) => {
@@ -92,8 +88,8 @@ function Search() {
                                 const marker = new googleMaps.Marker({
                                     position: userLatLng,
                                     map: newMap,
-                                    title: user?.displayName || 'Address',
-                                    icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png', // Custom icon
+                                    title: user?.displayName || 'Your Location',
+                                    icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
                                 });
                                 setUserLocationMarker(marker);
                             }
@@ -117,7 +113,16 @@ function Search() {
         if (!map) {
             initializeMap();
         }
-    }, [user, pickup, dropoff, pickupMarker, ]);
+    }, [user, pickup, dropoff, pickupMarker, map, router, userLocationMarker, dispatch]);
+
+    useEffect(() => {
+        if (pickupMarker && dropoffMarker) {
+            const pickupLocation = pickupMarker.getPosition();
+            const dropoffLocation = dropoffMarker.getPosition();
+            dispatch(setPickupCoordinates([pickupLocation.lat(), pickupLocation.lng()]));
+            dispatch(setDropoffCoordinates([dropoffLocation.lat(), dropoffLocation.lng()]));
+        }
+    }, [pickupMarker, dropoffMarker, dispatch]);
 
     const updatePolyline = () => {
         const googleMaps = window.google.maps;
@@ -149,13 +154,6 @@ function Search() {
     const handlePopupClose = () => {
         setIsPopupOpen(false);
     };
-
-    // Extract coordinates for query parameters
-    const pickupLocation = pickupMarker ? pickupMarker.getPosition() : null;
-    const dropoffLocation = dropoffMarker ? dropoffMarker.getPosition() : null;
-
-    dispatch(setPickupCoordinates([pickupLocation ? pickupLocation.lat() : 0, pickupLocation ? pickupLocation.lng() : 0]))
-    dispatch(setDropoffCoordinates([dropoffLocation ? dropoffLocation.lat() : 0, dropoffLocation ? dropoffLocation.lng() : 0]))
 
     return (
         <Wrapper>

@@ -12,9 +12,10 @@ function Confirm() {
     const router = useRouter();
     const dispatch = useDispatch();
     
-    const { selectedCar, loading, pickupCoordinates, dropoffCoordinates} = useSelector(state => state.confirmation);
+    const { selectedCar, loading, pickupCoordinates, dropoffCoordinates } = useSelector(state => state.confirmation);
     const user = useSelector((state) => state.auth.user);
-    const { pickup, dropoff} = useSelector(state => state.search);
+    const { pickup, dropoff } = useSelector(state => state.search);
+    const [defaultCar, setDefaultCar] = useState(null);
 
     useEffect(() => {
         if (!user) {
@@ -24,64 +25,81 @@ function Confirm() {
             getPickupCoordinates(pickup);
             getDropoffCoordinates(dropoff);
         }
-    }, );
+    }, [user, router, pickupCoordinates, dropoffCoordinates, pickup, dropoff]);
 
     useEffect(() => {
         if (pickupCoordinates?.length > 0 && dropoffCoordinates?.length > 0) {
             setLoading(false);
         }
-    }, [pickupCoordinates, dropoffCoordinates, loading, selectedCar]);
+    }, [pickupCoordinates, dropoffCoordinates, loading]);
+
+    useEffect(() => {
+        if (defaultCar) {
+            dispatch(setSelectedCar(defaultCar));
+        }
+    }, [defaultCar, dispatch]);
 
     const getPickupCoordinates = async (pickup) => {
         try {
-            dispatch(setLoading(true))
-            const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${pickup}.json?` + 
+            dispatch(setLoading(true));
+            const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?` + 
                 new URLSearchParams({
-                    access_token: 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ',
-                    limit: 1,
+                    address: pickup,
+                    key: process.env.GOOGLE_API_KEY || 'AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU',
                 })
             );
             const data = await response.json();
-            if (data.features.length > 0) {
-                dispatch(setPickupCoordinates(data.features[0].center));
+            if (data.results.length > 0) {
+                dispatch(setPickupCoordinates([
+                    data.results[0].geometry.location.lat,
+                    data.results[0].geometry.location.lng
+                ]));
             } else {
                 console.error('No results found for pickup location');
             }
         } catch (error) {
             console.error('Error fetching pickup coordinates:', error);
-        } finally{
-            dispatch(setLoading(false))
+        } finally {
+            dispatch(setLoading(false));
         }
     };
 
     const getDropoffCoordinates = async (dropoff) => {
         try {
-            dispatch(setLoading(true))
-            const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${dropoff}.json?` + 
+            dispatch(setLoading(true));
+            const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?` + 
                 new URLSearchParams({
-                    access_token: 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ',
-                    limit: 1,
+                    address: dropoff,
+                    key: process.env.GOOGLE_API_KEY || 'AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU',
                 })
             );
             const data = await response.json();
-            if (data.features.length > 0) {
-                dispatch(setDropoffCoordinates(data.features[0].center));
+            if (data.results.length > 0) {
+                dispatch(setDropoffCoordinates([
+                    data.results[0].geometry.location.lat,
+                    data.results[0].geometry.location.lng
+                ]));
             } else {
                 console.error('No results found for dropoff location');
             }
         } catch (error) {
             console.error('Error fetching dropoff coordinates:', error);
-        }
-        finally{
-            dispatch(setLoading(false))
+        } finally {
+            dispatch(setLoading(false));
         }
     };
 
     const handleSelectRide = (car) => {
         dispatch(setSelectedCar(car));
-        router.push({
-            pathname: '/payment',
-        });
+        setDefaultCar(car); // Set the default car when a car is selected
+    };
+
+    const handleConfirmClick = () => {
+        if (selectedCar) {
+            router.push('/payment');
+        } else {
+            alert('Please select a car before confirming.');
+        }
     };
 
     if (loading) return <p>Loading...</p>;
@@ -99,19 +117,21 @@ function Confirm() {
                 pickupCoordinates={pickupCoordinates}
                 dropoffCoordinates={dropoffCoordinates}
             />
-            <RideContainer>
-                <RideSelector
-                    pickupCoordinates={pickupCoordinates}
-                    dropoffCoordinates={dropoffCoordinates}
-                    onSelectRide={handleSelectRide}
-                    loggedUser={user}
-                />
-                <ConfirmButtonContainer>
-                    <ConfirmButton onClick={() => handleSelectRide(selectedCar)}>
-                        Confirm UberX
-                    </ConfirmButton>
-                </ConfirmButtonContainer>
-            </RideContainer>
+            <Card>
+                <RideContainer>
+                    <RideSelector
+                        pickupCoordinates={pickupCoordinates}
+                        dropoffCoordinates={dropoffCoordinates}
+                        onSelectRide={handleSelectRide}
+                        loggedUser={user}
+                    />
+                    <ConfirmButtonContainer>
+                        <ConfirmButton onClick={handleConfirmClick}>
+                            {selectedCar ? `Confirm ${selectedCar.service}` : 'Confirm Ride'}
+                        </ConfirmButton>
+                    </ConfirmButtonContainer>
+                </RideContainer>
+            </Card>
         </Wrapper>
     );
 }
@@ -119,11 +139,15 @@ function Confirm() {
 export default Confirm;
 
 const Wrapper = tw.div`
-    flex h-screen flex-col
+    flex h-screen flex-col rounded-lg shadow-lg
+`;
+
+const Card = tw.div`
+    bg-white rounded-lg shadow-lg p-4 flex flex-col flex  h-1/2
 `;
 
 const RideContainer = tw.div`
-    flex flex-col flex-1 h-1/2
+    bg-white rounded-lg shadow-lg p-4 flex flex-col flex-1 h-1/2
 `;
 
 const ConfirmButtonContainer = tw.div`
@@ -131,7 +155,9 @@ const ConfirmButtonContainer = tw.div`
 `;
 
 const ConfirmButton = tw.div`
-    bg-black text-white my-4 mx-4 py-4 text-center text-xl
+    bg-gradient-to-r from-gray-600 to-gray-400 text-white text-center rounded-full p-4 font-semibold shadow-lg
+    hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
+    focus:outline-none focus:ring-1 focus:ring-gray-600 focus:ring-opacity-25
 `;
 
 const BackButtonContainer = tw.div`

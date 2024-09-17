@@ -93,19 +93,20 @@ function RecentTrips() {
                                     </Detail>
                                     <Detail>
                                         <Label>Price:</Label>
-                                        <Value>R{trip?.price}</Value>
+                                        <Value>R{trip?.price || 0}</Value>
                                     </Detail>
-                                </TripDetails>
-                                
-                                <DriverProfile>
+                                    <DriverProfile>
                                     <Image
-                                        src={trip.driverProfile || 'https://moonride-media.s3.amazonaws.com/moonriding.png'}
+                                        src={trip.driverProfile || 'https://moonride-media.s3.amazonaws.com/moonrides.png'}
                                         alt="Driver"
                                         width={50}
                                         height={50}
                                         className="rounded-full border-2 border-gray-300"
                                     />
                                 </DriverProfile>
+                                </TripDetails>
+                                
+                                
                             </TripCard>
                         </Link>
                     ))}
@@ -188,7 +189,7 @@ const Value = tw.span`
 `;
 
 const DriverProfile = tw.div`
-    absolute right-4 bottom-4 flex items-center justify-center
+    absolute right-4 justify-center flex items-center justify-center
 `;
 
 const LoadingMessage = tw.div`

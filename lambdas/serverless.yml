@@ -154,6 +154,20 @@ functions:
       - websocket:
           route: $default
 
+  getDirections:
+    handler: map/directions.handler
+    environment:
+      GOOGLE_API_KEY: AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU
+    events:
+      - http:
+          path: directions
+          method: post
+          cors:
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
+
 resources:
   Resources:
     TripsTable:
