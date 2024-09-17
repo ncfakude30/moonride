@@ -9,7 +9,7 @@ WORKDIR /app
 
 # Install Node.js dependencies
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --prefer-offline --production
+RUN npm install --legacy-peer-deps --no-audit --prefer-offline --production
 
 # Copy the application code
 COPY . .
@@ -17,8 +17,8 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Python build stage
-FROM public.ecr.aws/lambda/python:3.9 AS python-builder
+# Use the official AWS Lambda base image for Python
+FROM public.ecr.aws/lambda/python:3.9
 
 # Set the working directory inside the container
 WORKDIR /var/task
@@ -31,10 +31,10 @@ RUN python -m pip install --upgrade pip
 COPY lambdas/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy Lambda function code into the container
+# Copy the Lambda function code into the container
 COPY lambdas /var/task
 
-# Final production image
+# Production image
 FROM node:18-alpine
 
 # Set the working directory
@@ -48,7 +48,7 @@ COPY --from=builder /app/package.json /app/package-lock.json /app/
 # Install production dependencies
 RUN npm ci --production --no-audit --prefer-offline --no-optional
 
-# Copy Python Lambda dependencies
+# Copy Lambda package
 COPY --from=python-builder /var/task /var/task
 
 # Expose the port the app runs on
