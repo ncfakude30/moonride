@@ -59,7 +59,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
             try {
                
                 const response =  await getDirections({
-                     origin : `${pickupCoordinates[0]},${pickupCoordinates[1]}`,
+                    origin : `${pickupCoordinates[0]},${pickupCoordinates[1]}`,
                     destination: `${dropoffCoordinates[0]},${dropoffCoordinates[1]}`,
                 });
 
@@ -121,7 +121,7 @@ const Wrapper = tw.div`
 `;
 
 const Title = tw.h2`
-    text-gray-500 text-center text-xs py-2 border-b
+    font-seminbold text-gray-500 text-center text-xs py-2 border-b
 `;
 
 const CarList = tw.div`
