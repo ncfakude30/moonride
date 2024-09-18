@@ -97,7 +97,7 @@ function RecentTrips() {
                                     </Detail>
                                     <DriverProfile>
                                     <Image
-                                        src={trip.driverProfile || 'https://moonride-media.s3.amazonaws.com/moonrides.png'}
+                                        src={trip.driverProfile || 'https://moonride-media.s3.amazonaws.com/default.png'}
                                         alt="Driver"
                                         width={50}
                                         height={50}

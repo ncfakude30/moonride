@@ -153,7 +153,7 @@ function Payment() {
                 <DriverProfile
                         driverName={selectedCar?.driverName || 'Unknown Driver'}
                         driverRating={selectedCar?.rating || 'N/A'}
-                        driverImage={selectedCar?.driverProfile || 'https://moonride-media.s3.amazonaws.com/moonrides.png'}
+                        driverImage={selectedCar?.driverProfile || 'https://moonride-media.s3.amazonaws.com/default.png'}
                     />
                     <Details>
                         <p><strong>Pickup:</strong> {pickupPlace}</p>
