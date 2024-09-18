@@ -22,6 +22,7 @@ function Payment() {
     const [loading, setLoading] = useState(false);
     const [selectedGateway, setSelectedGateway] = useState('');
     const { pickup, dropoff } = useSelector(state => state.search);
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
 
     useEffect(() => {
         if (!user) {
@@ -68,7 +69,7 @@ function Payment() {
 
     const handlePayment = async () => {
         if (!selectedGateway) {
-            alert('Please select a payment gateway.');
+            handlePopupOpen();
             return;
         }
 
@@ -128,6 +129,14 @@ function Payment() {
         }
     };
 
+    const handlePopupOpen = () => {
+        setIsPopupOpen(true);
+    };
+
+    const handlePopupClose = () => {
+        setIsPopupOpen(false);
+    };
+
     return (
         <Wrapper>
             <BackButtonContainer>
@@ -141,8 +150,7 @@ function Payment() {
                 </BackButton>
             </BackButtonContainer>
             <Content>
-                <Card>
-                    <DriverProfile
+                <DriverProfile
                         driverName={selectedCar?.driverName || 'Unknown Driver'}
                         driverRating={selectedCar?.rating || 'N/A'}
                         driverImage={selectedCar?.driverProfile || 'https://moonride-media.s3.amazonaws.com/moonrides.png'}
@@ -171,28 +179,28 @@ function Payment() {
                                 isSelected={selectedGateway === 'ozow'}
                                 onClick={() => setSelectedGateway('ozow')}
                             >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Ozow' width={100} height={100} />
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Ozow' width={150} height={150} />
                                 <span>Ozow</span>
                             </GatewayOption>
                             <GatewayOption
                                 isSelected={selectedGateway === 'stripe'}
                                 onClick={() => setSelectedGateway('stripe')}
                             >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Stripe' width={100} height={100} />
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Stripe' width={150} height={150} />
                                 <span>Stripe</span>
                             </GatewayOption>
                             <GatewayOption
                                 isSelected={selectedGateway === 'paypal'}
                                 onClick={() => setSelectedGateway('paypal')}
                             >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='PayPal' width={100} height={100} />
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='PayPal' width={150} height={150} />
                                 <span>PayPal</span>
                             </GatewayOption>
                             <GatewayOption
                                 isSelected={selectedGateway === 'razorpay'}
                                 onClick={() => setSelectedGateway('razorpay')}
                             >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Razorpay' width={100} height={100} />
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Razorpay' width={200} height={200} />
                                 <span>Razorpay</span>
                             </GatewayOption>
                         </ScrollableGatewayList>
@@ -207,8 +215,19 @@ function Payment() {
                             {loading ? 'Processing...' : 'Confirm Payment'}
                         </Button>
                     )}
-                </Card>
+                    {isPopupOpen && (
+                        <PopupOverlay>
+                            <PopupCard>
+                                <PopupTitle>Payment</PopupTitle>
+                                <PopupContent>
+                                Please select a payment provider, to continue with payment!
+                                </PopupContent>
+                                <CloseButton onClick={handlePopupClose}>Close</CloseButton>
+                            </PopupCard>
+                        </PopupOverlay>
+                    )}
             </Content>
+            
         </Wrapper>
     );
 }
@@ -227,12 +246,19 @@ const DriverProfile = ({ driverName, driverRating, driverImage }) => (
 );
 
 const Wrapper = tw.div`
-    flex flex-col items-center justify-center h-screen p-4
+    relative bg-gray-100 p-4 rounded-lg shadow-lg w-full h-full flex flex-col
 `;
 
 
 const Content = tw.div`
-    flex-1 p-6
+    flex-1 p-6 mt-16 
+`;
+const BackButtonContainer = tw.div`
+    absolute rounded-full top-4 left-4 z-10 bg-white shadow-md cursor-pointer justify-start
+`;
+
+const BackButton = tw.div`
+    relative h-12 w-12
 `;
 
 const Card = tw.div`
@@ -296,11 +322,26 @@ const LoadingMessage = tw.p`
     text-blue-600 mt-4
 `;
 
-const BackButtonContainer = tw.div`
-    absolute rounded-full top-4 left-4 z-10 bg-white shadow-md cursor-pointer
+
+const PopupOverlay = tw.div`
+    fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20
 `;
 
-const BackButton = tw.div`
-    relative h-12 w-12
+const PopupCard = tw.div`
+    bg-white rounded-lg shadow-lg p-6 w-80 max-w-full text-center
 `;
 
+const PopupTitle = tw.h2`
+    text-xl font-bold mb-4
+`;
+
+const PopupContent = tw.p`
+    text-gray-700 mb-6
+`;
+
+const CloseButton = tw.button`
+    bg-gradient-to-r from-gray-600 to-gray-400 text-white rounded-full p-2 font-semibold shadow-lg
+    hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
+    focus:outline-none focus:ring-1 focus:ring-gray-500
+    w-full max-w-xs
+`;
