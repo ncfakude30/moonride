@@ -175,7 +175,7 @@ function Payment() {
                     </Details>
 
                     <PaymentGatewaySelection>
-                        <p><strong>Select Payment Gateway:</strong></p>
+                        <p><strong>Payment option:</strong></p>
                         <ScrollableGatewayList>
                             <GatewayOption
                                 isSelected={selectedGateway === 'cash'}
@@ -185,8 +185,8 @@ function Payment() {
                                 <PaymentTitle>Cash</PaymentTitle>
                             </GatewayOption>
                             <GatewayOption
-                                isSelected={selectedGateway === 'ozow'}
-                                onClick={() => setSelectedGateway('ozow')}
+                                isSelected={selectedGateway === 'instant EFT'}
+                                onClick={() => setSelectedGateway('instant EFT')}
                             >
                                 <DriverImage src='https://moonride-media.s3.amazonaws.com/ozow.png' alt='Ozow' width={50} height={50} />
                                 <PaymentTitle>Ozow</PaymentTitle>
@@ -200,7 +200,7 @@ function Payment() {
                         <LoadingMessage>Processing payment, please wait...</LoadingMessage>
                     ) : (
                         <Button onClick={handlePayment} disabled={loading}>
-                            {loading ? 'Processing...' : 'Confirm Payment'}
+                            {loading ? 'Processing...' : selectedGateway ? `Confirm ${selectedGateway.charAt(0).toUpperCase() + selectedGateway.slice(1)}` : 'Confirm Payment'}
                         </Button>
                     )}
                     {isPopupOpen && (
@@ -208,14 +208,13 @@ function Payment() {
                             <PopupCard>
                                 <PopupTitle>Payment</PopupTitle>
                                 <PopupContent>
-                                Please select a payment provider, to continue with payment!
+                                Please select a payment option, to continue with payment!
                                 </PopupContent>
                                 <CloseButton onClick={handlePopupClose}>Close</CloseButton>
                             </PopupCard>
                         </PopupOverlay>
                     )}
             </Content>
-            
         </Wrapper>
     );
 }
@@ -236,7 +235,6 @@ const DriverProfile = ({ driverName, driverRating, driverImage }) => (
 const Wrapper = tw.div`
     relative bg-gray-100 p-4 rounded-lg shadow-lg w-full h-full flex flex-col
 `;
-
 
 const Content = tw.div`
     flex-1 p-6 mt-16 
@@ -261,29 +259,34 @@ const CarDetails = tw.div`
     flex items-center space-x-4
 `;
 
+const DirectionsContainer = tw.div`
+    flex-1 ml-4
+`;
+
+const PaymentGatewaySelection = tw.div`
+    flex flex-col mb-4
+`;
 
 const ScrollableGatewayList = tw.div`
     flex overflow-x-scroll space-x-4
 `;
 
 const GatewayOption = tw.div`
-    flex flex-col items-center justify-center p-4 cursor-pointer rounded-lg shadow-md 
-    transition-all duration-300 ease-in-out transform hover:scale-105 
-    ${(props) => props.isSelected ? 'bg-blue-500 text-white' : 'bg-white-200'}
+    flex flex-col items-center cursor-pointer border-2 rounded-lg p-2
+    ${(p) => (p.isSelected ? 'border-green-500 bg-green-100' : 'border-gray-300')}
 `;
+
+const PaymentTitle = tw.p`
+    text-sm mt-2
+`;
+
+
 
 const DriverImage = tw(Image)`
     rounded-full mb-2
     ${(props) => props.isSelected ? 'border-4 border-white' : 'border-2 border-gray-300'}
 `;
 
-const PaymentTitle = tw.h2`
-text-s font-semibold mb-2
-`;
-
-const PaymentGatewaySelection = tw.div`
-    mb-4
-`;
 
 const ProfileWrapper = tw.div`
     flex items-center space-x-4 mb-4
@@ -293,8 +296,8 @@ const DriverInfo = tw.div`
     flex flex-col
 `;
 
-const DirectionsContainer = tw.div`
-flex flex-col
+const DriverDetails = tw.div`
+    flex flex-col justify-center
 `;
 
 const DriverName = tw.p`
@@ -305,20 +308,22 @@ const DriverRating = tw.p`
     text-sm text-gray-600
 `;
 
+
 const Button = tw.button`
-    bg-gradient-to-r from-gray-600 to-gray-400 text-white rounded-full py-3 px-6 font-bold w-full mt-4 disabled:opacity-50
+    py-2 px-4 bg-gradient-to-r from-gray-600 to-gray-400 text-white rounded-full py-3 px-6 font-bold w-full mt-4 disabled:opacity-50
+    ${(p) => (p.disabled ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-gray-600')}
 `;
 
-const SuccessMessage = tw.p`
-    text-green-600 mt-4
+const SuccessMessage = tw.div`
+    text-lg text-green-600 font-semibold mt-4
 `;
 
-const ErrorMessage = tw.p`
-    text-red-600 mt-4
+const ErrorMessage = tw.div`
+    text-lg text-red-600 font-semibold mt-4
 `;
 
-const LoadingMessage = tw.p`
-    text-blue-600 mt-4
+const LoadingMessage = tw.div`
+    text-lg font-semibold mt-4
 `;
 
 
@@ -344,4 +349,3 @@ const CloseButton = tw.button`
     focus:outline-none focus:ring-1 focus:ring-gray-500
     w-full max-w-xs
 `;
-
