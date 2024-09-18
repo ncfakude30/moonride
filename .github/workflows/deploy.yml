@@ -29,7 +29,9 @@ jobs:
         run: |
           rm -rf node_modules
           npm install --legacy-peer-deps
-          npm install serverless --legacy-peer-deps
+
+      - name: Install Serverless globally
+        run: npm install -g serverless
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -37,22 +39,20 @@ jobs:
           python-version: '3.9'
 
       - name: Clean Python environment
-        working-directory: ./lambdas
         run: |
-          rm -rf venv # Ensure that no old environment exists
+          rm -rf venv  # Ensure that no old environment exists
           rm -rf .serverless
 
       - name: Install Python dependencies
-        working-directory: ./lambdas
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r lambdas/requirements.txt
 
       - name: Deploy Moonrides Backend
-        working-directory: ./lambdas
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: |
+          source venv/bin/activate  # Activate Python environment
           npx serverless deploy --verbose
