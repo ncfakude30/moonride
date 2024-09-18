@@ -168,7 +168,7 @@ function Payment() {
                                 />
                                 <DirectionsContainer>
                                 <p><strong>Service:</strong> {selectedCar.service}</p>
-                                <p><strong>Price:</strong> {selectedCar.price}</p>
+                                <p><strong>Price:</strong>R {selectedCar.price || '10'}</p>
                                 </DirectionsContainer>
                             </CarDetails>
                         )}
@@ -181,14 +181,14 @@ function Payment() {
                                 isSelected={selectedGateway === 'cash'}
                                 onClick={() => setSelectedGateway('cash')}
                             >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Cash' width={50} height={50} />
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/cash.png' alt='Cash' width={50} height={50} />
                                 <PaymentTitle>Cash</PaymentTitle>
                             </GatewayOption>
                             <GatewayOption
                                 isSelected={selectedGateway === 'ozow'}
                                 onClick={() => setSelectedGateway('ozow')}
                             >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Ozow' width={50} height={50} />
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/ozow.png' alt='Ozow' width={50} height={50} />
                                 <PaymentTitle>Ozow</PaymentTitle>
                             </GatewayOption>
                         </ScrollableGatewayList>
