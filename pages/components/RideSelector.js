@@ -40,6 +40,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
     const currency = useSelector((state) => state.ride.currency);
     const [rideDuration, setRideDuration] = useState(0);
     const [drivers, setDrivers] = useState([]); // State for fetched drivers
+    const [loading, setLoading] = useState(true); // Loading state for drivers
 
     useEffect(() => {
         const fetchCurrency = async () => {
@@ -83,11 +84,14 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
 
     useEffect(() => {
         const fetchCars = async () => {
+            setLoading(true); // Start loading
             try {
                 const fetchedDrivers = await fetchDrivers(pickupCoordinates); // Fetch drivers from Lambda
                 setDrivers(fetchedDrivers);
             } catch (error) {
                 console.error('Error fetching drivers:', error);
+            } finally {
+                setLoading(false); // End loading
             }
         };
 
@@ -102,22 +106,29 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
     return (
         <Wrapper>
             <Title>Choose a ride, or swipe up for more</Title>
-            <CarList>
-                {(drivers?.length > 0 ? drivers : carList).map((car, index) => (
-                    <Car
-                        key={index}
-                        onClick={() => handleCarClick(car)}
-                        selected={selectedCar?.service === car.service}
-                    >
-                        <CarImage src={car?.imgUrl} />
-                        <CarDetails>
-                            <CarName>{car.service}</CarName>
-                            <CarDuration>{`${rideDuration.toFixed(0)} minutes`}</CarDuration>
-                        </CarDetails>
-                        <CarPrice>{currency === 'ZAR' ? 'R' : '$'}{(rideDuration * car?.multiplier).toFixed(2)}</CarPrice>
-                    </Car>
-                ))}
-            </CarList>
+            {loading ? (
+                <LoadingWrapper>
+                    <Loader />
+                    <LoadingMessage>Please wait, looking for drivers...</LoadingMessage>
+                </LoadingWrapper>
+            ) : (
+                <CarList>
+                    {(drivers?.length > 0 ? drivers : carList).map((car, index) => (
+                        <Car
+                            key={index}
+                            onClick={() => handleCarClick(car)}
+                            selected={selectedCar?.service === car.service}
+                        >
+                            <CarImage src={car?.imgUrl} />
+                            <CarDetails>
+                                <CarName>{car.service}</CarName>
+                                <CarDuration>{`${rideDuration.toFixed(0)} minutes`}</CarDuration>
+                            </CarDetails>
+                            <CarPrice>{currency === 'ZAR' ? 'R' : '$'}{(rideDuration * car?.multiplier).toFixed(2)}</CarPrice>
+                        </Car>
+                    ))}
+                </CarList>
+            )}
         </Wrapper>
     );
 }
@@ -142,7 +153,7 @@ const CarDuration = tw.p`
 `;
 
 const Title = tw.div`
-text-gray-500 text-center text-xs py-2 border-b
+text-gray-500 text-center text-xs font-semibold py-2 border-b
 `;
 
 const CarList = tw.div`
@@ -160,4 +171,17 @@ h-14 mr-4
 
 const CarDetails = tw.div`
 flex-1
+`;
+
+const LoadingWrapper = tw.div`
+flex flex-col items-center justify-center py-6
+`;
+
+const LoadingMessage = tw.div`
+text-gray-500 text-center py-4 text-center text-xs py-2 border-b
+`;
+
+// Animated Loader (CSS keyframes)
+const Loader = tw.div`
+w-16 h-16 border-4 border-dashed rounded-full animate-spin border-gray-500
 `;

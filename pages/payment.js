@@ -297,10 +297,10 @@ const LoadingMessage = tw.p`
 `;
 
 const BackButtonContainer = tw.div`
-    flex flex-row items-center justify-start p-3 w-full
+    absolute rounded-full top-4 left-4 z-10 bg-white shadow-md cursor-pointer
 `;
 
 const BackButton = tw.div`
-    relative w-10 h-10 cursor-pointer
+    relative h-12 w-12
 `;
 
