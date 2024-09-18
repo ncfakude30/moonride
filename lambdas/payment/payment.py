@@ -7,11 +7,11 @@ from uuid import uuid4
 from datetime import datetime, timedelta
 
 PAYMENT_TABLE = os.getenv('TRANSACTIONS_TABLE', 'TransactionsTable')
-OZOW_API_URL = os.getenv('OZOW_API_URL', 'https://api.ozow.com/payments/create')
-OZOW_SITE_CODE = os.getenv('OZOW_SITE_CODE', 'your_site_code')
-OZOW_API_KEY = os.getenv('OZOW_API_KEY', 'your_api_key')
-OZOW_PRIVATE_KEY = os.getenv('OZOW_PRIVATE_KEY', 'your_api_key')
-OZOW_SECRET = os.getenv('OZOW_SECRET', 'your_secret')
+OZOW_API_URL = os.getenv('OZOW_API_URL', 'https://api.ozow.com')
+OZOW_SITE_CODE = os.getenv('OZOW_SITE_CODE', 'NCF-NCF-001')
+OZOW_API_KEY = os.getenv('OZOW_API_KEY', '667a79c009bd458c866666d98d8b2a75')
+OZOW_PRIVATE_KEY = os.getenv('OZOW_PRIVATE_KEY', '9bc47fe01bbe475a9995a887dcb1e73a')
+OZOW_SECRET = os.getenv('OZOW_SECRET', '9bc47fe01bbe475a9995a887dcb1e73a')
 SUCCESS_URL = os.getenv('SUCCESS_URL', 'https://www.moonride.co.za/success')
 CANCEL_URL = os.getenv('CANCEL_URL', 'https://www.moonride.co.za/cancel')
 NOTIFY_URL = os.getenv('NOTIFY_URL', 'https://www.moonride.co.za/notify')

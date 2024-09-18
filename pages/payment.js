@@ -269,7 +269,7 @@ const ScrollableGatewayList = tw.div`
 const GatewayOption = tw.div`
     flex flex-col items-center justify-center p-4 cursor-pointer rounded-lg shadow-md 
     transition-all duration-300 ease-in-out transform hover:scale-105 
-    ${(props) => props.isSelected ? 'bg-blue-500 text-white' : 'bg-gray-200'}
+    ${(props) => props.isSelected ? 'bg-blue-500 text-white' : 'bg-white-200'}
 `;
 
 const DriverImage = tw(Image)`
@@ -278,7 +278,7 @@ const DriverImage = tw(Image)`
 `;
 
 const PaymentTitle = tw.h2`
-text-lg font-semibold mb-4
+text-s font-semibold mb-2
 `;
 
 const PaymentGatewaySelection = tw.div`
