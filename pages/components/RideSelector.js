@@ -103,9 +103,10 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
                         <CarImage src={car?.imgUrl} />
                         <CarDetails>
                             <CarName>{car.service}</CarName>
-                            <CarPrice>{currency === 'ZAR' ? 'R' : '$'}{(rideDuration * car?.multiplier).toFixed(2)}</CarPrice>
+                            
                             <CarDuration>{`${rideDuration.toFixed(0)} minutes`}</CarDuration>
                         </CarDetails>
+                        <CarPrice>{currency === 'ZAR' ? 'R' : '$'}{(rideDuration * car?.multiplier).toFixed(2)}</CarPrice>
                     </Car>
                 ))}
             </CarList>
@@ -120,35 +121,44 @@ const Wrapper = tw.div`
     flex-1 overflow-y-scroll flex flex-col
 `;
 
-const Title = tw.h2`
-    font-seminbold text-gray-500 text-center text-xs py-2 border-b
-`;
-
-const CarList = tw.div`
-    overflow-y-scroll
-`;
-
-const Car = tw.div`
-    flex items-center p-4 cursor-pointer
-    ${({ selected }) => selected && tw`bg-gray-200 border-2 border-blue-500`}
-`;
-
-const CarImage = tw.img`
-    h-14 mr-4 rounded-full object-cover mr-4
-`;
-
-const CarDetails = tw.div`
-    flex-1
-`;
-
 const CarName = tw.h3`
     font-medium
 `;
 
-const CarPrice = tw.p`
-    text-sm
+const CarPrice = tw.div`
+text-sm
 `;
 
 const CarDuration = tw.p`
     text-xs text-blue-500
 `;
+
+const Title = tw.div`
+text-gray-500 text-center text-xs py-2 border-b
+`;
+
+const CarList = tw.div`
+overflow-y-scroll
+`;
+
+const Car = tw.div`
+flex p-4 items-center cursor-pointer
+${(selected) => selected&& tw`bg-gray-200 border-2 border-blue-500`}
+`;
+
+const CarImage = tw.img`
+h-14 mr-4
+`;
+
+const CarDetails = tw.div`
+flex-1
+`;
+
+const Service = tw.div`
+font-medium
+`;
+
+const Time = tw.div`
+text-xs text-blue-500
+`;
+
