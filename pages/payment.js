@@ -189,7 +189,7 @@ function Payment() {
                                 onClick={() => setSelectedGateway('instant EFT')}
                             >
                                 <DriverImage src='https://moonride-media.s3.amazonaws.com/ozow.png' alt='Ozow' width={50} height={50} />
-                                <PaymentTitle>Ozow</PaymentTitle>
+                                <PaymentTitle>Instant EFT</PaymentTitle>
                             </GatewayOption>
                         </ScrollableGatewayList>
                     </PaymentGatewaySelection>
