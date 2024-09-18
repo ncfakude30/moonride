@@ -55,7 +55,7 @@ export const requestTrip = async (dto) => {
 // Payment API functions
 export const initiatePayment = async (paymentDetails) => {
     try {
-        const response = await apiClient.post('/payment/initiate', paymentDetails);
+        const response = await apiClient.post('/payment', paymentDetails);
         return response?.data; // Expecting { paymentUrl: string, paymentId: string }
     } catch (error) {
         console.error('Error initiating payment:', error);
@@ -65,7 +65,7 @@ export const initiatePayment = async (paymentDetails) => {
 
 export const handlePaymentNotification = async (notificationDetails) => {
     try {
-        const response = await apiClient.post('/payment/notify', notificationDetails);
+        const response = await apiClient.post('/notify', notificationDetails);
         return response.data; // Expecting { success: boolean, message: string }
     } catch (error) {
         console.error('Error handling payment notification:', error);

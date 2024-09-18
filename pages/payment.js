@@ -323,7 +323,7 @@ const ErrorMessage = tw.div`
 `;
 
 const LoadingMessage = tw.div`
-    text-lg font-semibold mt-4
+    text-lg text-blue-600 font-semibold mt-4
 `;
 
 
