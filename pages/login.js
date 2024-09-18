@@ -4,7 +4,7 @@ import { signInWithPopup, onAuthStateChanged } from 'firebase/auth';
 import { auth, provider } from '../firebase';
 import tw from 'tailwind-styled-components';
 import Image from 'next/image';
-import { loginApi } from './api/app.service';
+import { loginApi } from './api/api.service';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../store/reducers/authSlice';
 

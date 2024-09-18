@@ -168,6 +168,18 @@ functions:
               - Authorization
             allowCredentials: true
 
+  drivers:
+    handler: map/drivers.handler
+    events:
+      - http:
+          path: drivers
+          method: post
+          cors:
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
+
 resources:
   Resources:
     TripsTable:

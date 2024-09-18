@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import tw from 'tailwind-styled-components';
 import Image from 'next/image';
 import Link from 'next/link';
-import { fetchRecentTrips } from '../api/app.service';
+import { fetchRecentTrips } from '../api/api.service';
 import { setTrips, appendTrips, setLoading, setError } from '../../store/reducers/tripSlice';
 
 function RecentTrips() {

@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import tw from 'tailwind-styled-components';
 import { useSelector, useDispatch } from 'react-redux';
-import { requestTrip, initiatePayment } from './api/app.service';
+import { requestTrip, initiatePayment } from './api/api.service';
 import { setPaymentStatus, setPaymentResponse } from '../store/reducers/paymentSlice';
 import Image from 'next/image';
 

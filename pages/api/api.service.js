@@ -83,6 +83,17 @@ export const getDirections = async (payload) => {
     }
 };
 
+export const fetchDrivers = async (pickupCoordinates) => {
+    try {
+        const response = await apiClient.post('/drivers', { pickupCoordinates });
+        return response?.data?.drivers || []; // Ensure this matches the expected response structure
+    } catch (error) {
+        console.error('Error fetching drivers:', error);
+        return [];
+    }
+};
+
+
 // Export the WebSocket service instance
 export default {
     apiClient

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import tw from 'tailwind-styled-components';
-import { carList } from '../../data/carList';
 import { setCurrency } from '../../store/actions/rideActions';
 import { setDirectionResponse, setSelectedCar } from '../../store/reducers/confirmationSlice';
-import {getDirections} from '../api/app.service';
+import { getDirections, fetchDrivers } from '../api/app.service';
+import { carList } from '../../data/carList';
 
 // Mapping countries to currencies
 const countryToCurrency = {
@@ -39,6 +39,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
     const directionResponse = useSelector((state) => state.confirmation.directionResponse);
     const currency = useSelector((state) => state.ride.currency);
     const [rideDuration, setRideDuration] = useState(0);
+    const [drivers, setDrivers] = useState([]); // State for fetched drivers
 
     useEffect(() => {
         const fetchCurrency = async () => {
@@ -50,23 +51,18 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
     }, [dispatch]);
 
     useEffect(() => {
-        console.log(`My coordinates : ${JSON.stringify({pickupCoordinates, dropoffCoordinates})}`)
         if (pickupCoordinates.length === 0 || dropoffCoordinates.length === 0) {
             return;
         }
 
         const fetchRideDuration = async () => {
             try {
-               
-                const response =  await getDirections({
-                    origin : `${pickupCoordinates[0]},${pickupCoordinates[1]}`,
+                const response = await getDirections({
+                    origin: `${pickupCoordinates[0]},${pickupCoordinates[1]}`,
                     destination: `${dropoffCoordinates[0]},${dropoffCoordinates[1]}`,
                 });
 
                 dispatch(setDirectionResponse(response));
-                // Google Maps Directions API
-                //const response = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&key=${process.env.GOOGLE_API_KEY || 'AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU'}`);
-                console.log(`After call: ${JSON.stringify(response)}`)
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -85,6 +81,19 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
         fetchRideDuration();
     }, [pickupCoordinates, dropoffCoordinates, directionResponse, dispatch]);
 
+    useEffect(() => {
+        const fetchCars = async () => {
+            try {
+                const fetchedDrivers = await fetchDrivers(pickupCoordinates); // Fetch drivers from Lambda
+                setDrivers(fetchedDrivers);
+            } catch (error) {
+                console.error('Error fetching drivers:', error);
+            }
+        };
+
+        fetchCars();
+    }, [pickupCoordinates]);
+
     const handleCarClick = (car) => {
         dispatch(setSelectedCar(car));
         onSelectRide(car); // Notify parent component about the selected car
@@ -94,7 +103,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
         <Wrapper>
             <Title>Choose a ride, or swipe up for more</Title>
             <CarList>
-                {carList.map((car, index) => (
+                {(drivers?.length > 0 ? drivers : carList).map((car, index) => (
                     <Car
                         key={index}
                         onClick={() => handleCarClick(car)}
@@ -103,7 +112,6 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
                         <CarImage src={car?.imgUrl} />
                         <CarDetails>
                             <CarName>{car.service}</CarName>
-                            
                             <CarDuration>{`${rideDuration.toFixed(0)} minutes`}</CarDuration>
                         </CarDetails>
                         <CarPrice>{currency === 'ZAR' ? 'R' : '$'}{(rideDuration * car?.multiplier).toFixed(2)}</CarPrice>
@@ -143,7 +151,7 @@ overflow-y-scroll
 
 const Car = tw.div`
 flex p-4 items-center cursor-pointer
-${(selected) => selected&& tw`bg-gray-200 border-2 border-blue-500`}
+${(selected) => selected && tw`bg-gray-200 border-2 border-blue-500`}
 `;
 
 const CarImage = tw.img`
@@ -153,12 +161,3 @@ h-14 mr-4
 const CarDetails = tw.div`
 flex-1
 `;
-
-const Service = tw.div`
-font-medium
-`;
-
-const Time = tw.div`
-text-xs text-blue-500
-`;
-
