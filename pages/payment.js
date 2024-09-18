@@ -166,8 +166,10 @@ function Payment() {
                                     width={200} height={200}
                                     className='object-cover'
                                 />
+                                <DirectionsContainer>
                                 <p><strong>Service:</strong> {selectedCar.service}</p>
                                 <p><strong>Price:</strong> {selectedCar.price}</p>
+                                </DirectionsContainer>
                             </CarDetails>
                         )}
                     </Details>
@@ -176,32 +178,18 @@ function Payment() {
                         <p><strong>Select Payment Gateway:</strong></p>
                         <ScrollableGatewayList>
                             <GatewayOption
+                                isSelected={selectedGateway === 'cash'}
+                                onClick={() => setSelectedGateway('cash')}
+                            >
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Cash' width={50} height={50} />
+                                <paymentTitle>Cash</paymentTitle>
+                            </GatewayOption>
+                            <GatewayOption
                                 isSelected={selectedGateway === 'ozow'}
                                 onClick={() => setSelectedGateway('ozow')}
                             >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Ozow' width={150} height={150} />
-                                <span>Ozow</span>
-                            </GatewayOption>
-                            <GatewayOption
-                                isSelected={selectedGateway === 'stripe'}
-                                onClick={() => setSelectedGateway('stripe')}
-                            >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Stripe' width={150} height={150} />
-                                <span>Stripe</span>
-                            </GatewayOption>
-                            <GatewayOption
-                                isSelected={selectedGateway === 'paypal'}
-                                onClick={() => setSelectedGateway('paypal')}
-                            >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='PayPal' width={150} height={150} />
-                                <span>PayPal</span>
-                            </GatewayOption>
-                            <GatewayOption
-                                isSelected={selectedGateway === 'razorpay'}
-                                onClick={() => setSelectedGateway('razorpay')}
-                            >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Razorpay' width={200} height={200} />
-                                <span>Razorpay</span>
+                                <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Ozow' width={50} height={50} />
+                                <paymentTitle>Ozow</paymentTitle>
                             </GatewayOption>
                         </ScrollableGatewayList>
                     </PaymentGatewaySelection>
@@ -237,7 +225,7 @@ export default Payment;
 // New DriverProfile Component
 const DriverProfile = ({ driverName, driverRating, driverImage }) => (
     <ProfileWrapper>
-        <DriverImage src={driverImage} alt={`${driverName} Profile`} width={100} height={100} />
+        <DriverImage src={driverImage} alt={`${driverName} Profile`} width={80} height={80} />
         <DriverInfo>
             <DriverName>{driverName}</DriverName>
             <DriverRating>⭐ {driverRating}</DriverRating>
@@ -273,21 +261,28 @@ const CarDetails = tw.div`
     flex items-center space-x-4
 `;
 
-const PaymentGatewaySelection = tw.div`
-    mb-4
-`;
 
 const ScrollableGatewayList = tw.div`
-    flex overflow-x-scroll
+    flex overflow-x-scroll space-x-4
 `;
 
 const GatewayOption = tw.div`
-    flex items-center space-x-2 p-2 cursor-pointer
-    ${(props) => props.isSelected && 'bg-blue-100'}
+    flex flex-col items-center justify-center p-4 cursor-pointer rounded-lg shadow-md 
+    transition-all duration-300 ease-in-out transform hover:scale-105 
+    ${(props) => props.isSelected ? 'bg-blue-500 text-white' : 'bg-gray-200'}
 `;
 
 const DriverImage = tw(Image)`
-    rounded-full
+    rounded-full mb-2
+    ${(props) => props.isSelected ? 'border-4 border-white' : 'border-2 border-gray-300'}
+`;
+
+const paymentTitle = tw.h2`
+text-lg font-semibold mb-4
+`;
+
+const PaymentGatewaySelection = tw.div`
+    mb-4
 `;
 
 const ProfileWrapper = tw.div`
@@ -296,6 +291,10 @@ const ProfileWrapper = tw.div`
 
 const DriverInfo = tw.div`
     flex flex-col
+`;
+
+const DirectionsContainer = tw.div`
+flex flex-col
 `;
 
 const DriverName = tw.p`
@@ -345,3 +344,4 @@ const CloseButton = tw.button`
     focus:outline-none focus:ring-1 focus:ring-gray-500
     w-full max-w-xs
 `;
+
