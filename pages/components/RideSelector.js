@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import tw from 'tailwind-styled-components';
 import { setCurrency } from '../../store/actions/rideActions';
 import { setDirectionResponse, setSelectedCar } from '../../store/reducers/confirmationSlice';
-import { getDirections, fetchDrivers } from '../api/app.service';
+import { getDirections, fetchDrivers } from '../api/api.service';
 import { carList } from '../../data/carList';
 
 // Mapping countries to currencies
