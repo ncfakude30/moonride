@@ -182,14 +182,14 @@ function Payment() {
                                 onClick={() => setSelectedGateway('cash')}
                             >
                                 <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Cash' width={50} height={50} />
-                                <paymentTitle>Cash</paymentTitle>
+                                <PaymentTitle>Cash</PaymentTitle>
                             </GatewayOption>
                             <GatewayOption
                                 isSelected={selectedGateway === 'ozow'}
                                 onClick={() => setSelectedGateway('ozow')}
                             >
                                 <DriverImage src='https://moonride-media.s3.amazonaws.com/moonrides.png' alt='Ozow' width={50} height={50} />
-                                <paymentTitle>Ozow</paymentTitle>
+                                <PaymentTitle>Ozow</PaymentTitle>
                             </GatewayOption>
                         </ScrollableGatewayList>
                     </PaymentGatewaySelection>
@@ -277,7 +277,7 @@ const DriverImage = tw(Image)`
     ${(props) => props.isSelected ? 'border-4 border-white' : 'border-2 border-gray-300'}
 `;
 
-const paymentTitle = tw.h2`
+const PaymentTitle = tw.h2`
 text-lg font-semibold mb-4
 `;
 
