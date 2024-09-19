@@ -59,9 +59,10 @@ custom:
     zip: true
     layer: true
     include:
-      - .serverless/**
+      - .serverless**
       - venv
       - .venv
+      - .requirement**
 
 functions:
   login:
