@@ -96,8 +96,8 @@ export default function Home() {
                             </ActionButton>
                             <ActionButton onClick={handlePopupOpen}> 
                                 <Badge>Coming Soon</Badge>
-                                <ActionButtonImage src='https://i.ibb.co/5RjchBg/uberschedule.png' />
-                                <Label>Reserve</Label>
+                                <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/weed.png' />
+                                <Label>Medicate</Label>
                             </ActionButton>
                         </ActionButtons>
                         <RecentTrips user={user} />

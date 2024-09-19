@@ -56,13 +56,11 @@ plugins:
 
 custom:
   pythonRequirements:
+    dockerizePip: true  # Use docker to ensure that dependencies are compatible with Lambda's environment
     zip: true
     layer: true
-    include:
-      - .serverless**
-      - venv
-      - .venv
-      - .requirement**
+    slim: true  # Removes unnecessary files like tests and documentation from the dependencies
+    invalidateCaches: true  # Ensure caching doesn't interfere with dependency resolution
 
 functions:
   login:
@@ -347,7 +345,7 @@ resources:
       Properties:
         ApiId: !Ref WebSocketApi
 
-    WebSocketApiIntegrationConnect:
+WebSocketApiIntegrationConnect:
       Type: 'AWS::ApiGatewayV2::Integration'
       Properties:
         ApiId: !Ref WebSocketApi
