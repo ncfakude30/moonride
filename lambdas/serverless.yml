@@ -65,6 +65,9 @@ custom:
 functions:
   login:
     handler: user/login.handler
+    package:
+      include:
+        - user/*
     events:
       - http:
           path: login
@@ -77,6 +80,9 @@ functions:
 
   getUser:
     handler: user/getUser.handler
+    package:
+      include:
+        - user/*
     events:
       - http:
           path: user/{userId}
@@ -89,6 +95,9 @@ functions:
 
   getRecentTrips:
     handler: ride/ride.handler
+    package:
+      include:
+        - ride/*
     events:
       - http:
           path: trips
@@ -101,6 +110,9 @@ functions:
 
   requestRide:
     handler: ride/request.handler
+    package:
+      include:
+        - ride/*
     events:
       - http:
           path: request
@@ -113,6 +125,9 @@ functions:
 
   processPayment:
     handler: payment/payment.handler
+    package:
+      include:
+        - payment/*
     events:
       - http:
           path: payment
@@ -125,6 +140,9 @@ functions:
 
   paymentCallback:
     handler: payment/payment_callback.handler
+    package:
+      include:
+        - payment/*
     events:
       - http:
           path: notify
@@ -137,24 +155,36 @@ functions:
 
   connect:
     handler: websocket/connect.handler
+    package:
+      include:
+        - websocket/*
     events:
       - websocket:
           route: $connect
 
   disconnect:
     handler: websocket/disconnect.handler
+    package:
+      include:
+        - websocket/*
     events:
       - websocket:
           route: $disconnect
 
   message:
     handler: websocket/message.handler
+    package:
+      include:
+        - websocket/*
     events:
       - websocket:
           route: $default
 
   getDirections:
     handler: map/directions.handler
+    package:
+      include:
+        - map/*
     environment:
       GOOGLE_API_KEY: AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU
     events:
@@ -169,6 +199,9 @@ functions:
 
   drivers:
     handler: map/drivers.handler
+    package:
+      include:
+        - map/*
     events:
       - http:
           path: drivers
@@ -345,7 +378,7 @@ resources:
       Properties:
         ApiId: !Ref WebSocketApi
 
-WebSocketApiIntegrationConnect:
+    WebSocketApiIntegrationConnect:
       Type: 'AWS::ApiGatewayV2::Integration'
       Properties:
         ApiId: !Ref WebSocketApi
