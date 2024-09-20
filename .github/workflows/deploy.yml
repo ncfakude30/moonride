@@ -48,7 +48,7 @@ jobs:
         working-directory: ./lambdas
         run: |
           mkdir -p python
-          pip install -r .requirements.txt -t .
+          pip install -r requirements.txt -t .
 
       - name: Zip and upload Lambda layer
         working-directory: ./lambdas
