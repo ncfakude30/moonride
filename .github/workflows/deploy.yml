@@ -45,15 +45,15 @@ jobs:
           rm -rf .serverless
 
       - name: Create Lambda Layer for Python dependencies
-        working-directory: ./lambdas/layers/common
+        working-directory: ./lambdas
         run: |
           mkdir -p python
-          pip install -r ../../requirements.txt -t python
+          pip install -r .requirements.txt -t .
 
       - name: Zip and upload Lambda layer
-        working-directory: ./lambdas/layers/common
+        working-directory: ./lambdas
         run: |
-          zip -r9 common-lambda-layer.zip python
+          zip -r9 common-lambda-layer.zip .
 
       - name: Deploy Moonrides Backend
         working-directory: ./lambdas
