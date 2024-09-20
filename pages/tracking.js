@@ -23,6 +23,7 @@ const Tracking = () => {
         if (!user) {
             router.push('/');
         }
+
         if (pickup && dropoff) {
             const pickupArray = pickup.split(',').map(coord => parseFloat(coord));
             const dropoffArray = dropoff.split(',').map(coord => parseFloat(coord));
@@ -36,7 +37,7 @@ const Tracking = () => {
                 loading: false
             }));
         }
-    }, [pickup, dropoff, newMessage, user]);
+    }, [pickup, dropoff, newMessage, user, router, dispatch]);
 
     useEffect(() => {
         if (messages.length > 0) {
@@ -61,7 +62,7 @@ const Tracking = () => {
         }
     };
 
-    if (false && loading) {
+    if (loading) {
         return <LoadingMessage>Loading map...</LoadingMessage>;
     }
 

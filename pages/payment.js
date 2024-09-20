@@ -4,6 +4,7 @@ import tw from 'tailwind-styled-components';
 import { useSelector, useDispatch } from 'react-redux';
 import { requestTrip, initiatePayment } from './api/api.service';
 import { setPaymentStatus, setPaymentResponse } from '../store/reducers/paymentSlice';
+import { setTrackingDetails, updateMessages } from '../store/actions/trackingActions';
 import Image from 'next/image';
 
 function Payment() {
@@ -99,27 +100,51 @@ function Payment() {
                 paymentGateway: selectedGateway
             };
 
-            const paymentResponse = await initiatePayment(request).catch((error) => {
-                console.log(`Failed to make a payment request: ${JSON.stringify(error)}`);
-                dispatch(setPaymentStatus(error));
-                return;
-            });
+            switch(selectedGateway?.toUpperCase()) {
+                case 'CASH':
+                    let tripResponse = await requestTrip(request).catch((error) => {
+                    console.log(error);
+                    dispatch(setPaymentStatus('failure'));
+                    });
 
-            const tripResponse = await requestTrip(request).catch((error) => {
-                console.log(error);
-                dispatch(setPaymentStatus('failure'));
-                router.push('/payment');
-            });
+                    console.log(tripResponse);
+                    dispatch(setPaymentStatus('Trip successfully requested.'));
+                    dispatch(setTrackingDetails({
+                        pickup: pickupCoordinates,
+                        dropoff: dropoffCoordinates,
+                        user,
+                        loading: false
+                    }));
+                    router.push('/');
+                    break;
 
-            if (paymentResponse?.paymentUrl && paymentResponse?.paymentId) {
-                dispatch(setPaymentResponse({
-                    paymentUrl: paymentResponse.paymentUrl,
-                    paymentId: paymentResponse.paymentId,
-                }));
-                window.location.href = paymentResponse.paymentUrl;
-            } else {
-                dispatch(setPaymentStatus('failure'));
-                router.push('/payment');
+                case 'INSTANT EFT':
+                    const paymentResponse = await initiatePayment(request).catch((error) => {
+                        console.log(`Failed to make a payment request: ${JSON.stringify(error)}`);
+                        dispatch(setPaymentStatus(error));
+                        return;
+                    });
+
+
+                    /* THIS TO BE CALLED AFTER SUCCESSFUL PAYMENT.
+                    tripResponse = await requestTrip(request).catch((error) => {
+                        console.log(error);
+                        dispatch(setPaymentStatus('failure'));
+                        router.push('/payment');
+                    });
+                    */
+
+                    console.log(tripResponse);
+                    if (paymentResponse?.paymentUrl && paymentResponse?.paymentId) {
+                        dispatch(setPaymentResponse({
+                            paymentUrl: paymentResponse.paymentUrl,
+                            paymentId: paymentResponse.paymentId,
+                        }));
+                        window.location.href = paymentResponse.paymentUrl;
+                    } else {
+                        dispatch(setPaymentStatus('failure'));
+                        router.push('/payment');
+                    }
             }
         } catch (error) {
             console.error('Payment failed:', error);
@@ -197,7 +222,10 @@ function Payment() {
                     {paymentStatus === 'success' && <SuccessMessage>Payment successful! Redirecting...</SuccessMessage>}
                     {paymentStatus === 'failure' && <ErrorMessage>Payment failed. Please try again.</ErrorMessage>}
                     {loading ? (
+                        <LoadingWrapper>
+                        <Loader />
                         <LoadingMessage>Processing payment, please wait...</LoadingMessage>
+                    </LoadingWrapper>
                     ) : (
                         <Button onClick={handlePayment} disabled={loading}>
                             {loading ? 'Processing...' : selectedGateway ? `Confirm ${selectedGateway.charAt(0).toUpperCase() + selectedGateway.slice(1)}` : 'Confirm Payment'}
@@ -322,8 +350,17 @@ const ErrorMessage = tw.div`
     text-lg text-red-600 font-semibold mt-4
 `;
 
+const LoadingWrapper = tw.div`
+flex flex-col items-center justify-center py-6
+`;
+
 const LoadingMessage = tw.div`
-    text-lg text-blue-600 font-semibold mt-4
+text-gray-500 text-center py-4 text-center text-xs py-2 border-b
+`;
+
+// Animated Loader (CSS keyframes)
+const Loader = tw.div`
+w-16 h-16 border-4 border-dashed rounded-full animate-spin border-gray-500
 `;
 
 
