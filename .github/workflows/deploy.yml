@@ -41,26 +41,21 @@ jobs:
       - name: Clean Python environment
         working-directory: ./lambdas
         run: |
-          rm -rf venv  # Ensure that no old environment exists
+          rm -rf venv # Ensure that no old environment exists
           rm -rf .serverless
 
-      - name: Create Lambda Layer for Python dependencies
+      - name: Install Python dependencies
         working-directory: ./lambdas
         run: |
-          mkdir -p python
-          pip install -r requirements.txt -t .
-
-      - name: Zip and upload Lambda layer
-        working-directory: ./lambdas
-        run: |
-          zip -r9 common-lambda-layer.zip .
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Deploy Moonrides Backend
         working-directory: ./lambdas
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: |
+          source venv/bin/activate  # Activate Python environment
           npx serverless deploy --verbose
-
-      - name: Check Serverless version
-        run: npx serverless --version
