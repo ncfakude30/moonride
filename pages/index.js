@@ -95,11 +95,6 @@ export default function Home() {
                                 <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/helper.png'/>
                                 <Label>Helper</Label>
                             </ActionButton>
-                            <ActionButton onClick={handlePopupOpen}> 
-                                <Badge>Coming Soon</Badge>
-                                <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/moon-rides.png' />
-                                <Label>Medicate</Label>
-                            </ActionButton>
                         </ActionButtons>
                         <RecentTrips user={user} />
                     </ActionItems>
