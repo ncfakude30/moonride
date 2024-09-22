@@ -73,6 +73,7 @@ export default function Home() {
                                 href={{
                                     pathname: '/search'
                                 }}
+                                passHref
                             >
                                 <ActionButton>
                                     <ActionButtonImage src='https://i.ibb.co/cyvcpfF/uberx.png' />
@@ -96,7 +97,7 @@ export default function Home() {
                             </ActionButton>
                             <ActionButton onClick={handlePopupOpen}> 
                                 <Badge>Coming Soon</Badge>
-                                <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/weed.png' />
+                                <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/moon-rides.png' />
                                 <Label>Medicate</Label>
                             </ActionButton>
                         </ActionButtons>

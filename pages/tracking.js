@@ -71,7 +71,7 @@ const Tracking = () => {
             <MapWrapper>
                 <Map pickupCoordinates={pickupCoords} dropoffCoordinates={dropoffCoords} user={user}/>
                 <BackButtonContainer>
-                    <Link href='/'>
+                    <Link href='/' passHref>
                         <BackButton>
                             <Image
                                 src='https://img.icons8.com/ios-filled/50/000000/left.png'

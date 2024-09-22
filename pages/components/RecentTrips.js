@@ -62,8 +62,8 @@ function RecentTrips() {
                             href={{
                                 pathname: '/tracking',
                                 query: {
-                                    pickup: trip?.pickup,
-                                    dropoff: trip?.dropoff,
+                                    pickup: trip?.pickupName || trip?.pickup,
+                                    dropoff: trip?.dropoffName || trip?.dropoff,
                                 }
                             }}
                             passHref

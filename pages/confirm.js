@@ -107,10 +107,11 @@ function Confirm() {
     return (
         <Wrapper>
             <BackButtonContainer>
-                <Link href='/search'>
+                <Link href='/search' passHref>
                     <BackButton>
                         <Image src='https://img.icons8.com/ios-filled/50/000000/left.png' alt='Back' layout='fill' />
                     </BackButton>
+                    
                 </Link>
             </BackButtonContainer>
             <Map
