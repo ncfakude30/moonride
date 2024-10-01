@@ -51,12 +51,10 @@ provider:
       Resource:
         - !Sub arn:aws:s3:::${self:provider.environment.IMAGE_BUCKET_NAME}/*
 
-plugins:
-  - serverless-webpack  # Replaced python-requirements with Webpack
-
 custom:
-  webpack:
-    includeModules: true
+  build:
+    esbuild:
+      minify: true
 
 functions:
   login:
