@@ -66,7 +66,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
                 console.log(response);
 
                 dispatch(setDirectionResponse(response));
-                const data = await response.json();
+                const data = response;
 
                 if (data.directions.status === "ZERO_RESULTS") {
                     setRideDuration(0); // Handle no results case

@@ -50,6 +50,7 @@ function RecentTrips() {
             dropoff: trip?.pickup,
             pickupCoordinates: trip?.pickupCoordinates,
             dropoff: trip?.dropoffCoordinates,
+            user,
             loading: false
         }));
         router.push('/tracking');

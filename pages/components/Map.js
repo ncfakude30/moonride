@@ -16,28 +16,40 @@ const Map = () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        setUserLocation({
+                        const location = {
                             lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        });
+                            lng: position.coords.longitude,
+                        };
+                        setUserLocation(location);
+                        if (!pickupCoordinates) {
+                            setPickupCoordinates(location); // Set as pickup if not provided
+                        }
                     },
                     () => {
-                        setUserLocation({
+                        const defaultLocation = {
                             lat: 39.39172,
-                            lng: -99.29011
-                        }); // Default to a central location
+                            lng: -99.29011,
+                        };
+                        setUserLocation(defaultLocation);
+                        if (!pickupCoordinates) {
+                            setPickupCoordinates(defaultLocation); // Set default if geolocation fails
+                        }
                     }
                 );
             } else {
-                setUserLocation({
+                const defaultLocation = {
                     lat: 39.39172,
-                    lng: -99.29011
-                }); // Default to a central location
+                    lng: -99.29011,
+                };
+                setUserLocation(defaultLocation);
+                if (!pickupCoordinates) {
+                    setPickupCoordinates(defaultLocation); // Set default if geolocation is not supported
+                }
             }
         };
 
         getUserLocation();
-    }, []);
+    }, [pickupCoordinates]);
 
     useEffect(() => {
         const fetchCoordinates = async (address, setter) => {
