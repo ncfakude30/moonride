@@ -10,7 +10,7 @@ const dynamodb = new AWS.DynamoDB.DocumentClient();
 const connectionsTable = CONNECTIONS_TABLE;
 const apigatewaymanagementapi = new AWS.ApiGatewayManagementApi({ endpoint: WEBSOCKET_ENDPOINT });
 
-export const lambdaHandler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
+export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
     console.log(`Received event: ${JSON.stringify(event)}`);
     const connectionId = event.requestContext.connectionId;
 

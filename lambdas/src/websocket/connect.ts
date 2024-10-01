@@ -8,7 +8,7 @@ const CONNECTIONS_TABLE = process.env.CONNECTIONS_TABLE || 'ConnectionsTable';
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 const connectionsTable = CONNECTIONS_TABLE;
 
-export const lambdaHandler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
+export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
     const connectionId = event.requestContext.connectionId;
     console.log(`New connection: ${connectionId}`);
 

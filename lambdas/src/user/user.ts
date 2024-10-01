@@ -7,7 +7,7 @@ const USERS_TABLE = process.env.USERS_TABLE || 'UsersTable';
 // Initialize DynamoDB DocumentClient
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const headers = {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',  // Allow requests from any origin

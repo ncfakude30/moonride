@@ -58,7 +58,7 @@ custom:
 
 functions:
   login:
-    handler: dist/user/login.handler
+    handler: dist/index.login
     package:
       include:
         - user/*
@@ -73,7 +73,7 @@ functions:
             allowCredentials: true
 
   getUser:
-    handler: dist/user/getUser.handler
+    handler: dist/index.user
     package:
       include:
         - user/*
@@ -88,7 +88,7 @@ functions:
             allowCredentials: true
 
   getRecentTrips:
-    handler: dist/ride/ride.handler
+    handler:  dist/index.trips
     package:
       include:
         - ride/*
@@ -103,7 +103,7 @@ functions:
             allowCredentials: true
 
   requestRide:
-    handler: dist/ride/request.handler
+    handler:  dist/index.request
     package:
       include:
         - ride/*
@@ -118,7 +118,7 @@ functions:
             allowCredentials: true
 
   processPayment:
-    handler: dist/payment/payment.handler
+    handler:  dist/index.payment
     package:
       include:
         - payment/*
@@ -133,7 +133,7 @@ functions:
             allowCredentials: true
 
   paymentCallback:
-    handler: dist/payment/payment_callback.handler
+    handler: dist/index.paymentCallBack
     package:
       include:
         - payment/*
@@ -148,7 +148,7 @@ functions:
             allowCredentials: true
 
   connect:
-    handler: dist/websocket/connect.handler
+    handler: dist/index.connect
     package:
       include:
         - websocket/*
@@ -157,7 +157,7 @@ functions:
           route: $connect
 
   disconnect:
-    handler: dist/websocket/disconnect.handler
+    handler: dist/index.disconnect
     package:
       include:
         - websocket/*
@@ -166,7 +166,7 @@ functions:
           route: $disconnect
 
   message:
-    handler: dist/websocket/message.handler
+    handler: dist/index.message
     package:
       include:
         - websocket/*
@@ -175,7 +175,7 @@ functions:
           route: $default
 
   getDirections:
-    handler: dist/map/directions.handler
+    handler: dist/index.directions
     package:
       include:
         - map/*
@@ -192,7 +192,7 @@ functions:
             allowCredentials: true
 
   drivers:
-    handler: dist/map/drivers.handler
+    handler: dist/index.drivers
     package:
       include:
         - map/*

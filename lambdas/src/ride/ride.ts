@@ -23,6 +23,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         'Access-Control-Allow-Headers': 'Content-Type,Authorization',  // Allow specific headers
         'Access-Control-Allow-Credentials': 'true'
     };
+    
 
     // Handle CORS preflight requests
     if (event.httpMethod === 'OPTIONS') {

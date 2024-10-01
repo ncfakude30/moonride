@@ -25,6 +25,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         'Access-Control-Allow-Headers': 'Content-Type,Authorization',
         'Access-Control-Allow-Credentials': 'true',
     };
+    
 
     if (event.httpMethod === 'OPTIONS') {
         return {
