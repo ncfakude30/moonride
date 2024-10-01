@@ -10,5 +10,3 @@ export { handler as message } from './websocket/message';
 export { handler as payment } from './payment/payment';
 export { handler as directions } from './map/directions';
 export { handler as drivers } from './map/drivers';
-
-// Additional exports for any other functions you might have
