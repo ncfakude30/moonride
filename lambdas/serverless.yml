@@ -62,7 +62,7 @@ custom:
 
 functions:
   login:
-    handler: user/login.handler
+    handler: dist/user/login.handler
     package:
       include:
         - user/*
@@ -77,7 +77,7 @@ functions:
             allowCredentials: true
 
   getUser:
-    handler: user/getUser.handler
+    handler: dist/user/getUser.handler
     package:
       include:
         - user/*
@@ -92,7 +92,7 @@ functions:
             allowCredentials: true
 
   getRecentTrips:
-    handler: ride/ride.handler
+    handler: dist/ride/ride.handler
     package:
       include:
         - ride/*
@@ -107,7 +107,7 @@ functions:
             allowCredentials: true
 
   requestRide:
-    handler: ride/request.handler
+    handler: dist/ride/request.handler
     package:
       include:
         - ride/*
@@ -122,7 +122,7 @@ functions:
             allowCredentials: true
 
   processPayment:
-    handler: payment/payment.handler
+    handler: dist/payment/payment.handler
     package:
       include:
         - payment/*
@@ -137,7 +137,7 @@ functions:
             allowCredentials: true
 
   paymentCallback:
-    handler: payment/payment_callback.handler
+    handler: dist/payment/payment_callback.handler
     package:
       include:
         - payment/*
@@ -152,7 +152,7 @@ functions:
             allowCredentials: true
 
   connect:
-    handler: websocket/connect.handler
+    handler: dist/websocket/connect.handler
     package:
       include:
         - websocket/*
@@ -161,7 +161,7 @@ functions:
           route: $connect
 
   disconnect:
-    handler: websocket/disconnect.handler
+    handler: dist/websocket/disconnect.handler
     package:
       include:
         - websocket/*
@@ -170,7 +170,7 @@ functions:
           route: $disconnect
 
   message:
-    handler: websocket/message.handler
+    handler: dist/websocket/message.handler
     package:
       include:
         - websocket/*
@@ -179,7 +179,7 @@ functions:
           route: $default
 
   getDirections:
-    handler: dist/map/directions.handler  # Updated to point to compiled output
+    handler: dist/map/directions.handler
     package:
       include:
         - map/*
@@ -196,7 +196,7 @@ functions:
             allowCredentials: true
 
   drivers:
-    handler: dist/map/drivers.handler  # Updated to point to compiled output
+    handler: dist/map/drivers.handler
     package:
       include:
         - map/*
