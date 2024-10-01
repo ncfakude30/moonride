@@ -332,7 +332,6 @@ resources:
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
 
-
     WebSocketApi:
       Type: 'AWS::ApiGatewayV2::Api'
       Properties:
