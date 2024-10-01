@@ -155,6 +155,10 @@ function Search() {
         setIsPopupOpen(false);
     };
 
+    const handleConfirmButton = () => {
+        router.push('/confirm');
+    }
+
     return (
         <Wrapper>
             <MapContainer id="map" />
@@ -181,15 +185,9 @@ function Search() {
                     </InputBoxes>
                     <PlusIcon src="https://img.icons8.com/ios/50/000000/plus-math.png" onClick={handlePopupOpen} />
                 </InputContainer>
-                <Link
-                    href={{
-                        pathname: '/confirm'
-                    }}
-                >
-                    <ConfirmContainer>
-                        <ConfirmButton>Confirm Locations</ConfirmButton>
+                    <ConfirmContainer >
+                        <ConfirmButton  onClick={handleConfirmButton}>Confirm Locations</ConfirmButton>
                     </ConfirmContainer>
-                </Link>
             </Card>
 
             {isPopupOpen && (

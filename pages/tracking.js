@@ -38,7 +38,7 @@ const Tracking = () => {
                 loading: false
             }));
         }
-    }, [pickup, dropoff, newMessage, user, router, dispatch]);
+    }, [pickup, dropoff, newMessage, user, router, loading, dispatch]);
 
     useEffect(() => {
         if (messages.length > 0) {

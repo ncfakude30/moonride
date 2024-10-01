@@ -57,7 +57,7 @@ function Confirm() {
             } else {
                 console.error('No results found for pickup location');
             }
-        } catch (error) {
+        } catch(error) {
             console.error('Error fetching pickup coordinates:', error);
         } finally {
             dispatch(setLoading(false));
@@ -82,7 +82,7 @@ function Confirm() {
             } else {
                 console.error('No results found for dropoff location');
             }
-        } catch (error) {
+        } catch(error) {
             console.error('Error fetching dropoff coordinates:', error);
         } finally {
             dispatch(setLoading(false));

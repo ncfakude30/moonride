@@ -63,14 +63,15 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
                     destination: `${dropoffCoordinates[0]},${dropoffCoordinates[1]}`,
                 });
 
-                dispatch(setDirectionResponse(response));
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
+                console.log(response);
 
+                dispatch(setDirectionResponse(response));
                 const data = await response.json();
-                if (data.routes && data.routes.length > 0) {
-                    const durationInSeconds = data.routes[0].legs[0]?.duration?.value;
+
+                if (data.directions.status === "ZERO_RESULTS") {
+                    setRideDuration(0); // Handle no results case
+                } else if (data.directions.routes && data.directions.routes.length > 0) {
+                    const durationInSeconds = data.directions.routes[0].legs[0]?.duration?.value;
                     setRideDuration(durationInSeconds / 60); // Convert duration from seconds to minutes
                 }
             } catch (err) {
@@ -96,7 +97,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
         };
 
         fetchCars();
-    }, [pickupCoordinates]);
+    }, [pickupCoordinates, loading]);
 
     const handleCarClick = (car) => {
         dispatch(setSelectedCar(car));
@@ -113,9 +114,9 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
                 </LoadingWrapper>
             ) : (
                 <CarList>
-                    {(drivers?.length > 0 ? drivers : carList).map((car, index) => (
+                    {(drivers?.length > 0 ? drivers : carList).map((car) => (
                         <Car
-                            key={index}
+                            key={car.service} // Use a unique identifier here
                             onClick={() => handleCarClick(car)}
                             selected={selectedCar?.service === car.service}
                         >
