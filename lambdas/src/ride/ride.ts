@@ -1,7 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import * as AWS from 'aws-sdk';
-import { Key } from 'aws-sdk/clients/dynamodb';
-import * as jsonwebtoken from 'jsonwebtoken';
 
 const RECENT_TRIPS_TABLE = process.env.RECENT_TRIPS_TABLE || 'TripsTable';
 const PAGE_LIMIT = Number(process.env.PAGE_LIMIT) || 5;  // Ensure PAGE_LIMIT is an integer
