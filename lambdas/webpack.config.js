@@ -1,11 +1,17 @@
 const path = require('path');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
-  entry: {
-    index: './src/index.ts',  // Change this to your entry point if different
+  mode: 'production', // Ensure production mode for optimizations
+  entry: './src/index.ts',
+  output: {
+    filename: 'index.js',
+    path: path.resolve(__dirname, 'dist'),
+    libraryTarget: 'commonjs2',
   },
-  target: 'node',
-  mode: 'production',
+  resolve: {
+    extensions: ['.ts', '.js'],
+  },
   module: {
     rules: [
       {
@@ -15,11 +21,10 @@ module.exports = {
       },
     ],
   },
-  resolve: {
-    extensions: ['.ts', '.js'],
-  },
-  output: {
-    filename: '[name].js',
-    path: path.resolve(__dirname, 'dist'),  // Output directory for compiled files
+  plugins: [
+    new CleanWebpackPlugin(), // Cleans the output directory before each build
+  ],
+  optimization: {
+    minimize: true, // Minimize output
   },
 };
