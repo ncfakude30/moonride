@@ -4,12 +4,15 @@ import tw from 'tailwind-styled-components';
 import Image from 'next/image';
 import Link from 'next/link';
 import { fetchRecentTrips } from '../api/api.service';
+import {setTrackingDetails} from '../../store/actions/trackingActions'
 import { setTrips, appendTrips, setLoading, setError } from '../../store/reducers/tripSlice';
+import { useRouter } from 'next/router';
 
 function RecentTrips() {
     const dispatch = useDispatch();
     const { trips, lastEvaluatedKey, hasMore, loading, hasNotifications } = useSelector((state) => state.trips);
     const user = useSelector((state) => state.auth.user);
+    const router = useRouter();
 
     const loadTrips = async (append = false) => {
         if (user) {
@@ -41,6 +44,17 @@ function RecentTrips() {
         }
     };
 
+    const handleTripClick = (trip) => {
+        dispatch(setTrackingDetails({
+            pickup: trip?.pickup,
+            dropoff: trip?.pickup,
+            pickupCoordinates: trip?.pickupCoordinates,
+            dropoff: trip?.dropoffCoordinates,
+            loading: false
+        }));
+        router.push('/tracking');
+    }
+
     useEffect(() => {
         loadTrips();
     }, [user]);
@@ -57,18 +71,8 @@ function RecentTrips() {
             ) : (
                 <>
                     {trips.map(trip => (
-                        <Link
-                            key={trip.tripId}
-                            href={{
-                                pathname: '/tracking',
-                                query: {
-                                    pickup: trip?.pickupName || trip?.pickup,
-                                    dropoff: trip?.dropoffName || trip?.dropoff,
-                                }
-                            }}
-                            passHref
-                        >
-                            <TripCard>
+                        <>
+                            <TripCard onClick={() => {handleTripClick(trip)}}>
                                 <BadgeWrapper>
                                     <StatusBadge status={trip?.status || 'complete'}>
                                         {trip.status || 'Completed'}
@@ -108,7 +112,7 @@ function RecentTrips() {
                                 
                                 
                             </TripCard>
-                        </Link>
+                        </>
                     ))}
                     {hasMore && (
                         <LoadMoreButton onClick={() => loadTrips(true)}>

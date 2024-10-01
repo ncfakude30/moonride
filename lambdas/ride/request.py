@@ -50,7 +50,9 @@ def handler(event, context):
                 'driverProfile': body.get('driverProfile'),
                 'pickupName': body.get('pickupName'),
                 'dropoffName': body.get('dropoffName'),
-                'tripDate': trip_date
+                'tripDate': trip_date,
+                'pickupCoordinates': body.get('pickupCoordinates'),
+                'dropoffCoordinates': body.get('dropoffCoordinates'),
             }
             
             # Add the item to DynamoDB

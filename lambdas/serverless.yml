@@ -4,7 +4,7 @@ service: moonrides
 
 provider:
   name: aws
-  runtime: python3.9
+  runtime: nodejs18.x  # Migrated to Node.js for TypeScript support
   region: us-east-1
   stage: ${opt:stage, 'dev'}
   environment:
@@ -52,15 +52,13 @@ provider:
         - !Sub arn:aws:s3:::${self:provider.environment.IMAGE_BUCKET_NAME}/*
 
 plugins:
-  - serverless-python-requirements
+  - serverless-webpack  # Replaced python-requirements with Webpack
+  - serverless-offline  # Optionally, if you're using serverless-offline for local development
 
 custom:
-  pythonRequirements:
-    dockerizePip: true  # Use docker to ensure that dependencies are compatible with Lambda's environment
-    zip: true
-    layer: true
-    slim: true  # Removes unnecessary files like tests and documentation from the dependencies
-    invalidateCaches: true  # Ensure caching doesn't interfere with dependency resolution
+  webpack:
+    webpackConfig: './webpack.config.js'
+    includeModules: true
 
 functions:
   login:
@@ -181,7 +179,7 @@ functions:
           route: $default
 
   getDirections:
-    handler: map/directions.handler
+    handler: dist/map/directions.handler  # Updated to point to compiled output
     package:
       include:
         - map/*
@@ -198,7 +196,7 @@ functions:
             allowCredentials: true
 
   drivers:
-    handler: map/drivers.handler
+    handler: dist/map/drivers.handler  # Updated to point to compiled output
     package:
       include:
         - map/*

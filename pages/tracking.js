@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useSelector, useDispatch } from 'react-redux';
 import { setTrackingDetails, updateMessages } from '../store/actions/trackingActions';
 import { useRouter } from 'next/router';
+import { setTrips } from '../store/reducers/tripSlice';
 
 const Tracking = () => {
     const router = useRouter();
@@ -62,6 +63,15 @@ const Tracking = () => {
         }
     };
 
+    const handleBackButton = () => {
+        setTrackingDetails(null);
+        setPickupCoords(null);
+        setDropoffCoords(null);
+        setTrips(null);
+
+        router.back()
+    }
+
     if (loading) {
         return <LoadingMessage>Loading map...</LoadingMessage>;
     }
@@ -71,15 +81,13 @@ const Tracking = () => {
             <MapWrapper>
                 <Map pickupCoordinates={pickupCoords} dropoffCoordinates={dropoffCoords} user={user}/>
                 <BackButtonContainer>
-                    <Link href='/' passHref>
-                        <BackButton>
+                    <BackButton onClick={() => handleBackButton()}>
                             <Image
                                 src='https://img.icons8.com/ios-filled/50/000000/left.png'
                                 alt='Back'
                                 layout='fill'
                             />
                         </BackButton>
-                    </Link>
                 </BackButtonContainer>
             </MapWrapper>
             <InfoContainer>

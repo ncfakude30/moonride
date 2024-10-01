@@ -27,35 +27,26 @@ jobs:
 
       - name: Clean and install Node.js dependencies
         run: |
+          cd lambdas  # Navigate to the lambdas directory
           rm -rf node_modules
           npm install --legacy-peer-deps
 
       - name: Install Serverless globally
         run: npm install -g serverless
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Clean Python environment
-        working-directory: ./lambdas
+      - name: Compile TypeScript code
         run: |
-          rm -rf venv # Ensure that no old environment exists
-          rm -rf .serverless
+          cd lambdas  # Navigate to the lambdas directory
+          npx tsc
 
-      - name: Install Python dependencies
-        working-directory: ./lambdas
+      - name: Bundle code with Webpack
         run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
+          cd lambdas  # Navigate to the lambdas directory
+          npx webpack --config webpack.config.js
 
       - name: Deploy Moonrides Backend
-        working-directory: ./lambdas
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: |
-          source venv/bin/activate  # Activate Python environment
+          cd lambdas  # Navigate to the lambdas directory
           npx serverless deploy --verbose

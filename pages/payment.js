@@ -97,7 +97,9 @@ function Payment() {
                 firstName: 'TestName',
                 lastName: 'LastTestName',
                 email: 'email@gmail.com',
-                paymentGateway: selectedGateway
+                paymentGateway: selectedGateway,
+                pickupCoordinates,
+                dropoffCoordinates,
             };
 
             switch(selectedGateway?.toUpperCase()) {
