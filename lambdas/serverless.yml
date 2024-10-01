@@ -58,7 +58,7 @@ custom:
 
 functions:
   login:
-    handler: dist/index.login
+    handler: src/index.login
     package:
       include:
         - user/*
@@ -74,7 +74,7 @@ functions:
             allowCredentials: true
 
   getUser:
-    handler: dist/index.user
+    handler: src/index.user
     package:
       include:
         - user/*
@@ -90,7 +90,7 @@ functions:
             allowCredentials: true
 
   getRecentTrips:
-    handler: dist/index.trips
+    handler: src/index.trips
     package:
       include:
         - ride/*
@@ -106,7 +106,7 @@ functions:
             allowCredentials: true
 
   requestRide:
-    handler: dist/index.request
+    handler: src/index.request
     package:
       include:
         - ride/*
@@ -122,7 +122,7 @@ functions:
             allowCredentials: true
 
   processPayment:
-    handler: dist/index.payment
+    handler: src/index.payment
     package:
       include:
         - payment/*
@@ -138,7 +138,7 @@ functions:
             allowCredentials: true
 
   paymentCallback:
-    handler: dist/index.paymentCallBack
+    handler: src/index.paymentCallBack
     package:
       include:
         - payment/*
@@ -154,7 +154,7 @@ functions:
             allowCredentials: true
 
   connect:
-    handler: dist/index.connect
+    handler: src/index.connect
     package:
       include:
         - websocket/*
@@ -163,7 +163,7 @@ functions:
           route: $connect
 
   disconnect:
-    handler: dist/index.disconnect
+    handler: src/index.disconnect
     package:
       include:
         - websocket/*
@@ -172,7 +172,7 @@ functions:
           route: $disconnect
 
   message:
-    handler: dist/index.message
+    handler: src/index.message
     package:
       include:
         - websocket/*
@@ -181,7 +181,7 @@ functions:
           route: $default
 
   getDirections:
-    handler: dist/index.directions
+    handler: src/index.directions
     package:
       include:
         - map/*
@@ -199,7 +199,7 @@ functions:
             allowCredentials: true
 
   drivers:
-    handler: dist/index.drivers
+    handler: src/index.drivers
     package:
       include:
         - map/*
