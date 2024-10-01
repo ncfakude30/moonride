@@ -2,7 +2,7 @@ const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
-  mode: 'production', // Ensure production mode for optimizations
+  mode: 'production',
   entry: './src/index.ts',
   output: {
     filename: 'index.js',
@@ -13,6 +13,8 @@ module.exports = {
     extensions: ['.ts', '.js'],
     fallback: {
       crypto: require.resolve('crypto-browserify'),
+      vm: require.resolve('vm-browserify'),
+      stream: require.resolve('stream-browserify'),
     },
   },
   module: {
@@ -25,9 +27,9 @@ module.exports = {
     ],
   },
   plugins: [
-    new CleanWebpackPlugin(), // Cleans the output directory before each build
+    new CleanWebpackPlugin(),
   ],
   optimization: {
-    minimize: true, // Minimize output
+    minimize: true,
   },
 };

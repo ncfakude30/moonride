@@ -33,6 +33,8 @@
     "postcss": "^8.3.11",
     "prettier": "^3.2.4",
     "serverless-python-requirements": "^6.1.1",
-    "tailwindcss": "^2.2.19"
+    "stream-browserify": "^3.0.0",
+    "tailwindcss": "^2.2.19",
+    "vm-browserify": "^1.1.2"
   }
 }
