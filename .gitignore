@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+/lambdas/node_modules
+/lambdas/dist
 /.pnp
 .pnp.js
 .*
