@@ -56,7 +56,6 @@ plugins:
 
 custom:
   webpack:
-    webpackConfig: './webpack.config.js'
     includeModules: true
 
 functions:
