@@ -32,7 +32,7 @@ jobs:
           npm install --legacy-peer-deps
 
       - name: Install Serverless globally
-        run: npm install -g serverless --legacy-peer-deps && npm install -g serverless-offline --legacy-peer-deps
+        run: npm install -g serverless
 
       - name: Compile TypeScript code
         run: |
