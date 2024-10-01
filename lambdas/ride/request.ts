@@ -69,12 +69,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                     status: 200,
                 }),
             };
-        } catch (error) {
+        } catch (error: unknown) {
             console.error(`Exception occurred: ${error}`);
             return {
                 statusCode: 500,
                 headers,
-                body: JSON.stringify({ message: 'Error adding trip', error: error.message }),
+                body: JSON.stringify({ message: 'Error adding trip', error: (error as any).message }),
             };
         }
     } else {

@@ -91,7 +91,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             return {
                 statusCode: 500,
                 headers,
-                body: JSON.stringify({ message: 'Error initiating payment', error: error.message }),
+                body: JSON.stringify({ message: 'Error initiating payment', error: (error as any)?.message }),
             };
         }
     } else {
@@ -127,8 +127,8 @@ async function initTransaction(payment: any): Promise<{ paymentRequestId: string
             paymentRequestId: responseData.paymentRequestId,
             url: responseData.url,
         };
-    } catch (error) {
-        console.error(`Error while making request to Ozow: ${JSON.stringify(error.response?.data || {})}`);
+    } catch (error: unknown) {
+        console.error(`Error while making request to Ozow: ${JSON.stringify((error as any)?.response?.data || {})}`);
         throw error;
     }
 }
