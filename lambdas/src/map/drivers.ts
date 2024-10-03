@@ -45,7 +45,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             return {
                 statusCode: 200,
                 headers,
-                body: JSON.stringify({ drivers }),
+                body: JSON.stringify({ drivers, pickupCoordinates }),
             };
         } catch (e) {
             console.error(`Exception occurred: ${e}`);

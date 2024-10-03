@@ -83,9 +83,9 @@ export const getDirections = async (payload) => {
     }
 };
 
-export const fetchDrivers = async (pickupCoordinates) => {
+export const fetchDrivers = async (payload) => {
     try {
-        const response = await apiClient.post('/drivers', { pickupCoordinates });
+        const response = await apiClient.post('/drivers', payload);
         return response?.data?.drivers || []; // Ensure this matches the expected response structure
     } catch (error) {
         console.error('Error fetching drivers:', error);

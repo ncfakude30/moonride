@@ -87,7 +87,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
         const fetchCars = async () => {
             setLoading(true); // Start loading
             try {
-                const fetchedDrivers = await fetchDrivers(pickupCoordinates); // Fetch drivers from Lambda
+                const fetchedDrivers = await fetchDrivers({pickupCoordinates}); // Fetch drivers from Lambda
                 console.log(fetchDrivers)
                 setDrivers(fetchedDrivers);
             } catch (error) {
