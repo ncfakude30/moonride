@@ -88,8 +88,7 @@ function Search() {
                                 const marker = new googleMaps.Marker({
                                     position: userLatLng,
                                     map: newMap,
-                                    title: user?.displayName || 'Your Location',
-                                    icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
+                                    title: user?.displayName || 'Address'
                                 });
                                 setUserLocationMarker(marker);
                             }

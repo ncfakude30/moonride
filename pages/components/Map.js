@@ -110,7 +110,7 @@ const Map = () => {
                 service.route(request, (result, status) => {
                     if (status === 'OK') {
                         renderer.setDirections(result);
-                        mapInstance.fitBounds(result.routes[0].bounds);
+                        mapInstance?.fitBounds(result.routes[0].bounds);
                     } else {
                         console.error('Error fetching directions:', status);
                     }

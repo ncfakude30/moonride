@@ -91,6 +91,7 @@ function Confirm() {
 
     const handleConfirmClick = () => {
         if (selectedCar) {
+            dispatch(setLoading(false));
             router.push('/payment');
         } else {
             alert('Please select a car before confirming.');
@@ -160,4 +161,17 @@ const BackButtonContainer = tw.div`
 
 const BackButton = tw.div`
     relative h-12 w-12
+`;
+
+const LoadingWrapper = tw.div`
+flex flex-col items-center justify-center py-6
+`;
+
+const LoadingMessage = tw.div`
+text-gray-500 text-center py-4 text-center text-xs py-2 border-b
+`;
+
+// Animated Loader (CSS keyframes)
+const Loader = tw.div`
+w-16 h-16 border-4 border-dashed rounded-full animate-spin border-gray-500
 `;

@@ -100,6 +100,7 @@ function Payment() {
                 paymentGateway: selectedGateway,
                 pickupCoordinates,
                 dropoffCoordinates,
+                bankReference: 'TestReference',
             };
 
             switch(selectedGateway?.toUpperCase()) {
@@ -205,14 +206,14 @@ function Payment() {
                         <p><strong>Payment option:</strong></p>
                         <ScrollableGatewayList>
                             <GatewayOption
-                                isSelected={selectedGateway === 'cash'}
+                                $isSelected={selectedGateway === 'cash'}
                                 onClick={() => setSelectedGateway('cash')}
                             >
                                 <DriverImage src='https://moonride-media.s3.amazonaws.com/cash.png' alt='Cash' width={50} height={50} />
                                 <PaymentTitle>Cash</PaymentTitle>
                             </GatewayOption>
                             <GatewayOption
-                                isSelected={selectedGateway === 'instant EFT'}
+                                $isSelected={selectedGateway === 'instant EFT'}
                                 onClick={() => setSelectedGateway('instant EFT')}
                             >
                                 <DriverImage src='https://moonride-media.s3.amazonaws.com/ozow.png' alt='Ozow' width={50} height={50} />
@@ -303,7 +304,7 @@ const ScrollableGatewayList = tw.div`
 
 const GatewayOption = tw.div`
     flex flex-col items-center cursor-pointer border-2 rounded-lg p-2
-    ${(p) => (p.isSelected ? 'border-green-500 bg-green-100' : 'border-gray-300')}
+    ${(p) => p.$isSelected ? 'border-green-500 bg-green-100' : 'border-gray-300'}
 `;
 
 const PaymentTitle = tw.p`

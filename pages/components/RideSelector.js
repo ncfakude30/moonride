@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import tw from 'tailwind-styled-components';
 import { setCurrency } from '../../store/actions/rideActions';
-import { setDirectionResponse, setSelectedCar } from '../../store/reducers/confirmationSlice';
+import { setDirectionResponse, setSelectedCar, setLoading } from '../../store/reducers/confirmationSlice';
 import { getDirections, fetchDrivers } from '../api/api.service';
 import { carList } from '../../data/carList';
 
@@ -37,10 +37,10 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
     const dispatch = useDispatch();
     const selectedCar = useSelector((state) => state.confirmation.selectedCar);
     const directionResponse = useSelector((state) => state.confirmation.directionResponse);
+    const loading = useSelector((state) => state.confirmation.directionResponse);
     const currency = useSelector((state) => state.ride.currency);
     const [rideDuration, setRideDuration] = useState(0);
     const [drivers, setDrivers] = useState([]); // State for fetched drivers
-    const [loading, setLoading] = useState(true); // Loading state for drivers
 
     useEffect(() => {
         const fetchCurrency = async () => {
@@ -52,12 +52,12 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
     }, [dispatch]);
 
     useEffect(() => {
-        if (pickupCoordinates.length === 0 || dropoffCoordinates.length === 0) {
+        if (pickupCoordinates.length === 0 || dropoffCoordinates.length === 0 || directionResponse) {
             return;
         }
 
         const fetchRideDuration = async () => {
-            setLoading(true); // start loading
+            dispatch(setLoading(true)); // start loading
             try {
                 const response = await getDirections({
                     origin: `${pickupCoordinates[0]},${pickupCoordinates[1]}`,
@@ -76,24 +76,25 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
                     setRideDuration(durationInSeconds / 60); // Convert duration from seconds to minutes
                 }
             } catch (err) {
+                dispatch(setDirectionResponse(null));
                 console.error(err);
                 console.error('Fetch error:', err);
             }
             finally{
-                setLoading(false); // End loading
+               dispatch(setLoading(false));  // End loading
             }
         };
 
         fetchRideDuration();
-    }, [pickupCoordinates, dropoffCoordinates, directionResponse, dispatch]);
+    }, [pickupCoordinates, dropoffCoordinates, directionResponse, loading, dispatch]);
 
     useEffect(() => {
-        if (!pickupCoordinates) {
+        if (!pickupCoordinates || drivers?.length >= 0) {
             return;
         }
 
         const fetchCars = async () => {
-            setLoading(true); // Start loading
+           dispatch(setLoading(true));  // Start loading
             try {
                 const fetchedDrivers = await fetchDrivers({pickupCoordinates}).catch((error) =>{
                     console.log(error);
@@ -106,12 +107,12 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
                 console.error('Error fetching drivers:', error);
                 setDrivers(carList);
             } finally {
-                setLoading(false); // End loading
+               dispatch(setLoading(false));  // End loading
             }
         };
 
         fetchCars();
-    }, [pickupCoordinates, loading, drivers]);
+    }, [pickupCoordinates, loading, drivers, dispatch]);
 
     const handleCarClick = (car) => {
         dispatch(setSelectedCar(car));
