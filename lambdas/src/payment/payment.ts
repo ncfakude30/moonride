@@ -48,16 +48,20 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             // Get the current date and time for paymentDate
             const paymentDate = new Date().toISOString();  // ISO 8601 format
 
-            // Prepare the payment data for Ozow
-            const ozowPayload = getPayload(
-                body.amount,
-                paymentId,
-                body.bankReference
-            );
+            let paymentResponse = null;
 
-            const { paymentRequestId, url } = await initTransaction(ozowPayload);
-
-            if (!paymentRequestId || !url) {
+            switch(body.paymentGateway?.toLowerCase()) {
+                case 'cash':
+                    paymentResponse = await handleCashTransaction();
+                    break;
+                case 'ozow':
+                    paymentResponse = await handleOzowTransaction(body, paymentId);
+                    break;
+                default:
+                    throw new Error(`Unsupported payment option for transaction: ${JSON.stringify(body)}`);
+            }
+            
+            if (!paymentResponse?.paymentRequestId || !paymentResponse?.url) {
                 throw new Error('Failed to initiate payment');
             }
 
@@ -66,8 +70,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 paymentId,
                 userId: body.userId,
                 amount: body.amount,
-                paymentUrl: url,
-                paymentRequestId,
+                paymentUrl: paymentResponse?.url,
+                paymentRequestId: paymentResponse?.paymentRequestId,
                 paymentDate,
                 status: 'PENDING',
             };
@@ -82,7 +86,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 headers,
                 body: JSON.stringify({
                     message: 'Payment successfully initiated',
-                    paymentUrl: url,
+                    paymentUrl: paymentResponse?.url,
                     paymentId,
                     status: 200,
                 }),
@@ -104,6 +108,22 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
 };
 
+async function handleCashTransaction(): Promise<any> {
+    return { paymentRequestId: uuidv4(), url: 'cash' };
+}
+
+async function handleOzowTransaction(body: any, paymentId: string): Promise<any> {
+    // Prepare the payment data for Ozow
+    const ozowPayload = getPayload(
+        body.amount,
+        paymentId,
+        body.bankReference
+    );
+
+    const { paymentRequestId, url } = await initTransaction(ozowPayload);
+    return { paymentRequestId, url };
+}
+
 async function initTransaction(payment: any): Promise<{ paymentRequestId: string; url: string }> {
     console.log(`Attempting to request a new payment url from Ozow: ${JSON.stringify(payment)}`);
 
@@ -116,7 +136,7 @@ async function initTransaction(payment: any): Promise<{ paymentRequestId: string
             },
         });
 
-        console.log(`Response from Ozow: ${JSON.stringify(response)}`);
+        console.log(`Response from Ozow: ${JSON.stringify(response?.data)}`);
 
         const responseData = response.data;
 
@@ -131,7 +151,8 @@ async function initTransaction(payment: any): Promise<{ paymentRequestId: string
             url: responseData.url,
         };
     } catch (error) {
-        console.error(`Error while making request to Ozow: ${JSON.stringify(error)}`);
+        console.error(error);
+        console.error(`Error while making request to Ozow: `, error);
         throw error;
     }
 }

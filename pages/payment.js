@@ -121,7 +121,7 @@ function Payment() {
                     router.push('/');
                     break;
 
-                case 'INSTANT EFT':
+                case 'OZOW':
                     const paymentResponse = await initiatePayment(request).catch((error) => {
                         console.log(`Failed to make a payment request: ${JSON.stringify(error)}`);
                         dispatch(setPaymentStatus(error));
@@ -213,8 +213,8 @@ function Payment() {
                                 <PaymentTitle>Cash</PaymentTitle>
                             </GatewayOption>
                             <GatewayOption
-                                $isSelected={selectedGateway === 'instant EFT'}
-                                onClick={() => setSelectedGateway('instant EFT')}
+                                $isSelected={selectedGateway === 'ozow'}
+                                onClick={() => setSelectedGateway('ozow')}
                             >
                                 <DriverImage src='https://moonride-media.s3.amazonaws.com/ozow.png' alt='Ozow' width={50} height={50} />
                                 <PaymentTitle>Instant EFT</PaymentTitle>
