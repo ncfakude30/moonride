@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 
 const PAYMENT_TABLE = process.env.TRANSACTIONS_TABLE || 'TransactionsTable';
-const OZOW_API_URL = process.env.OZOW_API_URL || 'https://api.ozow.com';
+const OZOW_API_URL = process.env.OZOW_API_URL || 'https://stagingapi.ozow.com';
 const OZOW_SITE_CODE = process.env.OZOW_SITE_CODE || 'NCF-NCF-001';
 const OZOW_API_KEY = process.env.OZOW_API_KEY || '667a79c009bd458c866666d98d8b2a75';
 const OZOW_PRIVATE_KEY = process.env.OZOW_PRIVATE_KEY || '9bc47fe01bbe475a9995a887dcb1e73a';
@@ -159,7 +159,6 @@ function getPayload(amount: number, transactionReference: string, bankReference:
         amount,
         transactionReference,
         bankReference,
-        customer: '',
         cancelUrl: CANCEL_URL,
         errorUrl: ERROR_URL,
         successUrl: SUCCESS_URL,

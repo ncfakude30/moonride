@@ -15,7 +15,7 @@ const countryToCurrency = {
 
 // Function to get currency code based on the country code
 const getCurrencyCode = (countryCode) => {
-    return countryToCurrency[countryCode] || 'USD'; // Default to USD if not found
+    return countryToCurrency[countryCode] || 'ZA'; // Default to USD if not found
 };
 
 // Function to get user's country code using an IP API
@@ -29,7 +29,7 @@ const getUserCountryCode = async () => {
         return countryCode;
     } catch (error) {
         console.error('Error fetching country code:', error);
-        return 'US'; // Default to US in case of an error
+        return 'ZA'; // Default to US in case of an error
     }
 };
 
@@ -140,7 +140,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
                                 <CarName>{car.service}</CarName>
                                 <CarDuration>{`${rideDuration.toFixed(0)} minutes`}</CarDuration>
                             </CarDetails>
-                            <CarPrice>{currency === 'ZAR' ? 'R' : '$'}{(rideDuration * car?.multiplier).toFixed(2)}</CarPrice>
+                            <CarPrice>{currency === 'ZAR' ? 'R' : 'R'}{(rideDuration * car?.multiplier).toFixed(2)}</CarPrice>
                         </Car>
                     ))}
                 </CarList>
