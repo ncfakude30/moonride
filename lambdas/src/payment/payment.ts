@@ -71,6 +71,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
             // Store the payment record in DynamoDB
             const item = {
+                transactionId: paymentId,
                 paymentId,
                 userId: body.userId,
                 amount: body.amount,
