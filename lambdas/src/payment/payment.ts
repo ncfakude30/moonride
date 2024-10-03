@@ -58,7 +58,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                     paymentResponse = await handleOzowTransaction(body, paymentId);
                     break;
                 default:
-                    throw new Error(`Unsupported payment option for transaction: ${JSON.stringify(body)}`);
+                    return {
+                        statusCode: 400,
+                        headers,
+                        body: JSON.stringify({ message: `Unsupported payment option for transaction: ${paymentId}, Paymwnr gateway: ${JSON.stringify(body.paymentGateway)}`}),
+                    };
             }
             
             if (!paymentResponse?.paymentRequestId || !paymentResponse?.url) {
