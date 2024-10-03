@@ -186,8 +186,10 @@ function generateHashCheck(payload: any): string {
         'expiryDateUtc',
     ];
 
-    const inputString = hashSequence.map(key => String(payload[key] || '')).join('') + OZOW_PRIVATE_KEY;
-    return crypto.createHash('sha512').update(inputString.toLowerCase()).digest('hex');
+    const inputString = hashSequence.reduce((str, key) => `${str}${payload[key]?.toString() || ''}`, '').concat(OZOW_PRIVATE_KEY).toLowerCase();
+    return crypto.createHash('sha512')
+                        .update(inputString)
+                        .digest("hex");
 }
 
 function getPayload(amount: number, transactionReference: string, bankReference: string): any {
@@ -208,6 +210,6 @@ function getPayload(amount: number, transactionReference: string, bankReference:
         allowVariableAmount: false,
     };
 
-    //payload.hashCheck = generateHashCheck(payload);
+    payload.hashCheck = generateHashCheck(payload);
     return payload;
 }
