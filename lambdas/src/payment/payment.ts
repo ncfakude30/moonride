@@ -211,6 +211,7 @@ function getPayload(amount: number, transactionReference: string, bankReference:
         isTest: false,
         expiryDateUtc: getExpiryDateUTC(15),
         allowVariableAmount: false,
+        CustomerIdentifier: '9407205736083'
     };
     return payload;
 }
