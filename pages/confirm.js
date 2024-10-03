@@ -28,12 +28,6 @@ function Confirm() {
     }, [user, router, pickupCoordinates, dropoffCoordinates, pickup, dropoff]);
 
     useEffect(() => {
-        if (pickupCoordinates?.length > 0 && dropoffCoordinates?.length > 0) {
-            setLoading(false);
-        }
-    }, [pickupCoordinates, dropoffCoordinates, loading]);
-
-    useEffect(() => {
         if (defaultCar) {
             dispatch(setSelectedCar(defaultCar));
         }
@@ -102,8 +96,6 @@ function Confirm() {
             alert('Please select a car before confirming.');
         }
     };
-
-    if (loading) return <p>Loading...</p>;
 
     return (
         <Wrapper>

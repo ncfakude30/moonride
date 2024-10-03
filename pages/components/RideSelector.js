@@ -57,6 +57,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
         }
 
         const fetchRideDuration = async () => {
+            setLoading(true); // start loading
             try {
                 const response = await getDirections({
                     origin: `${pickupCoordinates[0]},${pickupCoordinates[1]}`,
@@ -77,6 +78,9 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
             } catch (err) {
                 console.error(err);
                 console.error('Fetch error:', err);
+            }
+            finally{
+                setLoading(false); // End loading
             }
         };
 

@@ -91,7 +91,7 @@ const Map = () => {
 
                 // Add markers for pickup and dropoff
                 const addMarker = (position, title) => {
-                    new google.maps.marker.AdvancedMarkerElement({
+                    new google.maps.Marker({
                         position,
                         map: mapInstance,
                         title
@@ -118,9 +118,11 @@ const Map = () => {
 
                 return () => {
                     if (mapInstance) {
-                        mapInstance.remove(); // Clean up map instance
+                        mapInstance = null; // Clean up map instance
                     }
                 };
+            } else {
+                console.error('Google Maps API is not loaded yet.');
             }
         }
     }, [userLocation, pickupCoordinates, dropoffCoordinates]);

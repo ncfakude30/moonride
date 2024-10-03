@@ -43,6 +43,9 @@ export const handler = async (event: APIGatewayEvent, context: Context) => {
             const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&key=${GOOGLE_API_KEY}`;
             const response = await axios.get(url);
 
+
+            console.log(response);
+            
             if (response.status !== 200) {
                 return {
                     statusCode: response.status,
