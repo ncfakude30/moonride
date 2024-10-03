@@ -116,6 +116,8 @@ async function initTransaction(payment: any): Promise<{ paymentRequestId: string
             },
         });
 
+        console.log(`Response from Ozow: ${JSON.stringify(response)}`);
+
         const responseData = response.data;
 
         if (responseData.errorMessage) {
@@ -123,13 +125,13 @@ async function initTransaction(payment: any): Promise<{ paymentRequestId: string
             throw new Error(responseData.errorMessage);
         }
 
-        console.log(`Response from Ozow: ${JSON.stringify(responseData)}`);
+        console.log(`Response from Ozow 2: ${JSON.stringify(responseData)}`);
         return {
             paymentRequestId: responseData.paymentRequestId,
             url: responseData.url,
         };
-    } catch (error: unknown) {
-        console.error(`Error while making request to Ozow: ${JSON.stringify((error as any)?.response?.data || {})}`);
+    } catch (error) {
+        console.error(`Error while making request to Ozow: ${JSON.stringify(error)}`);
         throw error;
     }
 }
@@ -142,9 +144,20 @@ function getExpiryDateUtc(expiryLimit: number): string {
 
 function generateHashCheck(payload: any): string {
     const hashSequence = [
-        'siteCode', 'countryCode', 'currencyCode', 'amount', 'transactionReference',
-        'bankReference', 'customer', 'cancelUrl', 'errorUrl', 'successUrl',
-        'notifyUrl', 'isTest', 'selectedBankId', 'expiryDateUtc'
+        'siteCode',
+        'countryCode',
+        'currencyCode',
+        'amount',
+        'transactionReference',
+        'bankReference',
+        'customer',
+        'cancelUrl',
+        'errorUrl',
+        'successUrl',
+        'notifyUrl',
+        'isTest',
+        'selectedBankId',
+        'expiryDateUtc',
     ];
 
     const inputString = hashSequence.map(key => String(payload[key] || '')).join('') + OZOW_PRIVATE_KEY;
@@ -156,6 +169,7 @@ function getPayload(amount: number, transactionReference: string, bankReference:
         siteCode: OZOW_SITE_CODE,
         countryCode: 'ZA',
         currencyCode: 'ZAR',
+        customer: '',
         amount,
         transactionReference,
         bankReference,
@@ -163,7 +177,7 @@ function getPayload(amount: number, transactionReference: string, bankReference:
         errorUrl: ERROR_URL,
         successUrl: SUCCESS_URL,
         notifyUrl: NOTIFY_URL,
-        isTest: true,
+        isTest: false,
         expiryDateUtc: getExpiryDateUtc(15),
         allowVariableAmount: false,
     };
