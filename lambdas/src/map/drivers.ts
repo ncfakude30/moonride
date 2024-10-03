@@ -42,23 +42,26 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 { service: 'Black SUV', imgUrl: 'https://i.ibb.co/1nStPWT/uberblacksuv.png', multiplier: 2.8 },
             ];
 
+
+            console.log(drivers);
+
             return {
                 statusCode: 200,
-                headers,
+                headers: headers,
                 body: JSON.stringify({ drivers, pickupCoordinates }),
             };
         } catch (e) {
             console.error(`Exception occurred: ${e}`);
             return {
                 statusCode: 500,
-                headers,
+                headers: headers,
                 body: JSON.stringify({ message: 'Error fetching drivers', error: (e as any)?.message }),
             };
         }
     } else {
         return {
             statusCode: 405,
-            headers,
+            headers: headers,
             body: JSON.stringify({ message: 'Method not allowed' }),
         };
     }

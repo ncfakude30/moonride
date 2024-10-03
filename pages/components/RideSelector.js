@@ -88,6 +88,10 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
     }, [pickupCoordinates, dropoffCoordinates, directionResponse, dispatch]);
 
     useEffect(() => {
+        if (!pickupCoordinates) {
+            return;
+        }
+        
         const fetchCars = async () => {
             setLoading(true); // Start loading
             try {
