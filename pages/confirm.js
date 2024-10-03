@@ -92,6 +92,7 @@ function Confirm() {
     const handleSelectRide = (car) => {
         dispatch(setSelectedCar(car));
         setDefaultCar(car); // Set the default car when a car is selected
+        dispatch(setLoading(false));
     };
 
     const handleConfirmClick = () => {

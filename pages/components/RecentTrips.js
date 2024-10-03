@@ -72,56 +72,50 @@ function RecentTrips() {
             ) : (
                 <>
                     {trips.map(trip => (
-                        <>
-                            <TripCard onClick={() => {handleTripClick(trip)}}>
-                                <BadgeWrapper>
-                                    <StatusBadge status={trip?.status || 'complete'}>
-                                        {trip.status || 'Completed'}
-                                    </StatusBadge>
-                                    {true ? 
-                                    <NotificationWrapper>
-                                            <NotificationLabel>Notifications</NotificationLabel>
-                                            <NotificationBadge>
-                                                5
-                                            </NotificationBadge>
-                                        </NotificationWrapper>: '' }
-                                </BadgeWrapper>
-                                
-                                <TripDetails>
-                                    <Detail>
-                                        <Label>Pickup:</Label>
-                                        <Value>{truncateText(trip?.pickupName || trip?.pickup)}</Value>
-                                    </Detail>
-                                    <Detail>
-                                        <Label>Dropoff:</Label>
-                                        <Value>{truncateText(trip?.dropoffName || trip?.dropoff)}</Value>
-                                    </Detail>
-                                    <Detail>
-                                        <Label>Price:</Label>
-                                        <Value>R{trip?.price || 0}</Value>
-                                    </Detail>
-                                    <DriverProfile>
-                                    <Image
-                                        src={trip.driverProfile || 'https://moonride-media.s3.amazonaws.com/default.png'}
-                                        alt="Driver"
-                                        width={50}
-                                        height={50}
-                                        className="rounded-full border-2 border-gray-300"
-                                    />
-                                </DriverProfile>
-                                </TripDetails>
-                                
-                                
-                            </TripCard>
-                        </>
-                    ))}
-                    {hasMore && (
-                        <LoadMoreButton onClick={() => loadTrips(true)}>
-                            Load More
-                        </LoadMoreButton>
-                    )}
-                </>
-            )}
+    <TripCard key={trip.tripId} onClick={() => {handleTripClick(trip)}}>
+        <BadgeWrapper>
+            <StatusBadge status={trip?.status || 'complete'}>
+                {trip.status || 'Completed'}
+            </StatusBadge>
+            {true ? 
+            <NotificationWrapper>
+                <NotificationLabel>Notifications</NotificationLabel>
+                <NotificationBadge>5</NotificationBadge>
+            </NotificationWrapper> : ''}
+        </BadgeWrapper>
+        
+        <TripDetails>
+            <Detail>
+                <Label>Pickup:</Label>
+                <Value>{truncateText(trip?.pickupName || trip?.pickup)}</Value>
+            </Detail>
+            <Detail>
+                <Label>Dropoff:</Label>
+                <Value>{truncateText(trip?.dropoffName || trip?.dropoff)}</Value>
+            </Detail>
+            <Detail>
+                <Label>Price:</Label>
+                <Value>R{trip?.price || 0}</Value>
+            </Detail>
+            <DriverProfile>
+                <Image
+                    src={trip.driverProfile || 'https://moonride-media.s3.amazonaws.com/default.png'}
+                    alt="Driver"
+                    width={50}
+                    height={50}
+                    className="rounded-full border-2 border-gray-300"
+                />
+            </DriverProfile>
+        </TripDetails>
+    </TripCard>
+    ))}
+    {hasMore && (
+        <LoadMoreButton onClick={() => loadTrips(true)}>
+            Load More
+        </LoadMoreButton>
+    )}
+            </>
+        )}
         </RecentTripsWrapper>
     );
 }
