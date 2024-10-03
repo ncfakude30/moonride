@@ -208,6 +208,6 @@ function getPayload(amount: number, transactionReference: string, bankReference:
         allowVariableAmount: false,
     };
 
-    payload.hashCheck = generateHashCheck(payload);
+    //payload.hashCheck = generateHashCheck(payload);
     return payload;
 }
