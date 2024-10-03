@@ -185,6 +185,7 @@ function generateHashCheck(payload: any): string {
         'isTest',
         'selectedBankId',
         'expiryDateUtc',
+        'CustomerIdentifier'
     ];
 
     const inputString = hashSequence.reduce((str, key) => `${str}${payload[key]?.toString() || ''}`, '').concat(OZOW_PRIVATE_KEY).toLowerCase();
