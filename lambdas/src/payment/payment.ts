@@ -18,7 +18,7 @@ const ERROR_URL = process.env.ERROR_URL || 'https://www.moonride.co.za/error';
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    console.log(`Received event: ${JSON.stringify(event)}`);
+    console.log(`Received event: ${JSON.stringify(JSON.parse(event.body || '{}'))}`);
     
     const headers = {
         'Content-Type': 'application/json',

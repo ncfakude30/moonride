@@ -5,7 +5,7 @@ import axios from 'axios';
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || 'AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU';
 
 export const handler = async (event: APIGatewayEvent, context: Context) => {
-    console.log(`Received event: ${JSON.stringify(event)}`);
+    console.log(`Received event: ${JSON.stringify(JSON.parse(event.body || '{}'))}`);
 
     const headers = {
         'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export const handler = async (event: APIGatewayEvent, context: Context) => {
 
 
             console.log(response);
-            
+
             if (response.status !== 200) {
                 return {
                     statusCode: response.status,

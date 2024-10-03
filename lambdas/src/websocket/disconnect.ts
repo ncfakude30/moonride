@@ -11,7 +11,7 @@ const connectionsTable = CONNECTIONS_TABLE;
 const apigatewaymanagementapi = new AWS.ApiGatewayManagementApi({ endpoint: WEBSOCKET_ENDPOINT });
 
 export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
-    console.log(`Received event: ${JSON.stringify(event)}`);
+    console.log(`Received event: ${JSON.stringify(JSON.parse(event.body || '{}'))}`);
     const connectionId = event.requestContext.connectionId;
 
     // Delete the connection from DynamoDB

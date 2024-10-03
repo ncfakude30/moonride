@@ -7,7 +7,7 @@ const TRIP_TABLE = process.env.TRIP_TABLE || 'TripsTable';
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    console.log(`Received event: ${JSON.stringify(event)}`);
+    console.log(`Received event: ${JSON.stringify(JSON.parse(event.body || '{}'))}`);
 
     const headers = {
         'Content-Type': 'application/json',

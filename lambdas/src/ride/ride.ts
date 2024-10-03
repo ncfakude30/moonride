@@ -12,7 +12,7 @@ const decimalToFloat = (obj: any) => {
 };
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    console.log(`Received event: ${JSON.stringify(event)}`);
+    console.log(`Received event: ${JSON.stringify(JSON.parse(event.body || '{}'))}`);
     
     const headers = {
         'Content-Type': 'application/json',
