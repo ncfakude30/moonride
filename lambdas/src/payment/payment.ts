@@ -74,7 +74,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 transactionId: paymentId,
                 paymentId,
                 userId: body.userId,
-                amount: body.amount,
+                amount: String(body.amount),
                 paymentUrl: paymentResponse?.url,
                 paymentRequestId: paymentResponse?.paymentRequestId,
                 paymentDate,
