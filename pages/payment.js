@@ -93,7 +93,7 @@ function Payment() {
                 userId: user?.id || user?.uuid,
                 pickupName: pickupPlace || pickupShortName,
                 dropoffName: dropoffPlace || dropoffShortName,
-                amount: (ride?.selectedCar ? ride?.selectedCar?.price : selectedCar?.price) || 10,
+                amount: String((ride?.selectedCar ? ride?.selectedCar?.price : selectedCar?.price) || 10),
                 firstName: 'TestName',
                 lastName: 'LastTestName',
                 email: 'email@gmail.com',
