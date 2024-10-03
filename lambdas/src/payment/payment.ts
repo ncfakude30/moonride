@@ -124,8 +124,8 @@ async function handleOzowTransaction(body: any, paymentId: string): Promise<any>
         paymentId,
         body.bankReference
     );
-
-    const { paymentRequestId, url } = await initTransaction(ozowPayload);
+    const hashCheck = generateHashCheck(ozowPayload);
+    const { paymentRequestId, url } = await initTransaction({...ozowPayload, hashCheck});
     return { paymentRequestId, url };
 }
 
@@ -209,7 +209,5 @@ function getPayload(amount: number, transactionReference: string, bankReference:
         expiryDateUtc: getExpiryDateUtc(15),
         allowVariableAmount: false,
     };
-
-    payload.hashCheck = generateHashCheck(payload);
     return payload;
 }
