@@ -162,10 +162,11 @@ async function initTransaction(payment: any): Promise<{ paymentRequestId: string
     }
 }
 
-function getExpiryDateUtc(expiryLimit: number): string {
-    const currentDateUtc = new Date();
-    const expiryDateUtc = new Date(currentDateUtc.getTime() + expiryLimit * 60000);
-    return expiryDateUtc.toISOString();
+function getExpiryDateUTC(limit: number): string {
+    const currentDateUTC = new Date();
+    currentDateUTC.setUTCMinutes(currentDateUTC.getUTCMinutes() + limit);
+    const formattedDateTimeUTC = currentDateUTC.toISOString().slice(0, 16).replace('T', ' ');
+    return formattedDateTimeUTC;
 }
 
 function generateHashCheck(payload: any): string {
@@ -187,6 +188,8 @@ function generateHashCheck(payload: any): string {
     ];
 
     const inputString = hashSequence.reduce((str, key) => `${str}${payload[key]?.toString() || ''}`, '').concat(OZOW_PRIVATE_KEY).toLowerCase();
+
+    console.log(`inputString: ${inputString}`);
     return crypto.createHash('sha512')
                         .update(inputString)
                         .digest("hex");
@@ -206,7 +209,7 @@ function getPayload(amount: number, transactionReference: string, bankReference:
         successUrl: SUCCESS_URL,
         notifyUrl: NOTIFY_URL,
         isTest: false,
-        expiryDateUtc: getExpiryDateUtc(15),
+        expiryDateUtc: getExpiryDateUTC(15),
         allowVariableAmount: false,
     };
     return payload;
