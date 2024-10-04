@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import * as AWS from 'aws-sdk';
 import * as crypto from 'crypto';
+import querystring from 'querystring'; // Import the querystring module
 
 const PAYMENT_TABLE = process.env.TRANSACTIONS_TABLE || 'TransactionsTable';
 const OZOW_PRIVATE_KEY = process.env.OZOW_PRIVATE_KEY || '9bc47fe01bbe475a9995a887dcb1e73a';
@@ -27,8 +28,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     if (event.httpMethod === 'POST') {
         try {
-            const body = JSON.parse(event.body || '{}');
-            console.log('Received notification:', body);
+            // Parse the body from x-www-form-urlencoded format
+            const body = querystring.parse(event.body || '') as Record<string, string>;
+            console.log('Parsed notification:', body);
 
             // Step 1: Validate the hash
             const isValidHash = validateHash(body);
@@ -78,7 +80,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 };
 
 // Step 1: Validate the hash received from Ozow
-function validateHash(body: any): boolean {
+function validateHash(body: Record<string, string>): boolean {
     const hashSequence = [
         body.SiteCode,
         body.TransactionId,
@@ -91,7 +93,7 @@ function validateHash(body: any): boolean {
         body.Optional4 || '',
         body.Optional5 || '',
         body.CurrencyCode,
-        body.IsTest.toString(),
+        body.IsTest?.toString() || 'false', // Ensure this is a string
         body.StatusMessage || ''
     ];
 
