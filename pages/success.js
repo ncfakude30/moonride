@@ -54,10 +54,10 @@ function Success() {
 
   // Countdown logic and automatic redirect after 5 seconds
   useEffect(() => {
-    if (isValid === true && countdown > 0) { // Ensure countdown only starts when payment is valid
+    if (countdown > 0) { // Ensure countdown only starts when payment is valid
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (isValid === true && countdown <= 0) {
+    } else if (countdown <= 0) {
       router.push('/'); // Redirect to home page after countdown ends
     }
   }, [countdown, isValid, router]);
