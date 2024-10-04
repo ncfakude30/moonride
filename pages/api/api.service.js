@@ -94,25 +94,38 @@ export const fetchDrivers = async (payload) => {
     }
 };
 
-export const isPaymentValid = async (paymentDetails) => {
+
+export const isPaymentValid = (paymentDetails) => {
     try {
-        // Generate the hash on the client-side using the response details
-        const concatenatedString = `${paymentDetails.SiteCode}${paymentDetails.TransactionId}${paymentDetails.TransactionReference}${paymentDetails.Amount}${paymentDetails.Status}${paymentDetails.Optional1}${paymentDetails.Optional2}${paymentDetails.Optional3}${paymentDetails.Optional4}${paymentDetails.Optional5}${paymentDetails.CurrencyCode}${paymentDetails.IsTest}${paymentDetails.StatusMessage}`.toLowerCase();
-        
-        const calculatedHash = crypto
-            ?.createHash('sha512')
-            ?.update(concatenatedString + (process.env.OZOW_PRIVATE_KEY || '9bc47fe01bbe475a9995a887dcb1e73a')) // Append private key
-            ?.digest('hex')
-            ?.toLowerCase(); // Apply toLowerCase on the resulting hex string
-
-            console.log(`calculated: ${calculatedHash},\nexpected: ${paymentDetails?.Hash?.toLowerCase()},\nstring: ${concatenatedString}`)
-        return calculatedHash === paymentDetails?.Hash?.toLowerCase();
+      const generatedHash = generateHash(paymentDetails);
+      const receivedHash = paymentDetails.Hash?.trim();
+      return generatedHash === receivedHash;
     } catch (error) {
-        console.error('Error verifying payment:', error);
-        return false;
+      console.error('Error verifying payment:', error);
+      return false;
     }
-};
-
+  };
+  
+  // Helper function to generate the hash
+  const generateHash = (ozowDto) => {
+    const variables = [
+      ozowDto.SiteCode,
+      ozowDto.TransactionId,
+      ozowDto.TransactionReference,
+      ozowDto.Amount,
+      ozowDto.Status,
+      ozowDto.Optional1 || '',
+      ozowDto.Optional2 || '',
+      ozowDto.Optional3 || '',
+      ozowDto.Optional4 || '',
+      ozowDto.Optional5 || '',
+      ozowDto.CurrencyCode,
+      ozowDto.IsTest,
+      ozowDto.StatusMessage,
+    ];
+    const result = `${variables.join('')}${process.env.OZOW_PRIVATE_KEY || '9bc47fe01bbe475a9995a887dcb1e73a'}`?.toLowerCase();
+    return crypto.createHash('sha512')?.update(result)?.digest('hex');
+  };
 
 // Export the WebSocket service instance
 export default {

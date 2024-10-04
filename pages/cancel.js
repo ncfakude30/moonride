@@ -28,21 +28,37 @@ function Cancel() {
 }, [dispatch, user, router]);
 
   useEffect(() => {
-
-    if(!query) {
+    if (!query || Object.keys(query).length === 0) {
         setIsValid(false);
         return;
-    }
+      }
+  
+      console.log(query);
 
     // Verify payment using the query parameters from the Ozow redirect
     const verifyTransaction = async () => {
       try {
-        const result = await isPaymentValid(query); // Pass the query as the payment details
-        if (!result) {
-          setIsValid(false); // Payment is invalid
-        } else {
-          setIsValid(true);  // Payment is valid
-        }
+         // Pass the query parameters to the isPaymentValid function
+      const result = isPaymentValid({
+        SiteCode: query.SiteCode,
+        TransactionId: query.TransactionId,
+        TransactionReference: query.TransactionReference,
+        Amount: query.Amount,
+        Status: query.Status,
+        Hash: query.Hash,
+        Optional1: query.Optional1,
+        Optional2: query.Optional2,
+        Optional3: query.Optional3,
+        Optional4: query.Optional4,
+        Optional5: query.Optional5,
+        CurrencyCode: query.CurrencyCode,
+        IsTest: query.IsTest,
+        StatusMessage: query.StatusMessage,
+      });
+
+      console.log(result);
+      
+      setIsValid(result);
       } catch (error) {
         console.error('Payment verification error:', error);
         setIsValid(false); // Assume invalid on error
@@ -50,7 +66,7 @@ function Cancel() {
     };
 
     verifyTransaction();
-  }, [query]);
+  }, [query, isValid]);
 
   // Countdown logic and automatic redirect after 5 seconds
   useEffect(() => {
@@ -60,7 +76,7 @@ function Cancel() {
     } else if (countdown <= 0) {
       router.push('/'); // Redirect to home page after countdown ends
     }
-  }, [countdown, isValid, router]);
+  }, [countdown, router]);
 
   // Show loading or verification message while isValid is null
   if (isValid === null) {
