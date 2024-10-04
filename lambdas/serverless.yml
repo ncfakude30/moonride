@@ -27,6 +27,7 @@ provider:
         - dynamodb:Scan
         - dynamodb:DeleteItem
         - dynamodb:BatchGetItem
+        - dynamodb:UpdateItem
       Resource:
         - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.TRIPS_TABLE}
         - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.USERS_TABLE}
