@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as crypto from 'crypto';
 
 const apiEndpoint = process.env.API_BASE_URL || 'https://ufqmmf6blc.execute-api.us-east-1.amazonaws.com/dev';
 
@@ -93,8 +94,28 @@ export const fetchDrivers = async (payload) => {
     }
 };
 
+export const isPaymentValid = async (paymentDetails) => {
+    try {
+        // Generate the hash on the client-side using the response details
+        const concatenatedString = `${paymentDetails.SiteCode}${paymentDetails.TransactionId}${paymentDetails.TransactionReference}${paymentDetails.Amount}${paymentDetails.Status}${paymentDetails.Optional1}${paymentDetails.Optional2}${paymentDetails.Optional3}${paymentDetails.Optional4}${paymentDetails.Optional5}${paymentDetails.CurrencyCode}${paymentDetails.IsTest}${paymentDetails.StatusMessage}`.toLowerCase();
+        
+        const calculatedHash = crypto
+            ?.createHash('sha512')
+            ?.update(concatenatedString + (process.env.OZOW_PRIVATE_KEY || '9bc47fe01bbe475a9995a887dcb1e73a')) // Append private key
+            ?.digest('hex')
+            ?.toLowerCase(); // Apply toLowerCase on the resulting hex string
+
+        return calculatedHash === paymentDetails?.Hash?.toLowerCase();
+    } catch (error) {
+        console.error('Error verifying payment:', error);
+        return false;
+    }
+};
+
 
 // Export the WebSocket service instance
 export default {
     apiClient
 };
+
+
