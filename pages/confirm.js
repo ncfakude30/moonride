@@ -21,8 +21,11 @@ function Confirm() {
         if (!user) {
             router.push('/login');
         } 
-        if (!pickupCoordinates && !dropoffCoordinates) {
+        if (pickupCoordinates?.length === 0 ) {
             getPickupCoordinates(pickup);
+        }
+
+        if (dropoffCoordinates?.length === 0 ) {
             getDropoffCoordinates(dropoff);
         }
     }, [user, router, pickupCoordinates, dropoffCoordinates, pickup, dropoff]);

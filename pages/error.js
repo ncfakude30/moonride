@@ -80,7 +80,7 @@ function Success() {
             We encountered an issue processing your payment. Please try again or contact support.
             </ErrorDescription>
             <ErrorButton onClick={() => router.push('/payment')}>Retry Payment</ErrorButton>
-            <ErrorButton onClick={() => router.push('/')}>Go to Home</ErrorButton>
+            <Button onClick={() => router.push('/')}>Go to Home</Button>
         </Message>
         </Wrapper>
     );
@@ -110,9 +110,9 @@ const Countdown = tw.span`
 `;
 
 const Button = tw.button`
-    bg-gradient-to-r from-green-600 to-green-400 text-white rounded-full p-2 font-semibold shadow-lg
-    hover:bg-gradient-to-r hover:from-green-500 hover:to-green-300 transition-colors
-    focus:outline-none focus:ring-1 focus:ring-green-500
+    bg-gradient-to-r from-gray-600 to-gray-400 text-white rounded-full p-2 font-semibold shadow-lg
+    hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
+    focus:outline-none focus:ring-1 focus:ring-gray-500
     w-full max-w-xs
 `;
 

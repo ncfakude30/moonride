@@ -27,6 +27,29 @@ function Search() {
             return;
         }
 
+        const updatePolyline = () => {
+            const googleMaps = window.google.maps;
+            if (pickupMarker && dropoffMarker) {
+                const path = [
+                    pickupMarker.getPosition(),
+                    dropoffMarker.getPosition(),
+                ];
+                if (polyline) {
+                    polyline.setPath(path);
+                } else {
+                    const newPolyline = new googleMaps.Polyline({
+                        path: path,
+                        geodesic: true,
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2,
+                        map: map,
+                    });
+                    setPolyline(newPolyline);
+                }
+            }
+        };    
+
         const initializeMap = async () => {
             const googleMaps = await loadGoogleMaps('AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU');
             const mapContainer = document.getElementById('map');
@@ -112,7 +135,7 @@ function Search() {
         if (!map) {
             initializeMap();
         }
-    }, [user, pickup, dropoff, pickupMarker, map, router, userLocationMarker, dispatch]);
+    }, [user, pickup, dropoff, pickupMarker, map, router, userLocationMarker, dispatch, dropoffMarker, polyline]);
 
     useEffect(() => {
         if (pickupMarker && dropoffMarker) {
@@ -123,28 +146,6 @@ function Search() {
         }
     }, [pickupMarker, dropoffMarker, dispatch]);
 
-    const updatePolyline = () => {
-        const googleMaps = window.google.maps;
-        if (pickupMarker && dropoffMarker) {
-            const path = [
-                pickupMarker.getPosition(),
-                dropoffMarker.getPosition(),
-            ];
-            if (polyline) {
-                polyline.setPath(path);
-            } else {
-                const newPolyline = new googleMaps.Polyline({
-                    path: path,
-                    geodesic: true,
-                    strokeColor: '#FF0000',
-                    strokeOpacity: 1.0,
-                    strokeWeight: 2,
-                    map: map,
-                });
-                setPolyline(newPolyline);
-            }
-        }
-    };
 
     const handlePopupOpen = () => {
         setIsPopupOpen(true);
