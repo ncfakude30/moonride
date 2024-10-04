@@ -117,7 +117,7 @@ async function updatePaymentStatus(transactionReference: string, status: string)
             '#status': 'status'
         },
         ExpressionAttributeValues: {
-            ':status': status
+            ':status': status?.toUpperCase()
         },
         ReturnValues: 'UPDATED_NEW'
     };
