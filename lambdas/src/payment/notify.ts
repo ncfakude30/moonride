@@ -8,6 +8,7 @@ const OZOW_PRIVATE_KEY = process.env.OZOW_PRIVATE_KEY || '9bc47fe01bbe475a9995a8
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    console.log('Received notification:', event);
     const headers = {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
