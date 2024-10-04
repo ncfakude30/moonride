@@ -105,6 +105,7 @@ export const isPaymentValid = async (paymentDetails) => {
             ?.digest('hex')
             ?.toLowerCase(); // Apply toLowerCase on the resulting hex string
 
+            console.log(`calculated: ${calculatedHash},\nexpected: ${paymentDetails?.Hash?.toLowerCase()},\nstring: ${concatenatedString}`)
         return calculatedHash === paymentDetails?.Hash?.toLowerCase();
     } catch (error) {
         console.error('Error verifying payment:', error);
