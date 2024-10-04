@@ -1,27 +1,35 @@
-import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 import tw from 'tailwind-styled-components';
 
 function Success() {
-    return (
-        <Wrapper>
-            <Message>Thank you! Your trip has been confirmed and payment was successful.</Message>
-            <Link href='/' passHref>
-                <HomeButton>Go Home</HomeButton>
-            </Link>
-        </Wrapper>
-    );
+  const router = useRouter();
+
+  useEffect(() => {
+    // Add any additional logic here (e.g., updating DB, triggering notifications, etc.)
+  }, []);
+
+  return (
+    <Wrapper>
+      <Message>
+        <h1>Payment Successful!</h1>
+        <p>Thank you for your payment. Your transaction has been completed successfully.</p>
+        <Button onClick={() => router.push('/')}>Go to Home</Button>
+      </Message>
+    </Wrapper>
+  );
 }
 
 export default Success;
 
 const Wrapper = tw.div`
-    flex h-screen items-center justify-center flex-col
+  flex justify-center items-center h-screen bg-gray-100
 `;
 
 const Message = tw.div`
-    text-xl mb-4 text-center
+  bg-white p-8 rounded-lg shadow-lg text-center
 `;
 
-const HomeButton = tw.a`
-    bg-black text-white py-2 px-4 rounded cursor-pointer transition-colors duration-300 ease-in-out hover:bg-gray-800
+const Button = tw.button`
+  mt-4 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600
 `;

@@ -1,5 +1,5 @@
 // Importing all Lambda handlers
-export { handler as paymentCallBack } from './payment/payment_callback'
+export { handler as notify } from './payment/notify'
 export { handler as payment } from './payment/payment';
 export { handler as trips } from './ride/ride';
 export { handler as login } from './user/login';

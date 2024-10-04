@@ -146,7 +146,7 @@ functions:
             allowCredentials: true
 
   paymentCallback:
-    handler: src/index.paymentCallBack
+    handler: src/index.notify
     package:
       include:
         - payment/*
