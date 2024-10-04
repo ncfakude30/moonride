@@ -53,7 +53,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             }
 
             // Step 3: Update the payment status in DynamoDB
-            await updatePaymentStatus(TransactionReference, Status);
+            await updatePaymentStatus(TransactionReference, Status?.toUpperCase());
 
             return {
                 statusCode: 200,
@@ -117,7 +117,7 @@ async function updatePaymentStatus(transactionReference: string, status: string)
             '#status': 'status'
         },
         ExpressionAttributeValues: {
-            ':status': status?.toUpperCase()
+            ':status': status
         },
         ReturnValues: 'UPDATED_NEW'
     };
