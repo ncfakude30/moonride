@@ -332,8 +332,6 @@ resources:
         AttributeDefinitions:
           - AttributeName: 'transactionId'
             AttributeType: S
-          - AttributeName: 'userId'
-            AttributeType: S
         KeySchema:
           - AttributeName: 'transactionId'
             KeyType: HASH
