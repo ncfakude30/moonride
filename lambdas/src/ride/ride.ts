@@ -2,26 +2,18 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import * as AWS from 'aws-sdk';
 
 const RECENT_TRIPS_TABLE = process.env.RECENT_TRIPS_TABLE || 'TripsTable';
-const PAGE_LIMIT = Number(process.env.PAGE_LIMIT) || 5;  // Ensure PAGE_LIMIT is an integer
+const PAGE_LIMIT = Number(process.env.PAGE_LIMIT) || 5;
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-const decimalToFloat = (obj: any) => {
-    if (typeof obj === 'number') return obj;
-    throw new TypeError("Object of type Decimal is not JSON serializable");
-};
-
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    console.log(`Received event: ${JSON.stringify(JSON.parse(event.body || '{}'))}`);
-    
     const headers = {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',  // Allow requests from any origin
-        'Access-Control-Allow-Methods': 'OPTIONS,GET',  // Allow GET and OPTIONS methods
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization',  // Allow specific headers
-        'Access-Control-Allow-Credentials': 'true'
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS,GET',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+        'Access-Control-Allow-Credentials': 'true',
     };
-    
 
     // Handle CORS preflight requests
     if (event.httpMethod === 'OPTIONS') {
@@ -47,16 +39,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             const limit = Number(event.queryStringParameters?.limit) || PAGE_LIMIT;
             const lastEvaluatedKey = event.queryStringParameters?.lastEvaluatedKey ? JSON.parse(event.queryStringParameters.lastEvaluatedKey) : undefined;
 
-            const table = RECENT_TRIPS_TABLE;
-
-            // Building the query parameters
             const queryParams: AWS.DynamoDB.DocumentClient.QueryInput = {
-                TableName: table,
+                TableName: RECENT_TRIPS_TABLE,
                 KeyConditionExpression: 'userId = :userId',
                 ExpressionAttributeValues: {
                     ':userId': userId,
                 },
                 Limit: limit,
+                ScanIndexForward: false,  // Get latest trips first
             };
 
             // Add the ExclusiveStartKey if pagination is being used
@@ -64,10 +54,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 queryParams.ExclusiveStartKey = lastEvaluatedKey;
             }
 
-            // Query the DynamoDB table
             const response = await dynamodb.query(queryParams).promise();
 
-            // Prepare the result with pagination information
             const result = {
                 trips: response.Items?.map(item => {
                     return {
