@@ -4,7 +4,7 @@ import { signInWithPopup, onAuthStateChanged, signInWithPhoneNumber, RecaptchaVe
 import { auth, provider } from '../firebase'; // Firebase config and initialization
 import tw from 'tailwind-styled-components';
 import Image from 'next/image';
-import { loginApi } from './api/api.service';
+import { loginApi, registerApi } from './api/api.service'; // Add registerApi for registration
 import { useDispatch } from 'react-redux';
 import { setUser } from '../store/reducers/authSlice';
 
@@ -14,21 +14,26 @@ function Login() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationId, setVerificationId] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false); // State to toggle between login and registration
-  const [showPhoneInput, setShowPhoneInput] = useState(false); // State to toggle phone input
+  const [isRegistering, setIsRegistering] = useState(false); // Toggle between login and registration
+  const [showPhoneInput, setShowPhoneInput] = useState(false);
+  const [buttonText, setButtonText] = useState('Sign in with Phone Number'); // State for button text
+  const [isOtpSent, setIsOtpSent] = useState(false); // State for OTP action
+  const [isGoogleDisabled, setIsGoogleDisabled] = useState(false); // Disable Google button
+  const [isPhoneDisabled, setIsPhoneDisabled] = useState(false); // Disable Phone button
+  const [isLoading, setIsLoading] = useState(false); // Loader state for OTP sending
 
   useEffect(() => {
     const handleAuthStateChanged = async (user) => {
       if (user) {
         try {
-          const response = await loginApi({
+          const apiFunction = isRegistering ? registerApi : loginApi;
+          const response = await apiFunction({
             email: user.email,
             displayName: user.displayName,
             photoURL: user.photoURL,
             id: user?.id || user.uid,
           });
 
-          console.log(`Login response: ${JSON.stringify(response)}`);
           if (response.success) {
             dispatch(setUser({
               name: user.displayName,
@@ -37,7 +42,7 @@ function Login() {
             }));
             router.push('/');
           } else {
-            console.error('Failed to store user data');
+            console.error(`Failed to ${isRegistering ? 'register' : 'login'} user`);
             router.push('/login');
           }
         } catch (error) {
@@ -49,36 +54,47 @@ function Login() {
 
     const unsubscribe = onAuthStateChanged(auth, handleAuthStateChanged);
     return () => unsubscribe();
-  }, [dispatch, router]);
+  }, [dispatch, router, isRegistering]);
 
-  // Handle Google sign-in
   const handleGoogleSignIn = async () => {
     try {
+      setIsPhoneDisabled(true); // Disable phone button when Google sign-in is clicked
       await signInWithPopup(auth, provider);
     } catch (error) {
       console.error('Sign in failed:', error);
     }
   };
 
-  // Handle phone number sign-in
-  const handlePhoneSignIn = () => {
-    setShowPhoneInput(true); // Show the phone number input when clicked
+  // Handle phone number sign-in and OTP sending
+  const handlePhoneButtonClick = () => {
+    if (!isOtpSent) {
+      // First click: Show phone input and change button text
+      setShowPhoneInput(true);
+      setButtonText('Send OTP');
+      setIsOtpSent(true);
+      setIsGoogleDisabled(true); // Disable Google button when phone button is clicked
+    } else {
+      // Second click: Send OTP
+      handleSendOtp();
+    }
   };
 
   const handleSendOtp = async () => {
     try {
+      setIsLoading(true); // Start loader
       const recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
         size: 'invisible',
       }, auth);
 
       const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
       setVerificationId(confirmationResult.verificationId);
+      setIsLoading(false); // Stop loader
     } catch (error) {
       console.error('Error during phone sign-in:', error);
+      setIsLoading(false); // Stop loader in case of error
     }
   };
 
-  // Verify OTP
   const verifyCode = async () => {
     try {
       const credential = await auth.PhoneAuthProvider.credential(verificationId, verificationCode);
@@ -88,13 +104,14 @@ function Login() {
     }
   };
 
-  // Toggle between login and registration
   const toggleRegister = () => {
     setIsRegistering(!isRegistering);
     setPhoneNumber('');
     setVerificationCode('');
     setVerificationId('');
-    setShowPhoneInput(false); // Reset phone input visibility when toggling
+    setShowPhoneInput(false);
+    setIsOtpSent(false); // Reset OTP state when toggling
+    setButtonText('Sign in with Phone Number'); // Reset button text when toggling
   };
 
   return (
@@ -103,10 +120,18 @@ function Login() {
         <Image src='https://moonride-media.s3.amazonaws.com/moon-ride.png' alt='MoonRides Logo' width={200} height={200} />
         <Title>{isRegistering ? 'Register your account' : 'Login to access your account'}</Title>
 
-        {/* Phone Number Sign In */}
-        <SignInButton onClick={handlePhoneSignIn}>Sign in with Phone Number</SignInButton>
+        {/* Loader popup while sending OTP */}
+        {isLoading && (
+          <LoadingPopup>
+            <LoadingWrapper>
+              <Loader />
+              <LoadingMessage>Sending OTP...</LoadingMessage>
+            </LoadingWrapper>
+          </LoadingPopup>
+        )}
 
-        {showPhoneInput && (
+        {/* Phone number input */}
+        <div className={`overflow-hidden transition-all duration-500 ${showPhoneInput ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
           <InputBoxes>
             <Input
               type="text"
@@ -114,29 +139,36 @@ function Login() {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
             />
-            <SignInButton onClick={handleSendOtp}>Send OTP</SignInButton>
           </InputBoxes>
-        )}
-
-        {/* Google Sign In */}
-        <SignInButton onClick={handleGoogleSignIn}>Sign in with Google</SignInButton>
-
+        </div>
 
         {/* OTP Verification */}
         {verificationId && (
-          <InputBoxes>
-            <Input
-              type="text"
-              placeholder="Enter OTP"
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
-            />
+          <>
+            <InputBoxes>
+              <Input
+                type="text"
+                placeholder="Enter OTP"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+              />
+            </InputBoxes>
             <SignInButton onClick={verifyCode}>Verify OTP</SignInButton>
-          </InputBoxes>
+          </>
         )}
 
+        {/* Phone Number Sign In */}
+        <SignInButton onClick={handlePhoneButtonClick} disabled={isPhoneDisabled}>
+          {buttonText}
+        </SignInButton>
+
+        {/* Google Sign In */}
+        <SignInButton onClick={handleGoogleSignIn} disabled={isGoogleDisabled}>
+        {isRegistering ? 'Register with Google' : 'Sign in with Google'}
+        </SignInButton>
+
         <div id="recaptcha-container"></div>
-        
+
         {/* Toggle between login and registration */}
         <ToggleLink onClick={toggleRegister}>
           {isRegistering ? 'Already have an account? Login' : 'Don\'t have an account? Register'}
@@ -147,6 +179,8 @@ function Login() {
 }
 
 export default Login;
+
+// Tailwind CSS Components
 
 const Wrapper = tw.div`
   flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-gray-100
@@ -160,11 +194,12 @@ const SignInButton = tw.button`
     bg-gradient-to-r from-gray-600 to-gray-400 text-white text-center rounded-full p-4 font-semibold shadow-lg
     hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
     focus:outline-none focus:ring-1 focus:ring-gray-600 focus:ring-opacity-25
-    w-full max-w-xs my-2  // Added margin for spacing between buttons
+    w-full max-w-xs my-2
+    disabled:opacity-50 disabled:cursor-not-allowed
 `;
 
 const InputBoxes = tw.div`
-    flex flex-col mb-4 // Added bottom margin for spacing
+    flex flex-col mb-4
 `;
 
 const Input = tw.input`
@@ -179,5 +214,21 @@ const Title = tw.div`
 `;
 
 const ToggleLink = tw.span`
-  text-blue-500 cursor-pointer mt-4 hover:underline
+  text-white-500 font-semibold cursor-pointer mt-4 hover:underline
+`;
+
+const LoadingPopup = tw.div`
+  fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-70
+`;
+
+const LoadingWrapper = tw.div`
+  flex flex-col items-center justify-center py-6
+`;
+
+const LoadingMessage = tw.div`
+  text-white font-semibold text-center py-4 text-center text-xs py-2
+`;
+
+const Loader = tw.div`
+  w-16 h-16 border-4 border-dashed rounded-full animate-spin border-white-500
 `;
