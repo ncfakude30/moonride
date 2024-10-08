@@ -116,7 +116,6 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
     }, [pickupCoordinates, loading, drivers, dispatch]);
 
     const handleCarClick = (car) => {
-        const calculatedPrice = currency === 'ZAR' ? `R${(rideDuration * car?.multiplier).toFixed(2)}` : `$${(rideDuration * car?.multiplier).toFixed(2)}`;
         dispatch(setCarPrice((rideDuration * car?.multiplier).toFixed(2))); // Dispatch the calculated car price
         dispatch(setSelectedCar(car));
         onSelectRide(car); // Notify parent component about the selected car
