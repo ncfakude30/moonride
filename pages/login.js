@@ -7,6 +7,8 @@ import Image from 'next/image';
 import { loginApi, registerApi } from './api/api.service'; // Add registerApi for registration
 import { useDispatch } from 'react-redux';
 import { setUser } from '../store/reducers/authSlice';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 function Login() {
   const router = useRouter();
@@ -65,7 +67,6 @@ function Login() {
     }
   };
 
-  // Handle phone number sign-in and OTP sending
   const handlePhoneButtonClick = () => {
     if (!isOtpSent) {
       // First click: Show phone input and change button text
@@ -86,7 +87,7 @@ function Login() {
         size: 'invisible',
       }, auth);
 
-      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+      const confirmationResult = await signInWithPhoneNumber(auth, `+${phoneNumber?.trim()}`, recaptchaVerifier);
       setVerificationId(confirmationResult.verificationId);
       setIsLoading(false); // Stop loader
     } catch (error) {
@@ -133,11 +134,13 @@ function Login() {
         {/* Phone number input */}
         <div className={`overflow-hidden transition-all duration-500 ${showPhoneInput ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
           <InputBoxes>
-            <Input
-              type="text"
-              placeholder="Enter your phone number"
+            <PhoneInput
+              country={'us'} // Default country
               value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              onChange={setPhoneNumber}
+              placeholder="Enter your phone number"
+              specialLabel=""
+              disableDropdown={false}
             />
           </InputBoxes>
         </div>
@@ -164,7 +167,7 @@ function Login() {
 
         {/* Google Sign In */}
         <SignInButton onClick={handleGoogleSignIn} disabled={isGoogleDisabled}>
-        {isRegistering ? 'Register with Google' : 'Sign in with Google'}
+          {isRegistering ? 'Register with Google' : 'Sign in with Google'}
         </SignInButton>
 
         <div id="recaptcha-container"></div>
