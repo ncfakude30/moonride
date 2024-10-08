@@ -24,6 +24,7 @@ function Payment() {
     const [selectedGateway, setSelectedGateway] = useState('');
     const { pickup, dropoff } = useSelector(state => state.search);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const carPrice = useSelector((state) => state.ride.carPrice);
 
     useEffect(() => {
         if (!user) {
@@ -86,14 +87,14 @@ function Payment() {
             const request = {
                 pickup,
                 dropoff,
-                price: (ride?.selectedCar ? ride?.selectedCar.price : selectedCar?.price) || 10,
+                price: (carPrice) || 10,
                 time: ride?.selectedCar ? ride?.selectedCar?.time : selectedCar?.time,
                 rating: ride?.selectedCar ? ride?.selectedCar?.rating : selectedCar?.rating,
                 driverProfile: ride?.selectedCar ? ride?.selectedCar?.driverProfile : selectedCar?.driverProfile,
                 userId: user?.id || user?.uuid,
                 pickupName: pickupPlace || pickupShortName,
                 dropoffName: dropoffPlace || dropoffShortName,
-                amount: String((ride?.selectedCar ? ride?.selectedCar?.price : selectedCar?.price) || 10),
+                amount: String((carPrice) || 10),
                 firstName: 'TestName',
                 lastName: 'LastTestName',
                 email: 'email@gmail.com',
@@ -196,7 +197,7 @@ function Payment() {
                                 />
                                 <DirectionsContainer>
                                 <p><strong>Service:</strong> {selectedCar.service}</p>
-                                <p><strong>Price:</strong>R {selectedCar.price || '10'}</p>
+                                <p><strong>Price:</strong>R {carPrice || '10'}</p>
                                 </DirectionsContainer>
                             </CarDetails>
                         )}

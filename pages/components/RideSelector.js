@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import tw from 'tailwind-styled-components';
-import { setCurrency } from '../../store/actions/rideActions';
+import { setCurrency, setCarPrice } from '../../store/actions/rideActions';
 import { setDirectionResponse, setSelectedCar, setLoading } from '../../store/reducers/confirmationSlice';
 import { getDirections, fetchDrivers } from '../api/api.service';
 import { carList } from '../../data/carList';
@@ -41,6 +41,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
     const currency = useSelector((state) => state.ride.currency);
     const [rideDuration, setRideDuration] = useState(0);
     const [drivers, setDrivers] = useState([]); // State for fetched drivers
+    const carPrice = useSelector((state) => state.ride.carPrice);
 
     useEffect(() => {
         const fetchCurrency = async () => {
@@ -115,9 +116,12 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
     }, [pickupCoordinates, loading, drivers, dispatch]);
 
     const handleCarClick = (car) => {
+        const calculatedPrice = currency === 'ZAR' ? `R${(rideDuration * car?.multiplier).toFixed(2)}` : `$${(rideDuration * car?.multiplier).toFixed(2)}`;
+        dispatch(setCarPrice((rideDuration * car?.multiplier).toFixed(2))); // Dispatch the calculated car price
         dispatch(setSelectedCar(car));
         onSelectRide(car); // Notify parent component about the selected car
     };
+    
 
     return (
         <Wrapper>

@@ -1,4 +1,4 @@
-import { SET_SELECTED_CAR, SET_CURRENCY } from '../actions/rideActions';
+import { SET_SELECTED_CAR, SET_CURRENCY, SET_CAR_PRICE } from '../actions/rideActions';
 
 const initialState = {
     selectedCar: null,
@@ -17,9 +17,16 @@ const rideReducer = (state = initialState, action) => {
                 ...state,
                 currency: action.payload,
             };
+        case SET_CAR_PRICE:
+            return {
+                ...state,
+                carPrice: action.payload,
+            };
         default:
             return state;
     }
 };
+
+
 
 export default rideReducer;
