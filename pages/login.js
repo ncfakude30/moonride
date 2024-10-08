@@ -60,10 +60,13 @@ function Login() {
 
   const handleGoogleSignIn = async () => {
     try {
+      setIsLoading(true); // Start loading when Google sign-in is initiated
       setIsPhoneDisabled(true); // Disable phone button when Google sign-in is clicked
       await signInWithPopup(auth, provider);
+      setIsLoading(false); // Stop loading after successful sign-in
     } catch (error) {
       console.error('Sign in failed:', error);
+      setIsLoading(false); // Stop loading in case of error
     }
   };
 
@@ -121,12 +124,12 @@ function Login() {
         <Image src='https://moonride-media.s3.amazonaws.com/moon-ride.png' alt='MoonRides Logo' width={200} height={200} />
         <Title>{isRegistering ? 'Register your account' : 'Login to access your account'}</Title>
 
-        {/* Loader popup while sending OTP */}
+        {/* Loader popup while sending OTP or signing in with Google */}
         {isLoading && (
           <LoadingPopup>
             <LoadingWrapper>
               <Loader />
-              <LoadingMessage>Sending OTP...</LoadingMessage>
+              <LoadingMessage>{isOtpSent ? 'Sending OTP...' : 'Signing in with Google...'}</LoadingMessage>
             </LoadingWrapper>
           </LoadingPopup>
         )}
