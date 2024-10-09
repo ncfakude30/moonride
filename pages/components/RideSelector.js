@@ -120,7 +120,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
             {loading || driverLoading ? (
                 <LoadingWrapper>
                     <Loader />
-                    <LoadingMessage>{loading ? 'Calculating ride duration...' : 'Please wait, looking for drivers...'}</LoadingMessage>
+                    <LoadingMessage>{loading && 'Please wait, looking for drivers...'}</LoadingMessage>
                 </LoadingWrapper>
             ) : (
                 <>

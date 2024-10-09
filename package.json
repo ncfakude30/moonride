@@ -9,7 +9,11 @@
     "deploy": "serverless deploy"
   },
   "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
     "@mapbox/mapbox-gl-geocoder": "^5.0.2",
+    "@mui/icons-material": "^6.1.3",
+    "@mui/material": "^6.1.3",
     "@react-google-maps/api": "^2.19.3",
     "@reduxjs/toolkit": "^2.2.7",
     "axios": "^1.7.7",

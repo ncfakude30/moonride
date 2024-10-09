@@ -130,7 +130,7 @@ const SkeletonWrapper = tw.div`
 `;
 
 const ActionItems = tw.div`
-    flex-1 p-4
+    flex-1 p-4 
 `;
 
 const Header = tw.div`

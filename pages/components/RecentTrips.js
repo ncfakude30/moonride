@@ -4,13 +4,13 @@ import tw from 'tailwind-styled-components';
 import Image from 'next/image';
 import Link from 'next/link';
 import { fetchRecentTrips } from '../api/api.service';
-import {setTrackingDetails} from '../../store/actions/trackingActions'
+import { setTrackingDetails } from '../../store/actions/trackingActions';
 import { setTrips, appendTrips, setLoading, setError } from '../../store/reducers/tripSlice';
 import { useRouter } from 'next/router';
 
 function RecentTrips() {
     const dispatch = useDispatch();
-    const { trips, lastEvaluatedKey, hasMore, loading, hasNotifications } = useSelector((state) => state.trips);
+    const { trips, lastEvaluatedKey, hasMore, loading } = useSelector((state) => state.trips);
     const user = useSelector((state) => state.auth.user);
     const router = useRouter();
 
@@ -47,14 +47,14 @@ function RecentTrips() {
     const handleTripClick = (trip) => {
         dispatch(setTrackingDetails({
             pickup: trip?.pickup,
-            dropoff: trip?.pickup,
+            dropoff: trip?.dropoff,
             pickupCoordinates: trip?.pickupCoordinates,
             dropoff: trip?.dropoffCoordinates,
             user,
             loading: false
         }));
         router.push('/tracking');
-    }
+    };
 
     useEffect(() => {
         loadTrips();
@@ -72,50 +72,52 @@ function RecentTrips() {
             ) : (
                 <>
                     {trips.map(trip => (
-    <TripCard key={trip.tripId} onClick={() => {handleTripClick(trip)}}>
-        <BadgeWrapper>
-            <StatusBadge status={trip?.status || 'complete'}>
-                {trip.status || 'Completed'}
-            </StatusBadge>
-            {true ? 
-            <NotificationWrapper>
-                <NotificationLabel>Notifications</NotificationLabel>
-                <NotificationBadge>5</NotificationBadge>
-            </NotificationWrapper> : ''}
-        </BadgeWrapper>
-        
-        <TripDetails>
-            <Detail>
-                <Label>Pickup:</Label>
-                <Value>{truncateText(trip?.pickupName || trip?.pickup)}</Value>
-            </Detail>
-            <Detail>
-                <Label>Dropoff:</Label>
-                <Value>{truncateText(trip?.dropoffName || trip?.dropoff)}</Value>
-            </Detail>
-            <Detail>
-                <Label>Price:</Label>
-                <Value>R{trip?.price || 0}</Value>
-            </Detail>
-            <DriverProfile>
-                <Image
-                    src={trip.driverProfile || 'https://moonride-media.s3.amazonaws.com/default.png'}
-                    alt="Driver"
-                    width={50}
-                    height={50}
-                    className="rounded-full border-2 border-gray-300"
-                />
-            </DriverProfile>
-        </TripDetails>
-    </TripCard>
-    ))}
-    {hasMore && (
-        <LoadMoreButton onClick={() => loadTrips(true)}>
-            Load More
-        </LoadMoreButton>
-    )}
-            </>
-        )}
+                        <TripCard key={trip.tripId} onClick={() => handleTripClick(trip)}>
+                            <BadgeWrapper>
+                                <StatusBadge status={trip?.status || 'complete'}>
+                                    {trip.status || 'Completed'}
+                                </StatusBadge>
+                                {true ? (
+                                    <NotificationWrapper>
+                                        <NotificationLabel>Notifications</NotificationLabel>
+                                        <NotificationBadge>5</NotificationBadge>
+                                    </NotificationWrapper>
+                                ) : ''}
+                            </BadgeWrapper>
+
+                            <TripDetails>
+                                <TripDetail>
+                                    <Label>Pickup:</Label>
+                                    <Value>{truncateText(trip?.pickupName || trip?.pickup)}</Value>
+                                </TripDetail>
+                                <TripDetail>
+                                    <Label>Dropoff:</Label>
+                                    <Value>{truncateText(trip?.dropoffName || trip?.dropoff)}</Value>
+                                </TripDetail>
+                                <TripDetail>
+                                    <Label>Price:</Label>
+                                    <Value>R{trip?.price || 0}</Value>
+                                </TripDetail>
+                            </TripDetails>
+
+                            <DriverProfile>
+                                <Image
+                                    src={trip.driverProfile || 'https://moonride-media.s3.amazonaws.com/default.png'}
+                                    alt="Driver"
+                                    width={50}
+                                    height={50}
+                                    className="rounded-full border-2 border-gray-300"
+                                />
+                            </DriverProfile>
+                        </TripCard>
+                    ))}
+                    {hasMore && (
+                        <LoadMoreButton onClick={() => loadTrips(true)}>
+                            Load More
+                        </LoadMoreButton>
+                    )}
+                </>
+            )}
         </RecentTripsWrapper>
     );
 }
@@ -128,7 +130,7 @@ const truncateText = (text) => {
 export default RecentTrips;
 
 const RecentTripsWrapper = tw.div`
-    flex flex-col space-y-4 p-4
+      flex flex-col flex-wrap space-x-2 space-y-2 p-2
 `;
 
 const Title = tw.h2`
@@ -136,23 +138,17 @@ const Title = tw.h2`
 `;
 
 const TripCard = tw.div`
-    flex relative bg-white shadow-md rounded-lg p-4 transition-transform transform hover:scale-105 cursor-pointer
-    border border-gray-200
-    space-y-2
-    pt-6 pb-4
-    // Ensure space for driver profile
-    min-h-[150px] 
-    // Add padding for right alignment of driver profile
-    pr-16
+    relative bg-white text-gray-800 rounded-lg p-4 shadow-lg transition-transform transform hover:scale-105 cursor-pointer
+    hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50
+    overflow-hidden border border-gray-200 space-y-4
 `;
 
 const BadgeWrapper = tw.div`
-    absolute top-4 left-2 right-2 flex justify-between items-center
+    flex justify-between items-center
 `;
 
 const StatusBadge = tw.div`
-    w-20 h-6 px-2 py-1 text-white text-xs font-bold rounded-full
-    flex items-center justify-center
+    w-20 h-6 px-1 py-1 text-white text-xs font-bold rounded-full flex items-center justify-center
     ${props => props.status === 'complete' && 'bg-green-500'}
     ${props => props.status === 'cancelled' && 'bg-blue-500'}
     ${props => props.status === 'failed' && 'bg-red-500'}
@@ -171,12 +167,11 @@ const NotificationBadge = tw.div`
 `;
 
 const TripDetails = tw.div`
-    flex-1 pr-4 pt-4 flex flex-col space-y-2
-    mb-12
+    flex flex-col space-y-1 mb-4
 `;
 
-const Detail = tw.div`
-    flex items-center
+const TripDetail = tw.div`
+    flex items-center border-b border-gray-200 pb-1
 `;
 
 const Label = tw.span`
@@ -184,11 +179,12 @@ const Label = tw.span`
 `;
 
 const Value = tw.span`
-    text-gray-800 ml-2
+    text-gray-800 ml-2 flex-grow text-left // Ensure Value is aligned to the left
 `;
 
 const DriverProfile = tw.div`
-    absolute right-4 justify-center flex items-center justify-center
+    flex items-center justify-center absolute right-4 bottom-4 w-14 h-14
+    bg-white rounded-full shadow-md border border-gray-200
 `;
 
 const LoadingMessage = tw.div`
@@ -203,8 +199,4 @@ const LoadMoreButton = tw.button`
     bg-gradient-to-r from-gray-600 to-gray-400 text-white rounded-full p-4 font-semibold shadow-lg
     hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
     focus:outline-none focus:ring-1 focus:ring-gray-600 focus:ring-opacity-25
-`;
-
-const ButtonContainer = tw.div`
-    flex justify-center mt-4
 `;

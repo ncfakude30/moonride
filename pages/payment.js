@@ -4,8 +4,9 @@ import tw from 'tailwind-styled-components';
 import { useSelector, useDispatch } from 'react-redux';
 import { requestTrip, initiatePayment } from './api/api.service';
 import { setPaymentStatus, setPaymentResponse } from '../store/reducers/paymentSlice';
-import { setTrackingDetails, updateMessages } from '../store/actions/trackingActions';
+import { setTrackingDetails } from '../store/actions/trackingActions';
 import Image from 'next/image';
+import LocationOnIcon from '@mui/icons-material/LocationOn'; // Importing Material UI icon for location
 
 function Payment() {
     const router = useRouter();
@@ -18,20 +19,17 @@ function Payment() {
     const { paymentUrl, paymentId } = useSelector(state => state.payment.paymentResponse);
     const [pickupPlace, setPickupPlace] = useState('');
     const [dropoffPlace, setDropoffPlace] = useState('');
-    const [pickupShortName, setPickupShortName] = useState('');
-    const [dropoffShortName, setDropoffShortName] = useState('');
     const [loading, setLoading] = useState(false);
     const [selectedGateway, setSelectedGateway] = useState('');
     const { pickup, dropoff } = useSelector(state => state.search);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
-    const carPrice = useSelector((state) => state.ride.carPrice);
+    const carPrice = ride?.carPrice || 10;
 
     useEffect(() => {
         if (!user) {
             router.push('/login');
             return;
         }
-
         if (!pickupCoordinates && !dropoffCoordinates) {
             fetchPlaceName(pickup, 'pickup');
             fetchPlaceName(dropoff, 'dropoff');
@@ -48,23 +46,18 @@ function Payment() {
             );
             const data = await response.json();
             const placeName = data.features.length > 0 ? data.features[0].place_name : 'Unknown location';
-            const shortName = data.features.length > 0 ? data.features[0].text : 'Unknown';
 
             if (type === 'pickup') {
                 setPickupPlace(placeName);
-                setPickupShortName(shortName);
-            } else if (type === 'dropoff') {
+            } else {
                 setDropoffPlace(placeName);
-                setDropoffShortName(shortName);
             }
         } catch (error) {
             console.error('Error fetching place name:', error);
             if (type === 'pickup') {
                 setPickupPlace('Error fetching location');
-                setPickupShortName('Error');
-            } else if (type === 'dropoff') {
+            } else {
                 setDropoffPlace('Error fetching location');
-                setDropoffShortName('Error');
             }
         }
     };
@@ -87,14 +80,14 @@ function Payment() {
             const request = {
                 pickup,
                 dropoff,
-                price: (ride?.carPrice) || 10,
+                price: carPrice,
                 time: ride?.selectedCar ? ride?.selectedCar?.time : selectedCar?.time,
                 rating: ride?.selectedCar ? ride?.selectedCar?.rating : selectedCar?.rating,
                 driverProfile: ride?.selectedCar ? ride?.selectedCar?.driverProfile : selectedCar?.driverProfile,
                 userId: user?.id || user?.uuid,
                 pickupName: pickupPlace || pickupShortName,
                 dropoffName: dropoffPlace || dropoffShortName,
-                amount: String((ride?.carPrice) || 10),
+                amount: carPrice,
                 firstName: 'TestName',
                 lastName: 'LastTestName',
                 email: 'email@gmail.com',
@@ -104,14 +97,12 @@ function Payment() {
                 bankReference: 'TestReference',
             };
 
-            switch(selectedGateway?.toUpperCase()) {
+            switch (selectedGateway?.toUpperCase()) {
                 case 'CASH':
                     let tripResponse = await requestTrip(request).catch((error) => {
-                    console.log(error);
-                    dispatch(setPaymentStatus('failure'));
-                    });
-
-                    console.log(tripResponse);
+                        console.log(error);
+                        dispatch(setPaymentStatus('failure'));
+                        });
                     dispatch(setPaymentStatus('Trip successfully requested.'));
                     dispatch(setTrackingDetails({
                         pickup: pickupCoordinates,
@@ -129,18 +120,7 @@ function Payment() {
                         dispatch(setPaymentStatus(error));
                         return;
                     });
-
-
-                    /* THIS TO BE CALLED AFTER SUCCESSFUL PAYMENT.
-                    tripResponse = await requestTrip(request).catch((error) => {
-                        console.log(error);
-                        dispatch(setPaymentStatus('failure'));
-                        router.push('/payment');
-                    });
-                    */
-
-                    console.log(tripResponse);
-                    if (paymentResponse?.paymentUrl && paymentResponse?.paymentId) {
+                    if (paymentResponse?.paymentUrl) {
                         dispatch(setPaymentResponse({
                             paymentUrl: paymentResponse.paymentUrl,
                             paymentId: paymentResponse.paymentId,
@@ -151,6 +131,11 @@ function Payment() {
                         dispatch(setPaymentStatus('failure'));
                         router.push('/payment');
                     }
+                    break;
+
+                default:
+                    dispatch(setPaymentStatus('Invalid payment method'));
+                    break;
             }
         } catch (error) {
             console.error('Payment failed:', error);
@@ -160,13 +145,8 @@ function Payment() {
         }
     };
 
-    const handlePopupOpen = () => {
-        setIsPopupOpen(true);
-    };
-
-    const handlePopupClose = () => {
-        setIsPopupOpen(false);
-    };
+    const handlePopupOpen = () => setIsPopupOpen(true);
+    const handlePopupClose = () => setIsPopupOpen(false);
 
     return (
         <Wrapper>
@@ -182,72 +162,84 @@ function Payment() {
             </BackButtonContainer>
             <Content>
                 <DriverProfile
-                        driverName={selectedCar?.driverName || 'Unknown Driver'}
-                        driverRating={selectedCar?.rating || 'N/A'}
-                        driverImage={selectedCar?.driverProfile || 'https://moonride-media.s3.amazonaws.com/default.png'}
-                    />
-                    <Details>
-                        <p><strong>Pickup:</strong> {pickupPlace}</p>
-                        <p><strong>Dropoff:</strong> {dropoffPlace}</p>
-                        {selectedCar && (
-                            <CarDetails>
-                                <Image
-                                    src={selectedCar.imgUrl || 'https://moonride-media.s3.amazonaws.com/moonrides.png'}
-                                    alt={selectedCar.service || 'yes'}
-                                    width={200} height={200}
-                                    className='object-cover'
-                                />
-                                <DirectionsContainer>
-                                <p><strong>Service:</strong> {selectedCar.service}</p>
-                                <p><strong>Price:</strong>R {carPrice || '10'}</p>
-                                </DirectionsContainer>
-                            </CarDetails>
-                        )}
-                    </Details>
-
-                    <PaymentGatewaySelection>
-                        <p><strong>Payment option:</strong></p>
-                        <ScrollableGatewayList>
-                            <GatewayOption
-                                $isSelected={selectedGateway === 'cash'}
-                                onClick={() => setSelectedGateway('cash')}
-                            >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/cash.png' alt='Cash' width={50} height={50} />
-                                <PaymentTitle>Cash</PaymentTitle>
-                            </GatewayOption>
-                            <GatewayOption
-                                $isSelected={selectedGateway === 'ozow'}
-                                onClick={() => setSelectedGateway('ozow')}
-                            >
-                                <DriverImage src='https://moonride-media.s3.amazonaws.com/ozow.png' alt='Ozow' width={50} height={50} />
-                                <PaymentTitle>Instant EFT</PaymentTitle>
-                            </GatewayOption>
-                        </ScrollableGatewayList>
-                    </PaymentGatewaySelection>
-
-                    {paymentStatus === 'success' && <SuccessMessage>Payment successful! Redirecting...</SuccessMessage>}
-                    {paymentStatus === 'failure' && <ErrorMessage>Payment failed. Please try again.</ErrorMessage>}
-                    {loading ? (
-                        <LoadingWrapper>
+                    driverName={ride?.selectedCar?.driverName || 'Unknown Driver'}
+                    driverRating={ride?.selectedCar?.rating || 'N/A'}
+                    driverImage={ride?.selectedCar?.driverProfile || 'https://moonride-media.s3.amazonaws.com/default.png'}
+                />
+                <Details>
+                    <Location>
+                        <LocationIcon />
+                        <LocationText>
+                            <strong>Pickup:</strong> {pickupPlace}
+                        </LocationText>
+                    </Location>
+                    <Location>
+                        <LocationIcon />
+                        <LocationText>
+                            <strong>Dropoff:</strong> {dropoffPlace}
+                        </LocationText>
+                    </Location>
+                    {selectedCar && (
+                        <CarDetails>
+                            <ServiceDetails>
+                                <LocationText>
+                                <strong>Service: </strong>
+                                {selectedCar.service}
+                                </LocationText>
+                                <LocationText>
+                                <strong>Price: </strong> 
+                                    R{carPrice}
+                                </LocationText>
+                            </ServiceDetails>
+                            <Image
+                                src={selectedCar.imgUrl || 'https://moonride-media.s3.amazonaws.com/moonrides.png'}
+                                alt={selectedCar.service || 'Service Image'}
+                                width={200} height={200}
+                                className='object-cover rounded-lg'
+                            />
+                        </CarDetails>
+                    )}
+                </Details>
+                <PaymentGatewaySelection>
+                    <p><strong>Payment option:</strong></p>
+                    <ScrollableGatewayList>
+                        <GatewayOption
+                            $isSelected={selectedGateway === 'cash'}
+                            onClick={() => setSelectedGateway('cash')}
+                        >
+                            <Image src='https://moonride-media.s3.amazonaws.com/cash.png' alt='Cash' width={50} height={50} />
+                            <PaymentTitle>Cash</PaymentTitle>
+                        </GatewayOption>
+                        <GatewayOption
+                            $isSelected={selectedGateway === 'ozow'}
+                            onClick={() => setSelectedGateway('ozow')}
+                        >
+                            <Image src='https://moonride-media.s3.amazonaws.com/ozow.png' alt='Ozow' width={50} height={50} />
+                            <PaymentTitle>Instant EFT</PaymentTitle>
+                        </GatewayOption>
+                    </ScrollableGatewayList>
+                </PaymentGatewaySelection>
+                {paymentStatus === 'success' && <SuccessMessage>Payment successful! Redirecting...</SuccessMessage>}
+                {paymentStatus === 'failure' && <ErrorMessage>Payment failed. Please try again.</ErrorMessage>}
+                {loading ? (
+                    <LoadingWrapper>
                         <Loader />
                         <LoadingMessage>Processing payment, please wait...</LoadingMessage>
                     </LoadingWrapper>
-                    ) : (
-                        <Button onClick={handlePayment} disabled={loading}>
-                            {loading ? 'Processing...' : selectedGateway ? `Confirm ${selectedGateway.charAt(0).toUpperCase() + selectedGateway.slice(1)}` : 'Confirm Payment'}
-                        </Button>
-                    )}
-                    {isPopupOpen && (
-                        <PopupOverlay>
-                            <PopupCard>
-                                <PopupTitle>Payment</PopupTitle>
-                                <PopupContent>
-                                Please select a payment option, to continue with payment!
-                                </PopupContent>
-                                <CloseButton onClick={handlePopupClose}>Close</CloseButton>
-                            </PopupCard>
-                        </PopupOverlay>
-                    )}
+                ) : (
+                    <Button onClick={handlePayment} disabled={loading}>
+                        {loading ? 'Processing...' : selectedGateway ? `Confirm ${selectedGateway.charAt(0).toUpperCase() + selectedGateway.slice(1)}` : 'Confirm Payment'}
+                    </Button>
+                )}
+                {isPopupOpen && (
+                    <PopupOverlay>
+                        <PopupContainer>
+                            <PopupTitle>Select Payment Gateway</PopupTitle>
+                            <PopupMessage>Please select a payment gateway to proceed.</PopupMessage>
+                            <PopupButton onClick={handlePopupClose}>Close</PopupButton>
+                        </PopupContainer>
+                    </PopupOverlay>
+                )}
             </Content>
         </Wrapper>
     );
@@ -265,40 +257,47 @@ const DriverProfile = ({ driverName, driverRating, driverImage }) => (
         </DriverInfo>
     </ProfileWrapper>
 );
-
 const Wrapper = tw.div`
-    relative bg-gray-100 p-4 rounded-lg shadow-lg w-full h-full flex flex-col
+    relative bg-gray-100 p-4 rounded-lg shadow-lg justify-center min-h-screen
 `;
-
 const Content = tw.div`
     flex-1 p-6 mt-16 
 `;
 const BackButtonContainer = tw.div`
-    absolute rounded-full top-4 left-4 z-10 bg-white shadow-md cursor-pointer justify-start
+    absolute top-5 left-5 z-10
 `;
 
-const BackButton = tw.div`
-    relative h-12 w-12
+const BackButton = tw.button`
+   relative h-12 w-12 rounded-full shadow-md hover:shadow-lg transition-shadow
 `;
 
-const Card = tw.div`
-    bg-white rounded-lg shadow-lg p-4
-`;
 
 const Details = tw.div`
-    mb-4
+    mt-4
+`;
+
+const Location = tw.div`
+    flex items-center bg-gray-200 p-2 rounded-lg mb-2
+`;
+
+const LocationIcon = tw(LocationOnIcon)`
+    text-green-600
+`;
+
+const LocationText = tw.span`
+    ml-2 text-gray-800 font-semibold
 `;
 
 const CarDetails = tw.div`
-    flex items-center space-x-4
+    flex items-center space-x-4 bg-gray-200 p-4 rounded-lg mb-2
 `;
 
-const DirectionsContainer = tw.div`
-    flex-1 ml-4
+const ServiceDetails = tw.div`
+    flex flex-col ml-4 text-gray-800
 `;
 
 const PaymentGatewaySelection = tw.div`
-    flex flex-col mb-4
+   flex flex-col mt-4
 `;
 
 const ScrollableGatewayList = tw.div`
@@ -311,10 +310,17 @@ const GatewayOption = tw.div`
 `;
 
 const PaymentTitle = tw.p`
-    text-sm mt-2
+   text-sm mt-2
+`;
+
+const PopupMessage = tw.p`
+    mt-2
 `;
 
 
+const SuccessMessage = tw.p`
+    text-green-600 mt-2
+`;
 
 const DriverImage = tw(Image)`
     rounded-full mb-2
@@ -343,33 +349,26 @@ const DriverRating = tw.p`
 `;
 
 
+const ErrorMessage = tw.p`
+    text-red-600 mt-2
+`;
+
+const LoadingWrapper = tw.div`
+    flex items-center justify-center mt-4
+`;
+
+const Loader = tw.div`
+    animate-spin rounded-full border-t-2 border-b-2 border-gray-300 w-6 h-6
+`;
+
+const LoadingMessage = tw.p`
+    ml-2 text-gray-800
+`;
+
 const Button = tw.button`
     py-2 px-4 bg-gradient-to-r from-gray-600 to-gray-400 text-white rounded-full py-3 px-6 font-bold w-full mt-4 disabled:opacity-50
     ${(p) => (p.disabled ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-gray-600')}
 `;
-
-const SuccessMessage = tw.div`
-    text-lg text-green-600 font-semibold mt-4
-`;
-
-const ErrorMessage = tw.div`
-    text-lg text-red-600 font-semibold mt-4
-`;
-
-const LoadingWrapper = tw.div`
-flex flex-col items-center justify-center py-6
-`;
-
-const LoadingMessage = tw.div`
-text-gray-500 text-center py-4 text-center text-xs py-2 border-b
-`;
-
-// Animated Loader (CSS keyframes)
-const Loader = tw.div`
-w-16 h-16 border-4 border-dashed rounded-full animate-spin border-gray-500
-`;
-
-
 const PopupOverlay = tw.div`
     fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20
 `;
@@ -377,6 +376,11 @@ const PopupOverlay = tw.div`
 const PopupCard = tw.div`
     bg-white rounded-lg shadow-lg p-6 w-80 max-w-full text-center
 `;
+
+const PopupContainer = tw.div`
+    bg-white rounded-lg shadow-lg p-6 w-80 max-w-full text-center
+`;
+
 
 const PopupTitle = tw.h2`
     text-xl font-bold mb-4
@@ -386,9 +390,10 @@ const PopupContent = tw.p`
     text-gray-700 mb-6
 `;
 
-const CloseButton = tw.button`
+const PopupButton = tw.button`
     bg-gradient-to-r from-gray-600 to-gray-400 text-white rounded-full p-2 font-semibold shadow-lg
     hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
     focus:outline-none focus:ring-1 focus:ring-gray-500
     w-full max-w-xs
 `;
+
