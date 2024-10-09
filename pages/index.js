@@ -82,6 +82,11 @@ export default function Home() {
                             </Link>
                             <ActionButton onClick={handlePopupOpen}>
                                 <Badge>Coming Soon</Badge>
+                                <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/bus.png'/>
+                                <Label>Bus Tracker</Label>
+                            </ActionButton>
+                            <ActionButton onClick={handlePopupOpen}>
+                                <Badge>Coming Soon</Badge>
                                 <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/water.png'/>
                                 <Label>Water</Label>
                             </ActionButton>
