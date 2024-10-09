@@ -13,6 +13,7 @@ function Success() {
   const { query } = router;
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
+  const { payment } = useSelector(state => state.payment.paymentResponse);
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -28,6 +29,12 @@ function Success() {
 }, [dispatch, user, router]);
 
 useEffect(() => {
+    console.log(payment);
+    if (payment && (payment.toUpperCase() === 'CASH')) {
+      setIsValid(true);
+      return;
+    }
+
     if (!query || Object.keys(query).length === 0) {
         setIsValid(false);
         return;
@@ -66,7 +73,7 @@ useEffect(() => {
     };
 
     verifyTransaction();
-  }, [query, isValid]);
+  }, [query, isValid, payment]);
 
 
   // Countdown logic and automatic redirect after 5 seconds

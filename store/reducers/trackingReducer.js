@@ -4,6 +4,7 @@ const initialState = {
     user: null,
     messages: [],
     loading: true,
+    payment: null,
 };
 
 const trackingReducer = (state = initialState, action) => {
@@ -15,6 +16,7 @@ const trackingReducer = (state = initialState, action) => {
                 dropoff: action.payload.dropoff,
                 user: action.payload.user,
                 loading: false,
+                payment:  action.payload.payment,
             };
         case 'UPDATE_MESSAGES':
             return {

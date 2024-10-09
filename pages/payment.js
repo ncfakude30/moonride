@@ -117,9 +117,10 @@ function Payment() {
                         pickup: pickupCoordinates,
                         dropoff: dropoffCoordinates,
                         user,
-                        loading: false
+                        loading: false,
+                        payment: 'cash',
                     }));
-                    router.push('/');
+                    router.push('/success');
                     break;
 
                 case 'OZOW':
@@ -143,6 +144,7 @@ function Payment() {
                         dispatch(setPaymentResponse({
                             paymentUrl: paymentResponse.paymentUrl,
                             paymentId: paymentResponse.paymentId,
+                            payment: 'ozow'
                         }));
                         window.location.href = paymentResponse.paymentUrl;
                     } else {
