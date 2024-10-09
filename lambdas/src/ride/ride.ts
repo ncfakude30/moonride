@@ -46,7 +46,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                     ':userId': userId,
                 },
                 Limit: limit,
-                ScanIndexForward: false,  // Get latest trips first
+                ScanIndexForward: false,
             };
 
             // Add the ExclusiveStartKey if pagination is being used

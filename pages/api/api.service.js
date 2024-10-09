@@ -32,16 +32,28 @@ export async function fetchRecentTrips(userId, lastEvaluatedKey = null, limit = 
         }
 
         const response = await apiClient.get('/trips', { params });
-        return response.data; // Ensure this matches the expected response structure
+
+        // Assuming response.data.trips is an array of trips
+        const sortedTrips = response.data?.trips?.sort((a, b) => {
+            // Ensure tripDate is in a Date format or a timestamp for accurate comparison
+            return new Date(b?.tripDate) - new Date(a?.tripDate);
+        });
+
+        return {
+            trips: sortedTrips,
+            lastEvaluatedKey: response.data.lastEvaluatedKey,
+            error: null,
+        };
     } catch (error) {
         console.error('Error fetching recent trips:', error);
         return {
             trips: [],
             lastEvaluatedKey: null,
-            error: error.response ? error.response.data : 'An error occurred while fetching trips'
+            error: error.response ? error.response.data : 'An error occurred while fetching trips',
         };
     }
 }
+
 
 export const requestTrip = async (dto) => {
     try {
