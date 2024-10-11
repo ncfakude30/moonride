@@ -12,11 +12,11 @@ const trackingReducer = (state = initialState, action) => {
         case 'SET_TRACKING_DETAILS':
             return {
                 ...state,
-                pickup: action.payload.pickup,
-                dropoff: action.payload.dropoff,
-                user: action.payload.user,
+                pickup: action?.payload?.pickup,
+                dropoff: action?.payload?.dropoff,
+                user: action?.payload?.user,
                 loading: false,
-                payment:  action.payload.payment,
+                payment:  action?.payload?.payment,
             };
         case 'UPDATE_MESSAGES':
             return {

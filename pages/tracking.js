@@ -2,23 +2,22 @@ import { useEffect, useState } from 'react';
 import tw from 'tailwind-styled-components';
 import Map from './components/Map'; // Adjust the import path as needed
 import Image from 'next/image';
-import Link from 'next/link';
 import { useSelector, useDispatch } from 'react-redux';
 import { setTrackingDetails, updateMessages } from '../store/actions/trackingActions';
 import { useRouter } from 'next/router';
 import { setTrips } from '../store/reducers/tripSlice';
+import { sendMessage } from '../store/reducers/webSocketSlice';
 
 const Tracking = () => {
     const router = useRouter();
     const dispatch = useDispatch();
-    const { pickup, dropoff, messages, loading } = useSelector(state => state.tracking);
-    const { sendMessage } = useSelector(state => state.webSocket);
+    const { pickup, dropoff, loading } = useSelector(state => state.tracking);
+    const messages = useSelector((state) => state.webSocket.messages);
 
     const [pickupCoords, setPickupCoords] = useState(null);
     const [dropoffCoords, setDropoffCoords] = useState(null);
     const [newMessage, setNewMessage] = useState('');
     const user = useSelector((state) => state.auth.user);
-
 
     useEffect(() => {
         if (!user) {
@@ -41,30 +40,37 @@ const Tracking = () => {
     }, [pickup, dropoff, newMessage, user, router, loading, dispatch]);
 
     useEffect(() => {
+        console.log(messages);
         if (messages.length > 0) {
-            messages.map((message) => {
-                const data = JSON.parse(message);
-                if (data.type === 'chat_message') {
-                    dispatch(updateMessages(data.message));
-                }
-            })
-            
+          // Convert messages to a Set to remove duplicates
+          const uniqueMessages = Array.from(new Set(messages));
+          uniqueMessages.forEach((message) => {
+            try {
+              const data = JSON.parse(message);
+              if (data?.type === 'chat_message') {
+                dispatch(updateMessages(data?.message));
+              }
+            } catch (error) {
+              console.error('Invalid JSON message:', message);
+            }
+          });
         }
-    }, []);
+      }, [messages, dispatch]);
 
     const handleSendMessage = () => {
         if (newMessage.trim() && sendMessage) {
-            sendMessage({
+            dispatch(sendMessage({
                 type: 'chat_message',
                 text: newMessage,
+                isUser: user?.isUser || true,
                 recipientId: user?.id || user?.uuid
-            });
+            }));
             setNewMessage('');
         }
     };
 
     const handleBackButton = () => {
-        setTrackingDetails(null);
+        dispatch(setTrackingDetails(null));
         setPickupCoords(null);
         setDropoffCoords(null);
         setTrips(null);
@@ -106,9 +112,9 @@ const Tracking = () => {
                     <ChatHeader>Chat with the driver:</ChatHeader>
                     <MessageList>
                         {messages.map((msg, index) => (
-                            <MessageRow key={index} isUser={msg.isUser}>
+                            <MessageRow key={index} isUser={msg?.isUser}>
                                 <ProfilePictureSmall
-                                    src={msg.isUser ? 'https://moonride-media.s3.amazonaws.com/default.png' : 'https://moonride-media.s3.amazonaws.com/default.png'}
+                                    src={msg.isUser? 'https://moonride-media.s3.amazonaws.com/default.png' : 'https://moonride-media.s3.amazonaws.com/default.png'}
                                     alt={msg.isUser ? 'User' : 'Driver'}
                                 />
                                 <MessageBubble isUser={msg.isUser}>
@@ -182,7 +188,7 @@ const ProfilePictureSmall = tw.img`
 `;
 
 const MessageBubble = tw.div`
-    max-w-xs p-3 rounded-lg text-white
+    max-w-xs p-3 rounded-lg text-gray-600 font-medium
     ${(props) => props.isUser ? 'bg-blue-500 ml-2' : 'bg-gray-300 mr-2 text-black'}
 `;
 

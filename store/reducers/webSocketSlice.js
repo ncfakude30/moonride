@@ -6,7 +6,8 @@ const webSocketSlice = createSlice({
   initialState: {
     status: 'disconnected', // Added status to track connection state
     error: null, // Added error to store WebSocket errors
-    messages: [], // Added messages to store received messages
+    messages: [],
+    ws: null, // Added messages to store received messages
   },
   reducers: {
     setWebSocket: (state, action) => {
@@ -22,6 +23,14 @@ const webSocketSlice = createSlice({
         state.ws = null;
       }
     },
+    sendMessage: (state, action) => {
+      const socket = state?.ws;
+      if (socket) {
+          socket.send(JSON.stringify({ ...action.payload}));
+      } else {
+          console.error('WebSocket is not connected');
+      }
+    },
     setStatus: (state, action) => {
       state.status = action.payload;
     },
@@ -34,6 +43,6 @@ const webSocketSlice = createSlice({
   },
 });
 
-export const { setWebSocket, clearWebSocket, setStatus, addMessage, setError } = webSocketSlice.actions;
+export const { setWebSocket, clearWebSocket, setStatus, addMessage, setError, sendMessage, ws } = webSocketSlice.actions;
 
 export default webSocketSlice.reducer;

@@ -1,7 +1,7 @@
 // contexts/WebSocketContext.js
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setStatus, addMessage, setError, clearMessages } from '../store/reducers/webSocketSlice';
+import { setStatus, addMessage, setError, clearMessages, setWebSocket } from '../store/reducers/webSocketSlice';
 
 const WebSocketContext = createContext(null);
 
@@ -42,6 +42,9 @@ export const WebSocketProvider = ({ children }) => {
                 console.error('WebSocket error:', error);
                 dispatch(setError(error.message));
             };
+
+            dispatch(setWebSocket(socket.send));
+
         }
 
         return () => {
