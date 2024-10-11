@@ -43,7 +43,7 @@ export const WebSocketProvider = ({ children }) => {
                 dispatch(setError(error.message));
             };
 
-            dispatch(setWebSocket(socket.send));
+            dispatch(setWebSocket(socket));
 
         }
 
