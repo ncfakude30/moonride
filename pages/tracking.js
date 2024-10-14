@@ -44,7 +44,7 @@ const Tracking = () => {
         if (messages.length > 0) {
           // Convert messages to a Set to remove duplicates
           const uniqueMessages = Array.from(new Set(messages));
-          uniqueMessages.forEach((message) => {
+          uniqueMessages.filter((item) => item?.type).forEach((message) => {
             try {
               const data = JSON.parse(message);
               if (data?.type === 'chat_message') {
