@@ -9,6 +9,7 @@ const paymentSlice = createSlice({
             paymentId: null,
         }, 
         callback: null,
+        complete: false,
     },
     reducers: {
         setPaymentStatus: (state, action) => {
@@ -19,7 +20,10 @@ const paymentSlice = createSlice({
         },
         setPaymentCallback: (state, action) => {
             state.callback = action.payload;
-        }
+        },
+        setPaymentComplete: (state, action) => {
+            state.callback = action.payload;
+        },
     },
 });
 

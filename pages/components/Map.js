@@ -11,6 +11,7 @@ const Map = () => {
     const [directionsService, setDirectionsService] = useState(null);
     const [directionsRenderer, setDirectionsRenderer] = useState(null);
 
+    // Get user location and update map center
     useEffect(() => {
         const getUserLocation = () => {
             if (navigator.geolocation) {
@@ -51,6 +52,7 @@ const Map = () => {
         getUserLocation();
     }, [pickupCoordinates]);
 
+    // Fetch pickup and dropoff coordinates if available
     useEffect(() => {
         const fetchCoordinates = async (address, setter) => {
             if (!address) return;
@@ -75,56 +77,68 @@ const Map = () => {
         }
     }, [pickup, dropoff, pickupCoordinates, dropoffCoordinates]);
 
+    // Initialize and update map
     useEffect(() => {
-        if (userLocation && pickupCoordinates && dropoffCoordinates) {
-            if (typeof google !== 'undefined') {
-                const mapInstance = new google.maps.Map(document.getElementById('map'), {
-                    center: userLocation,
-                    zoom: 12
-                });
-
-                const service = new google.maps.DirectionsService();
-                const renderer = new google.maps.DirectionsRenderer();
-                renderer.setMap(mapInstance);
-                setDirectionsService(service);
-                setDirectionsRenderer(renderer);
-
-                // Add markers for pickup and dropoff
-                const addMarker = (position, title) => {
-                    new google.maps.Marker({
-                        position,
-                        map: mapInstance,
-                        title
-                    });
-                };
-
-                addMarker(pickupCoordinates, 'Pickup Location');
-                addMarker(dropoffCoordinates, 'Dropoff Location');
-
-                const request = {
-                    origin: new google.maps.LatLng(pickupCoordinates.lat, pickupCoordinates.lng),
-                    destination: new google.maps.LatLng(dropoffCoordinates.lat, dropoffCoordinates.lng),
-                    travelMode: 'DRIVING'
-                };
-
-                service.route(request, (result, status) => {
-                    if (status === 'OK') {
-                        renderer.setDirections(result);
-                        mapInstance?.fitBounds(result.routes[0].bounds);
-                    } else {
-                        console.error('Error fetching directions:', status);
-                    }
-                });
-
-                return () => {
-                    if (mapInstance) {
-                        mapInstance = null; // Clean up map instance
-                    }
-                };
-            } else {
-                console.error('Google Maps API is not loaded yet.');
-            }
+        if (typeof google === 'undefined') {
+            console.error('Google Maps API is not loaded yet.');
+            return;
         }
+
+        const mapInstance = new google.maps.Map(document.getElementById('map'), {
+            center: userLocation || { lat: 39.39172, lng: -99.29011 },
+            zoom: 12,
+        });
+        setMap(mapInstance);
+
+        if (!userLocation || !mapInstance) return;
+
+        const service = new google.maps.DirectionsService();
+        const renderer = new google.maps.DirectionsRenderer();
+        renderer.setMap(mapInstance);
+        setDirectionsService(service);
+        setDirectionsRenderer(renderer);
+
+        // If both pickup and dropoff coordinates are available, show directions
+        if (pickupCoordinates && dropoffCoordinates) {
+            const request = {
+                origin: new google.maps.LatLng(pickupCoordinates.lat, pickupCoordinates.lng),
+                destination: new google.maps.LatLng(dropoffCoordinates.lat, dropoffCoordinates.lng),
+                travelMode: 'DRIVING',
+            };
+
+            service.route(request, (result, status) => {
+                if (status === 'OK') {
+                    renderer.setDirections(result);
+                    mapInstance?.fitBounds(result.routes[0].bounds);
+                } else {
+                    console.error('Error fetching directions:', status);
+                }
+            });
+        } else {
+            // If only user location is available, add a pin for the user's location
+            const userMarker = new google.maps.Marker({
+                position: userLocation,
+                map: mapInstance,
+                title: 'Your Location',
+            });
+
+            // Continuously track user's location
+            const watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const newLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    };
+                    userMarker.setPosition(newLocation);
+                    mapInstance.setCenter(newLocation);
+                }
+            );
+
+            return () => {
+                navigator.geolocation.clearWatch(watchId);
+            };
+        }
+
     }, [userLocation, pickupCoordinates, dropoffCoordinates]);
 
     return <MapWrapper id="map" />;

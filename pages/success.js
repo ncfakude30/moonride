@@ -14,6 +14,7 @@ function Success() {
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
   const { payment } = useSelector(state => state.payment.paymentResponse);
+  const { complete: isComplete } = useSelector(state => state.payment);
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -30,6 +31,11 @@ function Success() {
 
 useEffect(() => {
     console.log(payment);
+    if(isComplete && (payment.toUpperCase() === 'CASH')) {
+      setIsValid(true);
+      return;
+    }
+    
     if (payment && (payment.toUpperCase() === 'CASH')) {
       setIsValid(true);
       return;

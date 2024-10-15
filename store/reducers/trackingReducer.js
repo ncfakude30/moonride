@@ -1,6 +1,8 @@
 const initialState = {
     pickup: null,
     dropoff: null,
+    pickupCoordinates: null,
+    dropoffCoordinates: null,
     user: null,
     messages: [],
     loading: true,

@@ -3,10 +3,11 @@ import { useEffect, useState } from 'react';
 import tw from 'tailwind-styled-components';
 import { useSelector, useDispatch } from 'react-redux';
 import { requestTrip, initiatePayment } from './api/api.service';
-import { setPaymentStatus, setPaymentResponse } from '../store/reducers/paymentSlice';
+import { setPaymentStatus, setPaymentResponse , setPaymentComplete} from '../store/reducers/paymentSlice';
 import { setTrackingDetails } from '../store/actions/trackingActions';
 import Image from 'next/image';
-import LocationOnIcon from '@mui/icons-material/LocationOn'; // Importing Material UI icon for location
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import { setTrips, appendTrips, setLoading, setError } from '../../store/reducers/tripSlice';
 
 function Payment() {
     const router = useRouter();
@@ -14,8 +15,7 @@ function Payment() {
     const user = useSelector(state => state.auth.user);
     const ride = useSelector(state => state.ride);
     const paymentStatus = useSelector(state => state.payment.status);
-    const { selectedCar } = useSelector(state => state.confirmation);
-    const { pickupCoordinates, dropoffCoordinates } = useSelector(state => state.search);
+    const { selectedCar, pickupCoordinates, dropoffCoordinates } = useSelector(state => state.confirmation);
     const { paymentUrl, paymentId } = useSelector(state => state.payment.paymentResponse);
     const [pickupPlace, setPickupPlace] = useState('');
     const [dropoffPlace, setDropoffPlace] = useState('');
@@ -30,37 +30,44 @@ function Payment() {
             router.push('/login');
             return;
         }
-        if (!pickupCoordinates && !dropoffCoordinates) {
-            fetchPlaceName(pickup, 'pickup');
+
+        const fetchPlaceName = async (coordinates, type) => {
+            try {
+                const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates}.json?` +
+                    new URLSearchParams({
+                        access_token: process.env.ACCESS_TOKEN || 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ',
+                        limit: 1
+                    })
+                );
+                const data = await response.json();
+                const placeName = data.features.length > 0 ? data.features[0].place_name : 'Unknown location';
+    
+                if (type === 'pickup') {
+                    setPickupPlace(placeName);
+                } else {
+                    setDropoffPlace(placeName);
+                }
+            } catch (error) {
+                console.error('Error fetching place name:', error);
+                if (type === 'pickup') {
+                    setPickupPlace('Error fetching location');
+                } else {
+                    setDropoffPlace('Error fetching location');
+                }
+            }
+        };
+
+        if (!pickupPlace ){
             fetchPlaceName(dropoff, 'dropoff');
-        }
-    }, [pickup, dropoff, pickupCoordinates, dropoffCoordinates, user, router]);
 
-    const fetchPlaceName = async (coordinates, type) => {
-        try {
-            const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates}.json?` +
-                new URLSearchParams({
-                    access_token: process.env.ACCESS_TOKEN || 'pk.eyJ1IjoibmNmY29ycCIsImEiOiJjbTBpY3Z6YnAwN240MmxzOXV2dnNzNzEwIn0.oVdWZdXHm_FMRDU2s4mAxQ',
-                    limit: 1
-                })
-            );
-            const data = await response.json();
-            const placeName = data.features.length > 0 ? data.features[0].place_name : 'Unknown location';
-
-            if (type === 'pickup') {
-                setPickupPlace(placeName);
-            } else {
-                setDropoffPlace(placeName);
-            }
-        } catch (error) {
-            console.error('Error fetching place name:', error);
-            if (type === 'pickup') {
-                setPickupPlace('Error fetching location');
-            } else {
-                setDropoffPlace('Error fetching location');
-            }
+        } 
+        
+        if (!dropoffPlace ){
+            fetchPlaceName(pickup, 'pickup');
         }
-    };
+
+    }, [pickup, dropoff, pickupCoordinates, dropoffCoordinates, user, router, pickupPlace, dropoffPlace]);
+
 
     const handlePayment = async () => {
         if (!selectedGateway) {
@@ -105,12 +112,34 @@ function Payment() {
                         });
                     dispatch(setPaymentStatus('Trip successfully requested.'));
                     dispatch(setTrackingDetails({
-                        pickup: pickupCoordinates,
-                        dropoff: dropoffCoordinates,
+                        pickup,
+                        dropoff,
+                        pickupCoordinates,
+                        dropoffCoordinates,
                         user,
                         loading: false,
                         payment: 'cash',
                     }));
+
+                    dispatch(setPaymentComplete(
+                        {
+                        pickup,
+                        dropoff,
+                        pickupCoordinates,
+                        dropoffCoordinates,
+                        user,
+                        loading: false,
+                        payment: 'cash',
+                        complete: true,
+                        }
+                    ));
+
+                    dispatch(setTrips({
+                        trips: [],
+                        lastEvaluatedKey: null,
+                        hasMore: false,
+                    }));
+                    
                     router.push('/success');
                     break;
 
