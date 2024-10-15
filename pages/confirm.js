@@ -28,7 +28,57 @@ function Confirm() {
         if (dropoffCoordinates?.length === 0 ) {
             getDropoffCoordinates(dropoff);
         }
-    }, [user, router, pickupCoordinates, dropoffCoordinates, pickup, dropoff]);
+
+        const getPickupCoordinates = async (pickup) => {
+            try {
+                dispatch(setLoading(true));
+                const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?` + 
+                    new URLSearchParams({
+                        address: pickup,
+                        key: process.env.GOOGLE_API_KEY || 'AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU',
+                    })
+                );
+                const data = await response.json();
+                if (data.results.length > 0) {
+                    dispatch(setPickupCoordinates([
+                        data.results[0].geometry.location.lat,
+                        data.results[0].geometry.location.lng
+                    ]));
+                } else {
+                    console.error('No results found for pickup location');
+                }
+            } catch(error) {
+                console.error('Error fetching pickup coordinates:', error);
+            } finally {
+                dispatch(setLoading(false));
+            }
+        };
+    
+        const getDropoffCoordinates = async (dropoff) => {
+            try {
+                dispatch(setLoading(true));
+                const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?` + 
+                    new URLSearchParams({
+                        address: dropoff,
+                        key: process.env.GOOGLE_API_KEY || 'AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU',
+                    })
+                );
+                const data = await response.json();
+                if (data.results.length > 0) {
+                    dispatch(setDropoffCoordinates([
+                        data.results[0].geometry.location.lat,
+                        data.results[0].geometry.location.lng
+                    ]));
+                } else {
+                    console.error('No results found for dropoff location');
+                }
+            } catch(error) {
+                console.error('Error fetching dropoff coordinates:', error);
+            } finally {
+                dispatch(setLoading(false));
+            }
+        };
+    }, [user, router, pickupCoordinates, dropoffCoordinates, pickup, dropoff, dispatch]);
 
     useEffect(() => {
         if (defaultCar) {
@@ -36,55 +86,6 @@ function Confirm() {
         }
     }, [defaultCar, dispatch]);
 
-    const getPickupCoordinates = async (pickup) => {
-        try {
-            dispatch(setLoading(true));
-            const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?` + 
-                new URLSearchParams({
-                    address: pickup,
-                    key: process.env.GOOGLE_API_KEY || 'AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU',
-                })
-            );
-            const data = await response.json();
-            if (data.results.length > 0) {
-                dispatch(setPickupCoordinates([
-                    data.results[0].geometry.location.lat,
-                    data.results[0].geometry.location.lng
-                ]));
-            } else {
-                console.error('No results found for pickup location');
-            }
-        } catch(error) {
-            console.error('Error fetching pickup coordinates:', error);
-        } finally {
-            dispatch(setLoading(false));
-        }
-    };
-
-    const getDropoffCoordinates = async (dropoff) => {
-        try {
-            dispatch(setLoading(true));
-            const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?` + 
-                new URLSearchParams({
-                    address: dropoff,
-                    key: process.env.GOOGLE_API_KEY || 'AIzaSyAhU-s47LJFmxiPK4X5zD4oWfccyUN8kEU',
-                })
-            );
-            const data = await response.json();
-            if (data.results.length > 0) {
-                dispatch(setDropoffCoordinates([
-                    data.results[0].geometry.location.lat,
-                    data.results[0].geometry.location.lng
-                ]));
-            } else {
-                console.error('No results found for dropoff location');
-            }
-        } catch(error) {
-            console.error('Error fetching dropoff coordinates:', error);
-        } finally {
-            dispatch(setLoading(false));
-        }
-    };
 
     const handleSelectRide = (car) => {
         dispatch(setSelectedCar(car));

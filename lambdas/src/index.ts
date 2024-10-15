@@ -2,6 +2,7 @@
 export { handler as notify } from './payment/notify'
 export { handler as payment } from './payment/payment';
 export { handler as trips } from './ride/ride';
+export { handler as request } from './ride/request';
 export { handler as login } from './user/login';
 export { handler as user } from './user/user';
 export { handler as paymentRequestId } from './ride/request';

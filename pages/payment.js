@@ -222,11 +222,14 @@ function Payment() {
                 {paymentStatus === 'success' && <SuccessMessage>Payment successful! Redirecting...</SuccessMessage>}
                 {paymentStatus === 'failure' && <ErrorMessage>Payment failed. Please try again.</ErrorMessage>}
                 {loading ? (
-                    <LoadingWrapper>
+                    <LoadingPopup>
+                        <LoadingWrapper>
                         <Loader />
                         <LoadingMessage>Processing payment, please wait...</LoadingMessage>
-                    </LoadingWrapper>
-                ) : (
+                        </LoadingWrapper>
+                    </LoadingPopup>
+                )         
+                : (
                     <Button onClick={handlePayment} disabled={loading}>
                         {loading ? 'Processing...' : selectedGateway ? `Confirm ${selectedGateway.charAt(0).toUpperCase() + selectedGateway.slice(1)}` : 'Confirm Payment'}
                     </Button>
@@ -353,16 +356,20 @@ const ErrorMessage = tw.p`
     text-red-600 mt-2
 `;
 
+const LoadingPopup = tw.div`
+  fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-70
+`;
+
 const LoadingWrapper = tw.div`
-    flex items-center justify-center mt-4
+  flex flex-col items-center justify-center py-6
+`;
+
+const LoadingMessage = tw.div`
+  text-white font-semibold text-center py-4 text-center text-xs py-2
 `;
 
 const Loader = tw.div`
-    animate-spin rounded-full border-t-2 border-b-2 border-gray-300 w-6 h-6
-`;
-
-const LoadingMessage = tw.p`
-    ml-2 text-gray-800
+  w-16 h-16 border-4 border-dashed rounded-full animate-spin border-white-500
 `;
 
 const Button = tw.button`
