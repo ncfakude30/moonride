@@ -7,7 +7,7 @@ import { setPaymentStatus, setPaymentResponse , setPaymentComplete} from '../sto
 import { setTrackingDetails } from '../store/actions/trackingActions';
 import Image from 'next/image';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { setTrips, appendTrips, setLoading, setError } from '../../store/reducers/tripSlice';
+import { setTrips, appendTrips, setLoading, setError } from '../store/reducers/tripSlice';
 
 function Payment() {
     const router = useRouter();
