@@ -4,7 +4,7 @@ import { setDriverStatus,  } from '../../store/reducers/driverReducer'; // Adjus
 import { useSelector, useDispatch } from 'react-redux';
 import { getUser, updateDriverStatus } from '../api/api.service';
 
-const OnlineToggle = () => {
+function DriverStatus () {
     const dispatch = useDispatch();
     const { online } = useSelector((state) => state.driver); // Get the online status from Redux
     const user = useSelector((state) => state.auth.user);
@@ -55,7 +55,7 @@ const OnlineToggle = () => {
     );
 };
 
-export default OnlineToggle;
+export default DriverStatus;
 
 const RoleToggle = tw.div`
   bg-gradient-to-r from-gray-600 to-gray-400 text-white text-center rounded-full p-2 font-semibold shadow-lg

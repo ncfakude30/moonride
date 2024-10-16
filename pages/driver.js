@@ -7,13 +7,14 @@ import Map from './components/Map';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import RecentTrips from './components/RecentTrips';
-import OnlineToggle from './components/DriverStatus'
+import DriverStatus from './components/driverStatus';
 import Image from 'next/image';
 import { useDispatch, useSelector } from 'react-redux';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { setUser, clearUser } from '../store/reducers/authSlice';
 import Skeleton from 'react-loading-skeleton';
+
 
 export default function Drivers() {
     const dispatch = useDispatch();
@@ -66,7 +67,7 @@ export default function Drivers() {
                         <ActionItems>
                             <Header style={{ backgroundColor: '#1a1a2e' }}>
                             <Image src='https://moonride-media.s3.amazonaws.com/moon-ride.png' alt="MoonRides Logo" height={80} width={80} />
-                                <OnlineToggle /> {/* Add the OnlineToggle here */}
+                                <DriverStatus /> {/* Add the DriverStatus here */}
                                 <Profile>
                                     <Name>{user && user.name}</Name>
                                     <UserImage
