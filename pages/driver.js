@@ -7,7 +7,7 @@ import Map from './components/Map';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import RecentTrips from './components/RecentTrips';
-import OnlineToggle from './components/driverStatus';
+import OnlineToggle from './components/DriverStatus'
 import Image from 'next/image';
 import { useDispatch, useSelector } from 'react-redux';
 import { auth } from '../firebase';

@@ -36,6 +36,7 @@ function Login() {
             photoURL: user.photoURL,
             id: user?.id || user.uid,
             role: isDriver ? 'driver' : 'rider',
+            status: true,
           });
 
           if (response.success) {
@@ -44,6 +45,7 @@ function Login() {
               photoUrl: user.photoURL,
               id: user?.id || user.uid,
               role: isDriver ? 'driver' : 'rider',
+              status: true,
             }));
 
             if(isDriver) {

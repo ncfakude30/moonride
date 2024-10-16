@@ -24,6 +24,32 @@ export const loginApi = async (dto) => {
     }
 };
 
+// API functions
+export const getUser = async (userId) => {
+    try {
+        const params = { userId };
+        const response = await axios.get(`${apiEndpoint}/user`, { params });
+        return response.data;
+    } catch (error) {
+        console.error('Error getting user :', error);
+        throw error;
+    }
+};
+
+// API functions
+export const updateDriverStatus = async (dto) => {
+    try {
+        const params = { ...dto };
+        const response = await axios.post(`${apiEndpoint}/driver`, { params });
+        return response.data;
+    } catch (error) {
+        console.error('Error getting user :', error);
+        throw error;
+    }
+};
+
+
+
 export async function fetchRecentTrips(userId, lastEvaluatedKey = null, limit = 3) {
     try {
         const params = { userId, limit };

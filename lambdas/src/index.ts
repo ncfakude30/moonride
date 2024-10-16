@@ -11,3 +11,4 @@ export { handler as disconnect } from './websocket/disconnect';
 export { handler as message } from './websocket/message';
 export { handler as directions } from './map/directions';
 export { handler as drivers } from './map/drivers';
+export { handler as driverStatus } from './driver/status';

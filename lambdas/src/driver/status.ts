@@ -6,8 +6,6 @@ const USERS_TABLE = process.env.USERS_TABLE || 'UsersTable';
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    console.log(`Received event: ${JSON.stringify(JSON.parse(event.body || '{}'))}`);
-
     const headers = {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',  // Allow requests from any origin
@@ -28,46 +26,45 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (event.httpMethod === 'POST') {
         try {
             const body = JSON.parse(event.body || '{}');
-            const { email, displayName, photoURL, id: userId, role, status } = body;
+            const { userId, status } = body;
 
             // Validate required fields
-            if (!userId || !email || !displayName || !photoURL) {
+            if (!userId || typeof status !== 'boolean') {
                 return {
                     statusCode: 400,
                     headers,
-                    body: JSON.stringify({ message: 'Missing required fields' }),
+                    body: JSON.stringify({ message: 'Missing or invalid required fields' }),
                 };
             }
 
-            const response = await dynamodb.get({
+            // Check if the user exists
+            const userResponse = await dynamodb.get({
                 TableName: USERS_TABLE,
                 Key: { userId },
             }).promise();
 
-            if (response.Item) {
+            if (!userResponse.Item) {
                 return {
-                    statusCode: 200,
+                    statusCode: 404,
                     headers,
-                    body: JSON.stringify({ message: 'User already exists', success: true }),
+                    body: JSON.stringify({ message: 'User not found' }),
                 };
             }
 
-            await dynamodb.put({
+            // Update the user's status in the table
+            await dynamodb.update({
                 TableName: USERS_TABLE,
-                Item: {
-                    userId,
-                    email,
-                    displayName,
-                    photoURL,
-                    role,
-                    status,
+                Key: { userId },
+                UpdateExpression: 'set onlineStatus = :status',
+                ExpressionAttributeValues: {
+                    ':status': status,
                 },
             }).promise();
 
             return {
-                statusCode: 201,
+                statusCode: 200,
                 headers,
-                body: JSON.stringify({ message: 'User data stored successfully', success: true }),
+                body: JSON.stringify({ message: 'User status updated successfully', success: true }),
             };
         } catch (error: unknown) {
             // Handle errors

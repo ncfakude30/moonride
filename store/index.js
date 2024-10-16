@@ -8,6 +8,7 @@ import paymentReducer from './reducers/paymentSlice';
 import searchReducer from './reducers/searchSlice';
 import rideReducer from './reducers/rideReducer';
 import trackingReducer from './reducers/trackingReducer';
+import driverReducer from './reducers/driverReducer';
 
 export const store = configureStore({
     reducer: {
@@ -20,5 +21,6 @@ export const store = configureStore({
         search: searchReducer,
         ride: rideReducer,
         tracking: trackingReducer,
+        driver: driverReducer,
     },
 });

@@ -223,6 +223,22 @@ functions:
               - Authorization
             allowCredentials: true
 
+  driverStatus:
+    handler: src/index.driverStatus
+    package:
+      include:
+        - driver/*
+    events:
+      - http:
+          path: driver/status
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
+
 resources:
   Resources:
     TripsTable:
