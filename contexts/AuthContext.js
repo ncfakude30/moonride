@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     const [userDataFetched, setUserDataFetched] = useState(false);
 
     useEffect(() => {
-        if (user && !userDataFetched) {
+        if (user) {
             // Fetch additional user data when user is authenticated
             const fetchUserData = async () => {
                 try {
@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
             fetchUserData();
         }
 
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
                 // Set user data from Firebase
                 const initialUser = {
@@ -42,7 +42,10 @@ export const AuthProvider = ({ children }) => {
                     status: firebaseUser?.status,
                 };
 
-                dispatch(setUser(initialUser)); // Store initial Firebase user data
+                const userResponse = await getUser(firebaseUser?.id || firebaseUser?.uuid);
+                const updatedUser = { ...initialUser, ...userResponse }; // Merge the fetched data with the existing user object
+
+                dispatch(setUser(updatedUser)); // Store initial Firebase user data
 
                 // Reset the user data fetch status when the Firebase user changes
                 setUserDataFetched(false);
