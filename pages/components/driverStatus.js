@@ -19,7 +19,7 @@ function DriverStatus () {
         
         const fetchStatus = async () => {
             try {
-                const user = await getUser(user?.id); // Fetch initial status from API or Redux
+                const user = await getUser(user?.id).catch(()=> null); // Fetch initial status from API or Redux
                 console.log(user);
                 setIsOnline(user?.status && user?.role?.toLowerCase() === 'driver'); // Update the state based on the fetched status
             } catch (error) {
@@ -36,7 +36,10 @@ function DriverStatus () {
         try {
             // Dispatch the action to update the status in Redux and database
             dispatch(setDriverStatus(newStatus)); 
-            await updateDriverStatus(newStatus);
+            await updateDriverStatus({
+                userId: user?.id,
+                status: newStatus,
+            });
             console.log('Driver status updated successfully');
         } catch (error) {
             console.error('Failed to update driver status:', error);

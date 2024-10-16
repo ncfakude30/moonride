@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,63 +10,61 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
-    const [userDataFetched, setUserDataFetched] = useState(false);
 
     useEffect(() => {
-        if (user) {
+        if (user && !user?.role) {
             // Fetch additional user data when user is authenticated
             const fetchUserData = async () => {
                 try {
-                    const userResponse = await getUser(user?.id || user.uid);
+                    const userResponse = await getUser(user.uid).catch(()=> null);
                     const updatedUser = { ...user, ...userResponse }; // Merge the fetched data with the existing user object
-
                     dispatch(setUser(updatedUser)); // Update the user in the store
-                    setUserDataFetched(true); // Mark the data as fetched
                 } catch (error) {
                     console.error('Error fetching user data:', error);
                 }
             };
             fetchUserData();
         }
+    }, [dispatch, user]);
 
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser) {
-                // Set user data from Firebase
-                const initialUser = {
-                    uid: firebaseUser.uid,
-                    displayName: firebaseUser.displayName,
-                    photoURL: firebaseUser.photoURL,
-                    email: firebaseUser.email,
-                    id: firebaseUser.id || firebaseUser.uid,
-                    role: firebaseUser?.role,
-                    status: firebaseUser?.status,
-                };
-
-                const userResponse = await getUser(firebaseUser?.id || firebaseUser?.uuid);
-                const updatedUser = { ...initialUser, ...userResponse }; // Merge the fetched data with the existing user object
-
-                dispatch(setUser(updatedUser)); // Store initial Firebase user data
-
-                // Reset the user data fetch status when the Firebase user changes
-                setUserDataFetched(false);
+    useEffect(() => {
+        if(user) {
+            return (
+                <AuthContext.Provider value={{uid: user?.uid,
+                    displayName: user?.displayName,
+                    photoURL: user?.photoURL,
+                    email: user?.email,
+                    role: user?.role,
+                    status: user?.status,
+                    id: user?.id || user?.uid,}}>
+                    {children}
+                </AuthContext.Provider>
+            );
+        }
+        
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                dispatch(setUser({
+                    uid: user.uid,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL,
+                    email: user.email,
+                    id: user?.id || user.uid,
+                }));
             } else {
                 dispatch(clearUser());
             }
         });
 
         return () => unsubscribe();
-    }, [dispatch, user, userDataFetched]);
+    }, [dispatch]);
 
     return (
-        <AuthContext.Provider value={{
-            uid: user?.uid,
+        <AuthContext.Provider value={{uid: user?.uid,
             displayName: user?.displayName,
             photoURL: user?.photoURL,
             email: user?.email,
-            id: user?.id || user?.uid,
-            role: user?.role,
-            status: user?.status,
-        }}>
+            id: user?.id || user?.uid,}}>
             {children}
         </AuthContext.Provider>
     );
