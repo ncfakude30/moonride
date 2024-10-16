@@ -89,7 +89,7 @@ functions:
         - user/*
     events:
       - http:
-          path: user/{userId}
+          path: user
           method: get
           cors:
             origin: '*'
