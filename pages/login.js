@@ -16,13 +16,14 @@ function Login() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationId, setVerificationId] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false); // Toggle between login and registration
+  const [isRegistering, setIsRegistering] = useState(false);
   const [showPhoneInput, setShowPhoneInput] = useState(false);
-  const [buttonText, setButtonText] = useState('Sign in with Phone Number'); // State for button text
-  const [isOtpSent, setIsOtpSent] = useState(false); // State for OTP action
-  const [isGoogleDisabled, setIsGoogleDisabled] = useState(false); // Disable Google button
-  const [isPhoneDisabled, setIsPhoneDisabled] = useState(false); // Disable Phone button
-  const [isLoading, setIsLoading] = useState(false); // Loader state for OTP sending
+  const [buttonText, setButtonText] = useState('Sign in with Phone Number');
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [isGoogleDisabled, setIsGoogleDisabled] = useState(false);
+  const [isPhoneDisabled, setIsPhoneDisabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDriver, setIsDriver] = useState(false); // Toggle state for Driver/Rider
 
   useEffect(() => {
     const handleAuthStateChanged = async (user) => {
@@ -34,6 +35,7 @@ function Login() {
             displayName: user.displayName,
             photoURL: user.photoURL,
             id: user?.id || user.uid,
+            role: isDriver ? 'driver' : 'rider',
           });
 
           if (response.success) {
@@ -41,8 +43,14 @@ function Login() {
               name: user.displayName,
               photoUrl: user.photoURL,
               id: user?.id || user.uid,
+              role: isDriver ? 'driver' : 'rider',
             }));
-            router.push('/');
+
+            if(isDriver) {
+              router.push('/driver');
+            } else{
+              router.push('/');
+            }
           } else {
             console.error(`Failed to ${isRegistering ? 'register' : 'login'} user`);
             router.push('/login');
@@ -56,46 +64,44 @@ function Login() {
 
     const unsubscribe = onAuthStateChanged(auth, handleAuthStateChanged);
     return () => unsubscribe();
-  }, [dispatch, router, isRegistering]);
+  }, [dispatch, router, isRegistering, isDriver]);
 
   const handleGoogleSignIn = async () => {
     try {
-      setIsLoading(true); // Start loading when Google sign-in is initiated
-      setIsPhoneDisabled(true); // Disable phone button when Google sign-in is clicked
+      setIsLoading(true);
+      setIsPhoneDisabled(true);
       await signInWithPopup(auth, provider);
-      setIsLoading(false); // Stop loading after successful sign-in
+      setIsLoading(false);
     } catch (error) {
       console.error('Sign in failed:', error);
-      setIsLoading(false); // Stop loading in case of error
+      setIsLoading(false);
     }
   };
 
   const handlePhoneButtonClick = () => {
     if (!isOtpSent) {
-      // First click: Show phone input and change button text
       setShowPhoneInput(true);
       setButtonText('Send OTP');
       setIsOtpSent(true);
-      setIsGoogleDisabled(true); // Disable Google button when phone button is clicked
+      setIsGoogleDisabled(true);
     } else {
-      // Second click: Send OTP
       handleSendOtp();
     }
   };
 
   const handleSendOtp = async () => {
     try {
-      setIsLoading(true); // Start loader
+      setIsLoading(true);
       const recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
         size: 'invisible',
       }, auth);
 
       const confirmationResult = await signInWithPhoneNumber(auth, `+${phoneNumber?.trim()}`, recaptchaVerifier);
       setVerificationId(confirmationResult.verificationId);
-      setIsLoading(false); // Stop loader
+      setIsLoading(false);
     } catch (error) {
       console.error('Error during phone sign-in:', error);
-      setIsLoading(false); // Stop loader in case of error
+      setIsLoading(false);
     }
   };
 
@@ -114,8 +120,12 @@ function Login() {
     setVerificationCode('');
     setVerificationId('');
     setShowPhoneInput(false);
-    setIsOtpSent(false); // Reset OTP state when toggling
-    setButtonText('Sign in with Phone Number'); // Reset button text when toggling
+    setIsOtpSent(false);
+    setButtonText('Sign in with Phone Number');
+  };
+
+  const toggleRole = () => {
+    setIsDriver(!isDriver);
   };
 
   return (
@@ -124,7 +134,7 @@ function Login() {
         <Image src='https://moonride-media.s3.amazonaws.com/moon-ride.png' alt='MoonRides Logo' width={200} height={200} />
         <Title>{isRegistering ? 'Register your account' : 'Login to access your account'}</Title>
 
-        {/* Loader popup while sending OTP or signing in with Google */}
+        {/* Loader popup */}
         {isLoading && (
           <LoadingPopup>
             <LoadingWrapper>
@@ -138,7 +148,7 @@ function Login() {
         <div className={`overflow-hidden transition-all duration-500 ${showPhoneInput ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
           <InputBoxes>
             <PhoneInput
-              country={'us'} // Default country
+              country={'us'}
               value={phoneNumber}
               onChange={setPhoneNumber}
               placeholder="Enter your phone number"
@@ -173,12 +183,18 @@ function Login() {
           {isRegistering ? 'Register with Google' : 'Sign in with Google'}
         </SignInButton>
 
-        <div id="recaptcha-container"></div>
-
+        {/* Role Toggle: Rider or Driver */}
+        <RoleToggle onClick={toggleRole}>
+          <ToggleLabel isDriver={isDriver}>
+            <ToggleCircle isDriver={isDriver} />
+          </ToggleLabel>
+          <ToggleText isDriver={isDriver}>{isDriver ? 'Sign in as Driver' : 'Sign in as Rider'}</ToggleText>
+        </RoleToggle>
         {/* Toggle between login and registration */}
         <ToggleLink onClick={toggleRegister}>
           {isRegistering ? 'Already have an account? Login' : 'Don\'t have an account? Register'}
         </ToggleLink>
+        <div id="recaptcha-container"></div>
       </Content>
     </Wrapper>
   );
@@ -197,26 +213,44 @@ const Content = tw.div`
 `;
 
 const SignInButton = tw.button`
-    bg-gradient-to-r from-gray-600 to-gray-400 text-white text-center rounded-full p-4 font-semibold shadow-lg
-    hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
-    focus:outline-none focus:ring-1 focus:ring-gray-600 focus:ring-opacity-25
-    w-full max-w-xs my-2
-    disabled:opacity-50 disabled:cursor-not-allowed
+  bg-gradient-to-r from-gray-600 to-gray-400 text-white text-center rounded-full p-4 font-semibold shadow-lg
+  hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
+  focus:outline-none focus:ring-1 focus:ring-gray-600 focus:ring-opacity-25
+  w-full my-2 disabled:bg-gray-400
 `;
 
 const InputBoxes = tw.div`
-    flex flex-col mb-4
+  flex items-center bg-white px-4 py-2 rounded-lg shadow-md mb-4
 `;
 
 const Input = tw.input`
-    h-12 bg-white text-gray-700 my-2 rounded-lg shadow-sm p-3 outline-none border border-gray-300
-    placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition
+  border-none outline-none w-full text-gray-600 text-lg
 `;
 
 const Title = tw.div`
   text-5xl font-extrabold text-gray-300 text-center mb-6
   bg-clip-text text-transparent bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900
   shadow-md
+`;
+
+const RoleToggle = tw.div`
+  bg-gradient-to-r from-gray-600 to-gray-400 text-white text-center rounded-full p-2 font-semibold shadow-lg
+  w-full my-2 disabled:bg-gray-400
+  relative flex items-center mt-2 cursor-pointer
+`;
+
+const ToggleLabel = tw.label`
+  relative flex items-center h-10 w-16 rounded-full p-1 transition-colors
+  ${(props) => props.isDriver ? 'bg-green-500' : 'bg-gradient-to-r from-gray-600 to-gray-400'}
+`;
+
+const ToggleCircle = tw.div`
+  bg-white h-8 w-8 rounded-full shadow-md transform transition-transform
+  ${(props) => props.isDriver ? 'translate-x-6' : 'translate-x-0'}
+`;
+
+const ToggleText = tw.span`
+  text-white-500 ml-3 text-lg font-medium
 `;
 
 const ToggleLink = tw.span`

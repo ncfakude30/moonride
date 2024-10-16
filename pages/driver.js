@@ -1,3 +1,5 @@
+// pages/drivers.js
+
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import tw from 'tailwind-styled-components';
@@ -5,6 +7,7 @@ import Map from './components/Map';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import RecentTrips from './components/RecentTrips';
+import OnlineToggle from './components/driverStatus';
 import Image from 'next/image';
 import { useDispatch, useSelector } from 'react-redux';
 import { auth } from '../firebase';
@@ -12,7 +15,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { setUser, clearUser } from '../store/reducers/authSlice';
 import Skeleton from 'react-loading-skeleton';
 
-export default function Home() {
+export default function Drivers() {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
     const router = useRouter();
@@ -62,7 +65,8 @@ export default function Home() {
                     <ContentWrapper>
                         <ActionItems>
                             <Header style={{ backgroundColor: '#1a1a2e' }}>
-                                <Image src='https://moonride-media.s3.amazonaws.com/moon-ride.png' alt="MoonRides Logo" height={112} width={112} />
+                            <Image src='https://moonride-media.s3.amazonaws.com/moon-ride.png' alt="MoonRides Logo" height={80} width={80} />
+                                <OnlineToggle /> {/* Add the OnlineToggle here */}
                                 <Profile>
                                     <Name>{user && user.name}</Name>
                                     <UserImage
@@ -71,33 +75,22 @@ export default function Home() {
                                     />
                                 </Profile>
                             </Header>
+                             
                             <ActionButtons>
-                                <Link href="/search" passHref>
-                                    <ActionButton>
-                                        <ActionButtonImage src='https://i.ibb.co/cyvcpfF/uberx.png' />
-                                        <Label>Ride</Label>
-                                    </ActionButton>
-                                </Link>
                                 <ActionButton onClick={handlePopupOpen}>
-                                    <Badge>Coming Soon</Badge>
-                                    <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/bus.png'/>
-                                    <Label>Bus Tracker</Label>
+                                    <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/dashboard.png' />
+                                    <Label>Dashboard</Label>
+                                </ActionButton>
+                            
+                                <ActionButton onClick={handlePopupOpen}>
+                                    <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/earnings.png' />
+                                    <Label>Earnings</Label>
                                 </ActionButton>
                                 <ActionButton onClick={handlePopupOpen}>
-                                    <Badge>Coming Soon</Badge>
-                                    <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/water.png'/>
-                                    <Label>Water</Label>
+                                    <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/settings.png' />
+                                    <Label>Settings</Label>
                                 </ActionButton>
-                                <ActionButton onClick={handlePopupOpen}>
-                                    <Badge>Coming Soon</Badge>
-                                    <ActionButtonImage src='https://i.ibb.co/n776JLm/bike.png'/>
-                                    <Label>Order</Label>
-                                </ActionButton>
-                                <ActionButton onClick={handlePopupOpen}>
-                                    <Badge>Coming Soon</Badge>
-                                    <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/helper.png'/>
-                                    <Label>Helper</Label>
-                                </ActionButton>
+                                
                             </ActionButtons>
                             <RecentTrips user={user} />
                         </ActionItems>
@@ -144,7 +137,7 @@ const Header = tw.div`
 `;
 
 const Profile = tw.div`
-    flex items-center
+    flex justify-between items-center
 `;
 
 const Name = tw.div`
@@ -171,7 +164,7 @@ const ActionButton = tw.button`
 `;
 
 const ActionButtonImage = tw.img`
-    h-24 w-24 object-cover mb-2 z-10
+    h-20 w-20 object-cover mb-4 z-8
 `;
 
 const Badge = tw.div`
