@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import tw from 'tailwind-styled-components';
 import { setDriverStatus,  } from '../../store/reducers/driverReducer'; // Adjust the import path as needed
 import { useSelector, useDispatch } from 'react-redux';
-import { getUser } from '../api/api.service';
+import { getUser, updateDriverStatus } from '../api/api.service';
 
 const OnlineToggle = () => {
     const dispatch = useDispatch();
@@ -36,6 +36,7 @@ const OnlineToggle = () => {
         try {
             // Dispatch the action to update the status in Redux and database
             dispatch(setDriverStatus(newStatus)); 
+            await updateDriverStatus(newStatus);
             console.log('Driver status updated successfully');
         } catch (error) {
             console.error('Failed to update driver status:', error);
