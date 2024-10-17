@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
         });
 
         return () => unsubscribe();
-    }, [children, dispatch, user]);
+    }, [dispatch]);
 
     return (
         <AuthContext.Provider value={{uid: user?.uid,
