@@ -19,6 +19,10 @@ function DriverStatus () {
         
         const fetchStatus = async () => {
             try {
+                if (user?.status) {
+                    setIsOnline(user?.status && user?.role?.toLowerCase() === 'driver'); // Update the state based on the fetched status
+                    return;
+                }
                 const user = await getUser(user?.id).catch(()=> null); // Fetch initial status from API or Redux
                 console.log(user);
                 setIsOnline(user?.status && user?.role?.toLowerCase() === 'driver'); // Update the state based on the fetched status
@@ -27,7 +31,7 @@ function DriverStatus () {
             }
         };
         fetchStatus();
-    }, [dispatch, user]);
+    }, [user]);
 
     // Toggle the driver's online/offline status
     const toggleOnlineStatus = async () => {
@@ -39,6 +43,8 @@ function DriverStatus () {
             await updateDriverStatus({
                 userId: user?.id,
                 status: newStatus,
+            }).catch((error) => {
+                console.log(error);
             });
             console.log('Driver status updated successfully');
         } catch (error) {

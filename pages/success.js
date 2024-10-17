@@ -35,7 +35,7 @@ useEffect(() => {
       setIsValid(true);
       return;
     }
-    
+
     if (payment && (payment.toUpperCase() === 'CASH')) {
       setIsValid(true);
       return;
@@ -79,7 +79,7 @@ useEffect(() => {
     };
 
     verifyTransaction();
-  }, [query, isValid, payment]);
+  }, [query, isValid, payment, isComplete]);
 
 
   // Countdown logic and automatic redirect after 5 seconds

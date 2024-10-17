@@ -5,10 +5,10 @@ const tripSlice = createSlice({
     initialState: {
         trips: [],
         lastEvaluatedKey: null,
-        hasMore: true,
+        hasMore: false,
         loading: false,
         error: null,
-        hasNotification: true,
+        hasNotification: false,
     },
     reducers: {
         setTrips(state, action) {

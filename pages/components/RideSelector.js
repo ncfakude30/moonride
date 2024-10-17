@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import tw from 'tailwind-styled-components';
 import { setCurrency, setCarPrice } from '../../store/actions/rideActions';
@@ -86,7 +86,7 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
         fetchRideDuration();
     }, [pickupCoordinates, dropoffCoordinates, directionResponse, dispatch]);
 
-    const fetchDriversList = async () => {
+    const fetchDriversList = useCallback(async () => {
         setDriverLoading(true);
         setFetchError(false);
         try {
@@ -99,14 +99,14 @@ function RideSelector({ pickupCoordinates, dropoffCoordinates, onSelectRide, log
         } finally {
             setDriverLoading(false);
         }
-    };
+    }, [pickupCoordinates]);
 
     useEffect(() => {
         if (!pickupCoordinates || drivers?.length > 0) {
             return;
         }
         fetchDriversList();
-    }, [pickupCoordinates, drivers]);
+    }, [pickupCoordinates, drivers, fetchDriversList]);
 
     const handleCarClick = (car) => {
         dispatch(setCarPrice((rideDuration * car?.multiplier).toFixed(2)));

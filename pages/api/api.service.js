@@ -25,6 +25,17 @@ export const loginApi = async (dto) => {
 };
 
 // API functions
+export const registerApi = async (dto) => {
+    try {
+        const response = await axios.post(`${apiEndpoint}/login`, dto);
+        return response.data;
+    } catch (error) {
+        console.error('Error registering:', error);
+        throw error;
+    }
+};
+
+// API functions
 export const getUser = async (userId) => {
     try {
         const params = { userId };
@@ -166,8 +177,6 @@ export const isPaymentValid = (paymentDetails) => {
   };
 
 // Export the WebSocket service instance
-export default {
-    apiClient
-};
+export default apiClient
 
 

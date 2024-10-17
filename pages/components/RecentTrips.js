@@ -4,7 +4,7 @@ import tw from 'tailwind-styled-components';
 import Image from 'next/image';
 import Link from 'next/link';
 import { fetchRecentTrips } from '../api/api.service';
-import { setTrackingDetails } from '../../store/actions/trackingActions';
+import {setTrackingDetails} from '../../store/actions/trackingActions';
 import { setTrips, appendTrips, setLoading, setError } from '../../store/reducers/tripSlice';
 import { useRouter } from 'next/router';
 
@@ -54,7 +54,7 @@ function RecentTrips() {
             loading: false
         }));
         router.push('/tracking');
-    };
+    }
 
     useEffect(() => {
         loadTrips();
@@ -128,7 +128,6 @@ const truncateText = (text) => {
 };
 
 export default RecentTrips;
-
 const RecentTripsWrapper = tw.div`
       flex flex-col flex-wrap space-x-2 space-y-2 p-2
 `;
