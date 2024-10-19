@@ -15,11 +15,27 @@ body {
   }
   
   .card {
-    background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+    background: linear-gradient(145deg, #767575, #fcf9f9);
     border-radius: 12px;
-    box-shadow: 8px 8px 15px #0b0b0b, -8px -8px 15px #2a2a2a;
+    box-shadow: 8px 8px 15px #0b0b0b, -8px -8px 15px #f4f3f3;
     padding: 20px;
-    transition: transform 0.3s;
+    transition: transform 0.3s, border-bottom 0.3s;
+    position: relative;
+  }
+  
+  .card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background-color: #1de9b6; /* Accent color for selected underline */
+    transition: width 0.3s;
+  }
+  
+  .card:hover::after, .card.selected::after {
+    width: 100%; /* Show the underline on hover or when selected */
   }
   
   .card:hover {
@@ -70,3 +86,38 @@ body {
     margin: 5px 0;
   }
   
+/* New styles for options (Trips, Earnings, Settings) */
+.options {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #1e1e1e;
+  }
+  
+  .option {
+    position: relative;
+    padding: 10px 20px;
+    font-size: 18px;
+    color: #e0e0e0;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  
+  .option:hover {
+    color: #1de9b6;
+  }
+  
+  .option::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background-color: #1de9b6;
+    transition: width 0.3s;
+  }
+  
+  .option:hover::after, .option.selected::after {
+    width: 100%; /* Show the underline on hover or when selected */
+  }

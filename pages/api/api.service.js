@@ -37,9 +37,14 @@ export const registerApi = async (dto) => {
 
 // API functions
 export const getUser = async (userId) => {
+    if(!userId) {
+        console.log(`No userId`);
+        return;
+    }
+
+    console.log(`Here userId: ${userId}`);
     try {
-        const params = { userId };
-        const response = await apiClient.get('/user', { params });
+        const response = await apiClient.get(`/user?userId=${userId}`);
         return response.data;
     } catch (error) {
         console.error('Error getting user :', error);

@@ -1,30 +1,20 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import {fetchDriverSettings, setDriverSettings} from '../../api/api.service';
+import React, { useState } from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import tw from 'tailwind-styled-components';
+import { fetchDriverSettings, setDriverSettings } from '../../api/api.service';
 
-const DriverSettings = () => {
-  const [settings, setSettings] = useState(null);
+const DriverSettings = ({ user, settings }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const user = useSelector((state) => state.auth.user);
   const [formData, setFormData] = useState({
-    profile: { name: "", phone: "" },
-    carDetails: { carName: "", carPlate: "" },
-    bankingDetails: { bankName: "", accountHolder: "", accountNumber: "", bankCode: "" },
+    profile: { name: settings?.profile?.name || "", phone: settings?.profile?.phone || "" },
+    carDetails: { carName: settings?.carDetails?.carName || "", carPlate: settings?.carDetails?.carPlate || "" },
+    bankingDetails: {
+      bankName: settings?.bankingDetails?.bankName || "",
+      accountHolder: settings?.bankingDetails?.accountHolder || "",
+      accountNumber: settings?.bankingDetails?.accountNumber || "",
+      bankCode: settings?.bankingDetails?.bankCode || ""
+    },
   });
-
-  useEffect(() => {
-    if (!user|| !user.id) {
-      console.log('No user');
-      return;
-  }
-
-  fetchDriverSettings(user?.id)
-    .then((res) => {
-      setSettings(res);
-      setFormData(res);
-    })
-    .catch((err) => console.error("Error fetching settings:", err));
-  }, [user]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -41,7 +31,27 @@ const DriverSettings = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Split the name to find the nested object
+    const keys = name.split(".");
+    setFormData((prev) => {
+      const newData = { ...prev };
+      let temp = newData;
+
+      // Navigate through the keys to set the value correctly
+      keys.forEach((key, index) => {
+        if (index === keys.length - 1) {
+          temp[key] = value; // Set the value at the deepest level
+        } else {
+          if (!temp[key]) {
+            temp[key] = {}; // Create nested object if it doesn't exist
+          }
+          temp = temp[key];
+        }
+      });
+
+      return newData;
+    });
   };
 
   return (
@@ -56,22 +66,22 @@ const DriverSettings = () => {
                 <input
                   type="text"
                   name="profile.name"
-                  value={formData.profile.name}
+                  value={formData.profile?.name}
                   onChange={handleChange}
                   placeholder="Name"
                 />
                 <input
                   type="text"
                   name="profile.phone"
-                  value={formData.profile.phone}
+                  value={formData.profile?.phone}
                   onChange={handleChange}
                   placeholder="Phone"
                 />
               </div>
             ) : (
               <div>
-                <p>Name: {settings?.profile.name}</p>
-                <p>Phone: {settings.profile.phone}</p>
+                <p>Name: {settings?.profile?.name}</p>
+                <p>Phone: {settings?.profile?.phone}</p>
               </div>
             )}
             <button onClick={handleEdit}>Edit</button>
@@ -85,22 +95,22 @@ const DriverSettings = () => {
                 <input
                   type="text"
                   name="carDetails.carName"
-                  value={formData.carDetails.carName}
+                  value={formData.carDetails?.carName}
                   onChange={handleChange}
                   placeholder="Car Name"
                 />
                 <input
                   type="text"
                   name="carDetails.carPlate"
-                  value={formData.carDetails.carPlate}
+                  value={formData.carDetails?.carPlate}
                   onChange={handleChange}
                   placeholder="Car Plate"
                 />
               </div>
             ) : (
               <div>
-                <p>Car Name: {settings.carDetails.carName}</p>
-                <p>Car Plate: {settings.carDetails.carPlate}</p>
+                <p>Car Name: {settings.carDetails?.carName}</p>
+                <p>Car Plate: {settings.carDetails?.carPlate}</p>
               </div>
             )}
             <button onClick={handleEdit}>Edit</button>
@@ -114,38 +124,38 @@ const DriverSettings = () => {
                 <input
                   type="text"
                   name="bankingDetails.bankName"
-                  value={formData.bankingDetails.bankName}
+                  value={formData.bankingDetails?.bankName}
                   onChange={handleChange}
                   placeholder="Bank Name"
                 />
                 <input
                   type="text"
                   name="bankingDetails.accountHolder"
-                  value={formData.bankingDetails.accountHolder}
+                  value={formData.bankingDetails?.accountHolder}
                   onChange={handleChange}
                   placeholder="Account Holder"
                 />
                 <input
                   type="text"
                   name="bankingDetails.accountNumber"
-                  value={formData.bankingDetails.accountNumber}
+                  value={formData.bankingDetails?.accountNumber}
                   onChange={handleChange}
                   placeholder="Account Number"
                 />
                 <input
                   type="text"
                   name="bankingDetails.bankCode"
-                  value={formData.bankingDetails.bankCode}
+                  value={formData.bankingDetails?.bankCode}
                   onChange={handleChange}
                   placeholder="Bank Code"
                 />
               </div>
             ) : (
               <div>
-                <p>Bank: {settings.bankingDetails.bankName}</p>
-                <p>Account Holder: {settings.bankingDetails.accountHolder}</p>
-                <p>Account Number: **** **** {settings.bankingDetails.accountNumber.slice(-4)}</p>
-                <p>Bank Code: {settings.bankingDetails.bankCode}</p>
+                <p>Bank: {settings.bankingDetails?.bankName}</p>
+                <p>Account Holder: {settings.bankingDetails?.accountHolder}</p>
+                <p>Account Number: **** **** {settings.bankingDetails?.accountNumber.slice(-4)}</p>
+                <p>Bank Code: {settings.bankingDetails?.bankCode}</p>
               </div>
             )}
             <button onClick={handleEdit}>Edit</button>

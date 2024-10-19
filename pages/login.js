@@ -150,7 +150,7 @@ function Login() {
         <div className={`overflow-hidden transition-all duration-500 ${showPhoneInput ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
           <InputBoxes>
             <PhoneInput
-              country={'us'}
+              country={'za'}
               value={phoneNumber}
               onChange={setPhoneNumber}
               placeholder="Enter your phone number"
@@ -187,10 +187,10 @@ function Login() {
 
         {/* Role Toggle: Rider or Driver */}
         <RoleToggle onClick={toggleRole}>
-          <ToggleLabel isDriver={isDriver}>
-            <ToggleCircle isDriver={isDriver} />
+          <ToggleLabel $isDriver={isDriver}>
+            <ToggleCircle $isDriver={isDriver} />
           </ToggleLabel>
-          <ToggleText isDriver={isDriver}>{isDriver ? 'Sign in as Driver' : 'Sign in as Rider'}</ToggleText>
+          <ToggleText $isDriver={isDriver}>{isDriver ? 'Sign in as Driver' : 'Sign in as Rider'}</ToggleText>
         </RoleToggle>
         {/* Toggle between login and registration */}
         <ToggleLink onClick={toggleRegister}>
@@ -243,12 +243,12 @@ const RoleToggle = tw.div`
 
 const ToggleLabel = tw.label`
   relative flex items-center h-10 w-16 rounded-full p-1 transition-colors
-  ${(props) => props.isDriver ? 'bg-green-500' : 'bg-gradient-to-r from-gray-600 to-gray-400'}
+  ${(props) => props.$isDriver ? 'bg-green-500' : 'bg-gradient-to-r from-gray-600 to-gray-400'}
 `;
 
 const ToggleCircle = tw.div`
   bg-white h-8 w-8 rounded-full shadow-md transform transition-transform
-  ${(props) => props.isDriver ? 'translate-x-6' : 'translate-x-0'}
+  ${(props) => props.$isDriver ? 'translate-x-6' : 'translate-x-0'}
 `;
 
 const ToggleText = tw.span`

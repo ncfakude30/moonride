@@ -4,15 +4,15 @@ import { setDriverStatus,  } from '../../store/reducers/driverReducer'; // Adjus
 import { useSelector, useDispatch } from 'react-redux';
 import { getUser, updateDriverStatus } from '../api/api.service';
 
-function DriverStatus () {
+function DriverStatus ({user}) {
     const dispatch = useDispatch();
     const { online } = useSelector((state) => state.driver); // Get the online status from Redux
-    const user = useSelector((state) => state.auth.user);
     const [isOnline, setIsOnline] = useState(online); // Set initial state
+    const myUser = user;
 
     // Fetch the driver's current status from the database on component mount
     useEffect(() => {
-        if(!user) {
+        if(!myUser) {
             console.log(`user is required`);
             return;
         }
@@ -20,18 +20,18 @@ function DriverStatus () {
         const fetchStatus = async () => {
             try {
                 if (user?.status) {
-                    setIsOnline(user?.status && user?.role?.toLowerCase() === 'driver'); // Update the state based on the fetched status
+                    setIsOnline(myUser?.status && myUser?.role?.toLowerCase() === 'driver'); // Update the state based on the fetched status
                     return;
                 }
-                const user = await getUser(user?.id).catch(()=> null); // Fetch initial status from API or Redux
-                console.log(user);
-                setIsOnline(user?.status && user?.role?.toLowerCase() === 'driver'); // Update the state based on the fetched status
+                const user = await getUser(myUser?.id).catch(()=> null); // Fetch initial status from API or Redux
+                console.log(`My returned user: ${JSON.stringify(myUser)}`);
+                setIsOnline(myUser?.status && myUser?.role?.toLowerCase() === 'driver'); // Update the state based on the fetched status
             } catch (error) {
                 console.error('Error fetching driver status:', error);
             }
         };
         fetchStatus();
-    }, [user]);
+    }, [user, myUser]);
 
     // Toggle the driver's online/offline status
     const toggleOnlineStatus = async () => {
@@ -41,7 +41,7 @@ function DriverStatus () {
             // Dispatch the action to update the status in Redux and database
             dispatch(setDriverStatus(newStatus)); 
             await updateDriverStatus({
-                userId: user?.id,
+                userId: myUser?.id,
                 status: newStatus,
             }).catch((error) => {
                 console.log(error);
@@ -54,10 +54,10 @@ function DriverStatus () {
 
     return (
         <RoleToggle onClick={toggleOnlineStatus}>
-            <ToggleLabel isOnline={isOnline}>
-                <ToggleCircle isOnline={isOnline} />
+            <ToggleLabel $isOnline={isOnline}>
+                <ToggleCircle $isOnline={isOnline} />
             </ToggleLabel>
-            <ToggleText isOnline={isOnline}>
+            <ToggleText $isOnline={isOnline}>
                 {isOnline ? 'Online' : 'Offline'}
             </ToggleText>
         </RoleToggle>
@@ -73,12 +73,12 @@ const RoleToggle = tw.div`
 
 const ToggleLabel = tw.label`
   relative flex items-center h-10 w-16 rounded-full p-1 transition-colors
-  ${(props) => (props.isOnline ? 'bg-green-500' : 'bg-gradient-to-r from-gray-600 to-gray-400')}
+  ${(props) => (props.$isOnline ? 'bg-green-500' : 'bg-gradient-to-r from-gray-600 to-gray-400')}
 `;
 
 const ToggleCircle = tw.div`
   bg-white h-8 w-8 rounded-full shadow-md transform transition-transform
-  ${(props) => (props.isOnline ? 'translate-x-6' : 'translate-x-0')}
+  ${(props) => (props.$isOnline ? 'translate-x-6' : 'translate-x-0')}
 `;
 
 const ToggleText = tw.span`
