@@ -14,6 +14,7 @@ provider:
     MESSAGES_TABLE: MessagesTable
     DRIVERS_TABLE: DriversTable
     TRANSACTIONS_TABLE: TransactionsTable
+    DRIVER_SETTINGS_TABLE: DriverSettingsTable
     IMAGE_BUCKET_NAME: moonride-media
     ACM_CERTIFICATE_ARN: arn:aws:acm:us-east-1:535002855362:certificate/ce06f91b-8929-4bdf-b955-18f5a77910c8
     HOUR: ${opt:hour, '12'}  # New hour configuration
@@ -35,6 +36,7 @@ provider:
         - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.MESSAGES_TABLE}
         - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.DRIVERS_TABLE}
         - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.TRANSACTIONS_TABLE}
+        - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.DRIVER_SETTINGS_TABLE}
     - Effect: "Allow"
       Action:
         - logs:CreateLogGroup
@@ -239,6 +241,38 @@ functions:
               - Authorization
             allowCredentials: true
 
+  getDriverSettings:
+    handler: src/index.getDriverSettings
+    package:
+      include:
+        - driver/*
+    events:
+      - http:
+          path: driver/settings
+          method: get
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
+
+  setDriverSettings:
+    handler: src/index.setDriverSettings
+    package:
+      include:
+        - driver/*
+    events:
+      - http:
+          path: driver/settings
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
+
 resources:
   Resources:
     TripsTable:
@@ -338,6 +372,18 @@ resources:
             AttributeType: S
         KeySchema:
           - AttributeName: geohash
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    DriverSettings:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:provider.environment.DRIVER_SETTINGS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 

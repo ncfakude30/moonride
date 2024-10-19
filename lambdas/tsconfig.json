@@ -10,6 +10,6 @@
   },
   "include": [
     "src/**/*.ts",
-    "lambdas/**/*.ts"  // Ensure all .ts files are included
+    "lambdas/**/*.ts"
   ]
 }

@@ -1,6 +1,7 @@
 import '../styles/globals.css';
 import 'tailwindcss/tailwind.css';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import '../styles/driver.settings.css';
 import { Provider } from 'react-redux';
 import { store } from '../store/index';
 import { AuthProvider } from '../contexts/AuthContext';

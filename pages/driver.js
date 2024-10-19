@@ -1,5 +1,3 @@
-// pages/drivers.js
-
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import tw from 'tailwind-styled-components';
@@ -8,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import RecentTrips from './components/RecentTrips';
 import DriverStatus from './components/driverStatus';
+import DriverSettings from './components/driver/DriverSettings'; // Import your settings component
 import Image from 'next/image';
 import { useDispatch, useSelector } from 'react-redux';
 import { auth } from '../firebase';
@@ -15,13 +14,13 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { setUser, clearUser } from '../store/reducers/authSlice';
 import Skeleton from 'react-loading-skeleton';
 
-
 export default function Drivers() {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
     const router = useRouter();
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [activeComponent, setActiveComponent] = useState('trips'); // Manage active component
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -51,6 +50,14 @@ export default function Drivers() {
         setIsPopupOpen(false);
     };
 
+
+    const handleOpenComponent = (component) => {
+        setActiveComponent(component); // Update to show the clicked component
+        if(component !== 'settings') {
+            handlePopupOpen();
+        }
+    };
+
     return (
         <Wrapper>
             {isLoading ? (
@@ -66,7 +73,7 @@ export default function Drivers() {
                     <ContentWrapper>
                         <ActionItems>
                             <Header style={{ backgroundColor: '#1a1a2e' }}>
-                            <Image src='https://moonride-media.s3.amazonaws.com/moon-ride.png' alt="MoonRides Logo" height={80} width={80} />
+                                <Image src='https://moonride-media.s3.amazonaws.com/moon-ride.png' alt="MoonRides Logo" height={80} width={80} />
                                 <DriverStatus /> {/* Add the DriverStatus here */}
                                 <Profile>
                                     <Name>{user && user.name}</Name>
@@ -78,22 +85,26 @@ export default function Drivers() {
                             </Header>
                              
                             <ActionButtons>
-                                <ActionButton onClick={handlePopupOpen}>
-                                    <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/dashboard.png' />
-                                    <Label>Dashboard</Label>
+                                <ActionButton onClick={() => handleOpenComponent('trips')}>
+                                <ActionButtonImage src='https://i.ibb.co/cyvcpfF/uberx.png' />
+                                    <Label>Trips</Label>
                                 </ActionButton>
                             
-                                <ActionButton onClick={handlePopupOpen}>
+                                <ActionButton onClick={() => handleOpenComponent('earnings')}>
                                     <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/earnings.png' />
                                     <Label>Earnings</Label>
                                 </ActionButton>
-                                <ActionButton onClick={handlePopupOpen}>
+                                <ActionButton onClick={() => handleOpenComponent('settings')}>
                                     <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/settings.png' />
                                     <Label>Settings</Label>
                                 </ActionButton>
                                 
                             </ActionButtons>
-                            <RecentTrips user={user} />
+
+                            {activeComponent === 'trips' && <RecentTrips user={user} />}
+                            {activeComponent === 'settings' && <DriverSettings user={user} />} {/* Render settings */}
+                            {/* You can add more conditions for other sections like earnings if needed */}
+                            {activeComponent === 'earnings' && <RecentTrips user={user} />}
                         </ActionItems>
                     </ContentWrapper>
                     {isPopupOpen && (
@@ -166,10 +177,6 @@ const ActionButton = tw.button`
 
 const ActionButtonImage = tw.img`
     h-20 w-20 object-cover mb-4 z-8
-`;
-
-const Badge = tw.div`
-    absolute top-1 left-1 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full
 `;
 
 const Label = tw.div`

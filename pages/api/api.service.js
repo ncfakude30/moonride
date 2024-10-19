@@ -16,7 +16,7 @@ const apiClient = axios.create({
 // API functions
 export const loginApi = async (dto) => {
     try {
-        const response = await axios.post(`${apiEndpoint}/login`, dto);
+        const response = await apiClient.post('/login', dto);
         return response.data;
     } catch (error) {
         console.error('Error logging in:', error);
@@ -27,7 +27,7 @@ export const loginApi = async (dto) => {
 // API functions
 export const registerApi = async (dto) => {
     try {
-        const response = await axios.post(`${apiEndpoint}/login`, dto);
+        const response = await apiClient.post('/login', dto);
         return response.data;
     } catch (error) {
         console.error('Error registering:', error);
@@ -39,7 +39,7 @@ export const registerApi = async (dto) => {
 export const getUser = async (userId) => {
     try {
         const params = { userId };
-        const response = await axios.get(`${apiEndpoint}/user`, { params });
+        const response = await apiClient.get('/user', { params });
         return response.data;
     } catch (error) {
         console.error('Error getting user :', error);
@@ -48,10 +48,9 @@ export const getUser = async (userId) => {
 };
 
 // API functions
-export const updateDriverStatus = async (dto) => {
+export const updateDriverStatus = async (payload) => {
     try {
-        const params = { ...dto };
-        const response = await axios.post(`${apiEndpoint}/driver`, { params });
+        const response = await apiClient.post('/driver/status', payload);
         return response.data;
     } catch (error) {
         console.error('Error getting user :', error);
@@ -137,6 +136,27 @@ export const fetchDrivers = async (payload) => {
     try {
         const response = await apiClient.post('/drivers', payload);
         return response?.data?.drivers || []; // Ensure this matches the expected response structure
+    } catch (error) {
+        console.error('Error fetching drivers:', error);
+        return [];
+    }
+};
+
+export const fetchDriverSettings = async (userId) => {
+    try {
+        const params = { userId };
+        const response = await apiClient.get('/drivers/settings', {params});
+        return response?.data;
+    } catch (error) {
+        console.error('Error fetching drivers:', error);
+        return [];
+    }
+};
+
+export const setDriverSettings = async (payload) => {
+    try {
+        const response = await apiClient.post('/drivers/settings', payload);
+        return response?.data;
     } catch (error) {
         console.error('Error fetching drivers:', error);
         return [];
