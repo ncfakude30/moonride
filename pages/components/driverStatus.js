@@ -43,10 +43,12 @@ function DriverStatus ({user}) {
             await updateDriverStatus({
                 userId: myUser?.id,
                 status: newStatus,
+            }).then((response) => {
+                console.log('Driver status updated successfully', response);
             }).catch((error) => {
                 console.log(error);
             });
-            console.log('Driver status updated successfully');
+            
         } catch (error) {
             console.error('Failed to update driver status:', error);
         }

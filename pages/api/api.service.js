@@ -44,7 +44,8 @@ export const getUser = async (userId) => {
 
     console.log(`Here userId: ${userId}`);
     try {
-        const response = await apiClient.get(`/user?userId=${userId}`);
+        const params = { userId };
+        const response = await apiClient.get('/user', {params});
         return response.data;
     } catch (error) {
         console.error('Error getting user :', error);

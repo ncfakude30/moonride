@@ -161,10 +161,10 @@ const Profile = tw.div`
     flex justify-between items-center
 `;
 
+
 const Name = tw.div`
-    flex-shrink-0
-    mr-4 text-sm text-gray-300 font-medium
-    overflow-hidden text-ellipsis whitespace-nowrap
+    mr-4 w-100 text-sm text-gray-300 font-medium
+    overflow-hidden text-ellipsis
 `;
 
 const UserImage = tw.img`

@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from 'react-redux';
-import tw from 'tailwind-styled-components';
-import { fetchDriverSettings, setDriverSettings } from '../../api/api.service';
+import { setDriverSettings } from '../../api/api.service';
 
 const DriverSettings = ({ user, settings }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [editingSection, setEditingSection] = useState(null); // To track the current editing section
   const [formData, setFormData] = useState({
     profile: { name: settings?.profile?.name || "", phone: settings?.profile?.phone || "" },
     carDetails: { carName: settings?.carDetails?.carName || "", carPlate: settings?.carDetails?.carPlate || "" },
@@ -16,23 +14,28 @@ const DriverSettings = ({ user, settings }) => {
     },
   });
 
-  const handleEdit = () => {
-    setIsEditing(true);
+  const handleEdit = (section) => {
+    setEditingSection(section); // Set the section being edited
   };
 
-  const handleSave = () => {
-    setDriverSettings(formData)
+  const handleSave = (section) => {
+    const updatedData = {
+      ...formData,
+      [section]: formData[section], // Only update the section being edited
+    };
+
+    setDriverSettings(updatedData)
       .then(() => {
-        setIsEditing(false);
-        alert("Settings updated successfully!");
+        setEditingSection(null); // Stop editing mode
+        alert(`${section} updated successfully!`);
       })
-      .catch((err) => console.error("Error saving settings:", err));
+      .catch((err) => console.error(`Error saving ${section}:`, err));
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Split the name to find the nested object
+    // Split the name to find the nested object (e.g., profile.name or bankingDetails.bankName)
     const keys = name.split(".");
     setFormData((prev) => {
       const newData = { ...prev };
@@ -61,94 +64,97 @@ const DriverSettings = ({ user, settings }) => {
           {/* Profile Settings Card */}
           <div className="card">
             <h3>Profile Settings</h3>
-            {isEditing ? (
+            {editingSection === 'profile' ? (
               <div>
                 <input
                   type="text"
                   name="profile.name"
-                  value={formData.profile?.name}
+                  value={formData.profile.name}
                   onChange={handleChange}
                   placeholder="Name"
                 />
                 <input
                   type="text"
                   name="profile.phone"
-                  value={formData.profile?.phone}
+                  value={formData.profile.phone}
                   onChange={handleChange}
                   placeholder="Phone"
                 />
+                <button onClick={() => handleSave('profile')}>Save</button>
               </div>
             ) : (
               <div>
-                <p>Name: {settings?.profile?.name}</p>
-                <p>Phone: {settings?.profile?.phone}</p>
+                <p>Name: {settings.profile?.name}</p>
+                <p>Phone: {settings.profile?.phone}</p>
+                <button onClick={() => handleEdit('profile')}>Edit</button>
               </div>
             )}
-            <button onClick={handleEdit}>Edit</button>
           </div>
 
           {/* Car Management Card */}
           <div className="card">
             <h3>Car Management</h3>
-            {isEditing ? (
+            {editingSection === 'carDetails' ? (
               <div>
                 <input
                   type="text"
                   name="carDetails.carName"
-                  value={formData.carDetails?.carName}
+                  value={formData.carDetails.carName}
                   onChange={handleChange}
                   placeholder="Car Name"
                 />
                 <input
                   type="text"
                   name="carDetails.carPlate"
-                  value={formData.carDetails?.carPlate}
+                  value={formData.carDetails.carPlate}
                   onChange={handleChange}
                   placeholder="Car Plate"
                 />
+                <button onClick={() => handleSave('carDetails')}>Save</button>
               </div>
             ) : (
               <div>
                 <p>Car Name: {settings.carDetails?.carName}</p>
                 <p>Car Plate: {settings.carDetails?.carPlate}</p>
+                <button onClick={() => handleEdit('carDetails')}>Edit</button>
               </div>
             )}
-            <button onClick={handleEdit}>Edit</button>
           </div>
 
           {/* Banking Details Card */}
           <div className="card">
             <h3>Banking Details</h3>
-            {isEditing ? (
+            {editingSection === 'bankingDetails' ? (
               <div>
                 <input
                   type="text"
                   name="bankingDetails.bankName"
-                  value={formData.bankingDetails?.bankName}
+                  value={formData.bankingDetails.bankName}
                   onChange={handleChange}
                   placeholder="Bank Name"
                 />
                 <input
                   type="text"
                   name="bankingDetails.accountHolder"
-                  value={formData.bankingDetails?.accountHolder}
+                  value={formData.bankingDetails.accountHolder}
                   onChange={handleChange}
                   placeholder="Account Holder"
                 />
                 <input
                   type="text"
                   name="bankingDetails.accountNumber"
-                  value={formData.bankingDetails?.accountNumber}
+                  value={formData.bankingDetails.accountNumber}
                   onChange={handleChange}
                   placeholder="Account Number"
                 />
                 <input
                   type="text"
                   name="bankingDetails.bankCode"
-                  value={formData.bankingDetails?.bankCode}
+                  value={formData.bankingDetails.bankCode}
                   onChange={handleChange}
                   placeholder="Bank Code"
                 />
+                <button onClick={() => handleSave('bankingDetails')}>Save</button>
               </div>
             ) : (
               <div>
@@ -156,12 +162,10 @@ const DriverSettings = ({ user, settings }) => {
                 <p>Account Holder: {settings.bankingDetails?.accountHolder}</p>
                 <p>Account Number: **** **** {settings.bankingDetails?.accountNumber.slice(-4)}</p>
                 <p>Bank Code: {settings.bankingDetails?.bankCode}</p>
+                <button onClick={() => handleEdit('bankingDetails')}>Edit</button>
               </div>
             )}
-            <button onClick={handleEdit}>Edit</button>
           </div>
-
-          {isEditing && <button onClick={handleSave}>Save</button>}
         </div>
       )}
     </div>
