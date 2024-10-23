@@ -10,7 +10,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const headers = {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',  // Allow requests from any origin
-      'Access-Control-Allow-Methods': 'OPTIONS,POST',  // Allow POST and OPTIONS methods
+      'Access-Control-Allow-Methods': 'OPTIONS,GET',  // Allow POST and OPTIONS methods
       'Access-Control-Allow-Headers': 'Content-Type,Authorization',  // Allow specific headers
       'Access-Control-Allow-Credentials': 'true'
   };
