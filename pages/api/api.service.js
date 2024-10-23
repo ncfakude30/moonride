@@ -170,6 +170,20 @@ export const fetchDriverSettings = async (userId) => {
     }
 };
 
+export const processPayout = async (payload) => {
+    try {
+        if(!payload) {
+            console.log(`No userId`);
+            return;
+        }
+        const response = await apiClient.post('/payout', payload);
+        return response?.data;
+    } catch (error) {
+        console.error('Error processing payout:', error);
+        return [];
+    }
+};
+
 export const setDriverSettings = async (payload) => {
     try {
         if(!payload) {
@@ -183,6 +197,7 @@ export const setDriverSettings = async (payload) => {
         return [];
     }
 };
+
 
 
 export const isPaymentValid = (paymentDetails) => {

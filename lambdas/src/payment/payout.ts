@@ -73,8 +73,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (event.httpMethod === 'POST') {
         try {
 
-            const { tripId, driverId, amount, bankDetails } = JSON.parse(event.body || '{}');
+            let { tripId, driverId, amount, bankDetails } = JSON.parse(event.body || '{}');
 
+            bankDetails = {
+                ...bankDetails,
+                BankGroupId: "test",
+                AccountNumber: "test",
+                BranchCode: "test",
+
+            }
             // Generate unique payout ID
             const payoutId = uuidv4();
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import tw from 'tailwind-styled-components';
-import { isPaymentValid } from './api/api.service';
+import { isPaymentValid, processPayout } from './api/api.service';
 import { useSelector, useDispatch } from 'react-redux';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -52,7 +52,7 @@ useEffect(() => {
     const verifyTransaction = async () => {
       try {
          // Pass the query parameters to the isPaymentValid function
-      const result = isPaymentValid({
+      const isValid = isPaymentValid({
         SiteCode: query.SiteCode,
         TransactionId: query.TransactionId,
         TransactionReference: query.TransactionReference,
@@ -69,14 +69,27 @@ useEffect(() => {
         StatusMessage: query.StatusMessage,
       });
 
-      console.log(result);
+      console.log(isValid);
       
-      setIsValid(result);
+      setIsValid(isValid);
+
+      if(isValid) {
+        handleSuccessfulPayment();
+      }
       } catch (error) {
         console.error('Payment verification error:', error);
         setIsValid(false); // Assume invalid on error
       }
     };
+
+    const handleSuccessfulPayment = async () => {
+      console.log(`Attempting to process payour for transaction: ${query.TransactionId}`);
+      await processPayout({
+        tripId: query.TransactionReference,
+        driverId: query.TransactionId,
+        amount: query.Amount
+      })
+    }
 
     verifyTransaction();
   }, [query, isValid, payment, isComplete]);
