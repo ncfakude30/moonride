@@ -25,7 +25,7 @@ function DriverStatus ({user}) {
                 }
                 const responseUser = await getUser(user?.id).catch(()=> null); // Fetch initial status from API or Redux
                 console.log(`My returned user: ${JSON.stringify(responseUser)}`);
-                setIsOnline(responseUser?.status && responseUser?.role?.toLowerCase() === 'driver'); // Update the state based on the fetched status
+                setIsOnline((responseUser?.status || responseUser?.onlineStatus)); // Update the state based on the fetched status
             } catch (error) {
                 console.error('Error fetching driver status:', error);
             }

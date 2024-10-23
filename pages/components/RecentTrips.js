@@ -61,7 +61,10 @@ function RecentTrips() {
     }, [user]);
 
     if (loading && trips.length === 0) {
-        return <LoadingWrapper><Loader /><LoadingMessage>Loading trips..</LoadingMessage></LoadingWrapper>;
+        return <LoadingWrapper>
+        <Loader />
+        <LoadingMessage>Loading trips...</LoadingMessage>
+      </LoadingWrapper>
     }
 
     return (
@@ -186,9 +189,6 @@ const DriverProfile = tw.div`
     bg-white rounded-full shadow-md border border-gray-200
 `;
 
-const LoadingMessage = tw.div`
-    text-center text-gray-600 font-medium
-`;
 
 const NoTripsMessage = tw.div`
     text-center text-gray-600 font-medium
@@ -200,15 +200,15 @@ const LoadMoreButton = tw.button`
     focus:outline-none focus:ring-1 focus:ring-gray-600 focus:ring-opacity-25
 `;
 
-const LoadingPopup = tw.div`
-  fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-70
-`;
-
 const LoadingWrapper = tw.div`
   flex flex-col items-center justify-center py-6
 `;
 
+const LoadingMessage = tw.div`
+  text-gray-700 font-semibold text-center py-4 text-center text-xs py-2
+`;
 
 const Loader = tw.div`
-  w-16 h-16 border-4 border-dashed rounded-full animate-spin border-white-500
+  w-16 h-16 border-4 border-dashed rounded-full animate-spin border-gray-500
 `;
+

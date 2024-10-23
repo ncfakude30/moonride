@@ -80,10 +80,10 @@ export default function Drivers() {
                                 />
                                 <DriverStatus user={user} />
                                 <Profile>
-                                    <Name>{user?.name || 'Driver'}</Name>
+                                    <Name>{user?.name || user?.displayName || ''}</Name>
                                     <UserImage
                                         src={user?.photoUrl}
-                                        alt={`${user?.name}'s profile`}
+                                        alt={`${user?.name || user?.displayName}'s profile`}
                                         onClick={handleSignOut}
                                     />
                                 </Profile>

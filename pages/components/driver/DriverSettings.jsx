@@ -26,7 +26,7 @@ const DriverSettings = ({ user }) => {
         const res = await fetchDriverSettings(user?.id); // Fetch settings using the user ID
         setSettings(res);
         setFormData({
-          profile: { name: res?.profile?.name || "", phone: res?.profile?.phone || "" },
+          profile: { name: res?.profile?.name || user?.displayName, phone: res?.profile?.phone || user?.email },
           carDetails: { carName: res?.carDetails?.carName || "", carPlate: res?.carDetails?.carPlate || "" },
           bankingDetails: {
             bankName: res?.bankingDetails?.bankName || "",
@@ -45,7 +45,7 @@ const DriverSettings = ({ user }) => {
     if (user?.id) {
       fetchSettings(); // Only fetch settings if user exists
     }
-  }, [user?.id]);
+  }, [user]);
 
   const handleEdit = (section) => {
     setEditingSection(section); // Set the section being edited
@@ -97,7 +97,7 @@ const DriverSettings = ({ user }) => {
       {loading && (
           <LoadingWrapper>
             <Loader />
-            <LoadingMessage>Loading...</LoadingMessage>
+            <LoadingMessage>Loading settings...</LoadingMessage>
           </LoadingWrapper>
       )}
       {settings && (
@@ -110,14 +110,14 @@ const DriverSettings = ({ user }) => {
                 <input
                   type="text"
                   name="profile.name"
-                  value={formData.profile.name}
+                  value={formData.profile.name || user?.displayName}
                   onChange={handleChange}
                   placeholder="Name"
                 />
                 <input
                   type="text"
                   name="profile.phone"
-                  value={formData.profile.phone}
+                  value={formData.profile.phone || user?.email}
                   onChange={handleChange}
                   placeholder="Phone"
                 />
@@ -125,8 +125,8 @@ const DriverSettings = ({ user }) => {
               </div>
             ) : (
               <div>
-                <p>Name: {settings.profile?.name}</p>
-                <p>Phone: {settings.profile?.phone}</p>
+                <p>Name: {settings.profile?.name || user?.displayName}</p>
+                <p>Phone: {settings.profile?.phone || user?.email}</p>
                 <button onClick={() => handleEdit('profile')}>Edit</button>
               </div>
             )}
@@ -225,9 +225,9 @@ const LoadingWrapper = tw.div`
 `;
 
 const LoadingMessage = tw.div`
-  text-white font-semibold text-center py-4 text-center text-xs py-2
+  text-gray-700 font-semibold text-center py-4 text-center text-xs py-2
 `;
 
 const Loader = tw.div`
-  w-16 h-16 border-4 border-dashed rounded-full animate-spin border-white-500
+  w-16 h-16 border-4 border-dashed rounded-full animate-spin border-gray-500
 `;
