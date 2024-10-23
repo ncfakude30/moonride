@@ -164,6 +164,37 @@ functions:
               - Authorization
             allowCredentials: true
 
+  processPayout:
+    handler: src/index.payout
+    package:
+      include:
+        - payment/*
+    events:
+      - http:
+          path: payout
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
+
+  payoutCallback:
+    handler: src/index.payoutCallback
+    package:
+      include:
+        - payment/*
+    events:
+      - http:
+          path: payout/notify
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
   connect:
     handler: src/index.connect
     package:
