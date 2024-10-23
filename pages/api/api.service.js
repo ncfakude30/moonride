@@ -162,7 +162,7 @@ export const fetchDriverSettings = async (userId) => {
         }
 
         const params = { userId };
-        const response = await apiClient.get('/drivers/settings', { params });
+        const response = await apiClient.get('/driver/settings', { params });
         return response?.data;
     } catch (error) {
         console.error('Error fetching drivers settings:', error);
@@ -176,7 +176,7 @@ export const setDriverSettings = async (payload) => {
             console.log(`No userId`);
             return;
         }
-        const response = await apiClient.post('/drivers/settings', payload);
+        const response = await apiClient.post('/driver/settings', payload);
         return response?.data;
     } catch (error) {
         console.error('Error settings drivers:', error);
