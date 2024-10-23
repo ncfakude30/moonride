@@ -68,6 +68,12 @@ export const updateDriverStatus = async (payload) => {
 
 export async function fetchRecentTrips(userId, lastEvaluatedKey = null, limit = 3) {
     try {
+        if(!userId) {
+            console.log(`No userId`);
+            return;
+        }
+    
+        console.log(`Here userId: ${userId}`);
         const params = { userId, limit };
         if (lastEvaluatedKey) {
             params.lastEvaluatedKey = lastEvaluatedKey;
@@ -150,21 +156,30 @@ export const fetchDrivers = async (payload) => {
 
 export const fetchDriverSettings = async (userId) => {
     try {
+        if(!userId) {
+            console.log(`No userId`);
+            return;
+        }
+
         const params = { userId };
-        const response = await apiClient.get('/drivers/settings', {params});
+        const response = await apiClient.get('/drivers/settings', { params });
         return response?.data;
     } catch (error) {
-        console.error('Error fetching drivers:', error);
+        console.error('Error fetching drivers settings:', error);
         return [];
     }
 };
 
 export const setDriverSettings = async (payload) => {
     try {
+        if(!payload) {
+            console.log(`No userId`);
+            return;
+        }
         const response = await apiClient.post('/drivers/settings', payload);
         return response?.data;
     } catch (error) {
-        console.error('Error fetching drivers:', error);
+        console.error('Error settings drivers:', error);
         return [];
     }
 };

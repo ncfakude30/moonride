@@ -1,18 +1,51 @@
-import React, { useState } from "react";
-import { setDriverSettings } from '../../api/api.service';
+import React, { useState, useEffect } from "react";
+import { setDriverSettings, fetchDriverSettings } from '../../api/api.service'; // Add fetchDriverSettings
+import tw from 'tailwind-styled-components';
 
-const DriverSettings = ({ user, settings }) => {
+const DriverSettings = ({ user }) => {
   const [editingSection, setEditingSection] = useState(null); // To track the current editing section
   const [formData, setFormData] = useState({
-    profile: { name: settings?.profile?.name || "", phone: settings?.profile?.phone || "" },
-    carDetails: { carName: settings?.carDetails?.carName || "", carPlate: settings?.carDetails?.carPlate || "" },
+    profile: { name: "", phone: "" },
+    carDetails: { carName: "", carPlate: "" },
     bankingDetails: {
-      bankName: settings?.bankingDetails?.bankName || "",
-      accountHolder: settings?.bankingDetails?.accountHolder || "",
-      accountNumber: settings?.bankingDetails?.accountNumber || "",
-      bankCode: settings?.bankingDetails?.bankCode || ""
+      bankName: "",
+      accountHolder: "",
+      accountNumber: "",
+      bankCode: ""
     },
   });
+
+  const [loading, setLoading] = useState(false); // Loader state
+  const [settings, setSettings] = useState(null); // Moved settings here
+
+  // Fetch the settings when the component mounts
+  useEffect(() => {
+    const fetchSettings = async () => {
+      setLoading(true);
+      try {
+        const res = await fetchDriverSettings(user?.id); // Fetch settings using the user ID
+        setSettings(res);
+        setFormData({
+          profile: { name: res?.profile?.name || "", phone: res?.profile?.phone || "" },
+          carDetails: { carName: res?.carDetails?.carName || "", carPlate: res?.carDetails?.carPlate || "" },
+          bankingDetails: {
+            bankName: res?.bankingDetails?.bankName || "",
+            accountHolder: res?.bankingDetails?.accountHolder || "",
+            accountNumber: res?.bankingDetails?.accountNumber || "",
+            bankCode: res?.bankingDetails?.bankCode || ""
+          },
+        });
+      } catch (err) {
+        console.error("Error fetching settings:", err);
+      } finally {
+        setLoading(false); // Stop loading
+      }
+    };
+
+    if (user?.id) {
+      fetchSettings(); // Only fetch settings if user exists
+    }
+  }, [user?.id]);
 
   const handleEdit = (section) => {
     setEditingSection(section); // Set the section being edited
@@ -24,12 +57,14 @@ const DriverSettings = ({ user, settings }) => {
       [section]: formData[section], // Only update the section being edited
     };
 
+    setLoading(true); // Start loading
     setDriverSettings(updatedData)
       .then(() => {
         setEditingSection(null); // Stop editing mode
         alert(`${section} updated successfully!`);
       })
-      .catch((err) => console.error(`Error saving ${section}:`, err));
+      .catch((err) => console.error(`Error saving ${section}:`, err))
+      .finally(() => setLoading(false)); // Stop loading
   };
 
   const handleChange = (e) => {
@@ -59,6 +94,12 @@ const DriverSettings = ({ user, settings }) => {
 
   return (
     <div className="settings-page">
+      {loading && (
+          <LoadingWrapper>
+            <Loader />
+            <LoadingMessage>Loading...</LoadingMessage>
+          </LoadingWrapper>
+      )}
       {settings && (
         <div className="settings-cards">
           {/* Profile Settings Card */}
@@ -158,9 +199,9 @@ const DriverSettings = ({ user, settings }) => {
               </div>
             ) : (
               <div>
-                <p>Bank: {settings.bankingDetails?.bankName}</p>
+                <p>Bank Name: {settings.bankingDetails?.bankName}</p>
                 <p>Account Holder: {settings.bankingDetails?.accountHolder}</p>
-                <p>Account Number: **** **** {settings.bankingDetails?.accountNumber.slice(-4)}</p>
+                <p>Account Number: {settings.bankingDetails?.accountNumber}</p>
                 <p>Bank Code: {settings.bankingDetails?.bankCode}</p>
                 <button onClick={() => handleEdit('bankingDetails')}>Edit</button>
               </div>
@@ -173,3 +214,20 @@ const DriverSettings = ({ user, settings }) => {
 };
 
 export default DriverSettings;
+
+
+const LoadingPopup = tw.div`
+  fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-70
+`;
+
+const LoadingWrapper = tw.div`
+  flex flex-col items-center justify-center py-6
+`;
+
+const LoadingMessage = tw.div`
+  text-white font-semibold text-center py-4 text-center text-xs py-2
+`;
+
+const Loader = tw.div`
+  w-16 h-16 border-4 border-dashed rounded-full animate-spin border-white-500
+`;

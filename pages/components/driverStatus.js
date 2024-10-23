@@ -8,11 +8,11 @@ function DriverStatus ({user}) {
     const dispatch = useDispatch();
     const { online } = useSelector((state) => state.driver); // Get the online status from Redux
     const [isOnline, setIsOnline] = useState(online); // Set initial state
-    const myUser = user;
+    const loggedUser = useSelector((state) => state.auth.user);
 
     // Fetch the driver's current status from the database on component mount
     useEffect(() => {
-        if(!myUser) {
+        if(!user) {
             console.log(`user is required`);
             return;
         }
@@ -20,18 +20,18 @@ function DriverStatus ({user}) {
         const fetchStatus = async () => {
             try {
                 if (user?.status) {
-                    setIsOnline(myUser?.status && myUser?.role?.toLowerCase() === 'driver'); // Update the state based on the fetched status
+                    setIsOnline(user?.status && user?.role?.toLowerCase() === 'driver'); // Update the state based on the fetched status
                     return;
                 }
-                const user = await getUser(myUser?.id).catch(()=> null); // Fetch initial status from API or Redux
-                console.log(`My returned user: ${JSON.stringify(myUser)}`);
-                setIsOnline(myUser?.status && myUser?.role?.toLowerCase() === 'driver'); // Update the state based on the fetched status
+                const responseUser = await getUser(user?.id).catch(()=> null); // Fetch initial status from API or Redux
+                console.log(`My returned user: ${JSON.stringify(responseUser)}`);
+                setIsOnline(responseUser?.status && responseUser?.role?.toLowerCase() === 'driver'); // Update the state based on the fetched status
             } catch (error) {
                 console.error('Error fetching driver status:', error);
             }
         };
         fetchStatus();
-    }, [user, myUser]);
+    }, [user, loggedUser]);
 
     // Toggle the driver's online/offline status
     const toggleOnlineStatus = async () => {
@@ -41,7 +41,7 @@ function DriverStatus ({user}) {
             // Dispatch the action to update the status in Redux and database
             dispatch(setDriverStatus(newStatus)); 
             await updateDriverStatus({
-                userId: myUser?.id,
+                userId: loggedUser?.id,
                 status: newStatus,
             }).then((response) => {
                 console.log('Driver status updated successfully', response);

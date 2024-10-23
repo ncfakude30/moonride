@@ -61,7 +61,7 @@ function RecentTrips() {
     }, [user]);
 
     if (loading && trips.length === 0) {
-        return <LoadingMessage>Loading trips...</LoadingMessage>;
+        return <LoadingWrapper><Loader /><LoadingMessage>Loading trips..</LoadingMessage></LoadingWrapper>;
     }
 
     return (
@@ -198,4 +198,17 @@ const LoadMoreButton = tw.button`
     bg-gradient-to-r from-gray-600 to-gray-400 text-white rounded-full p-4 font-semibold shadow-lg
     hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
     focus:outline-none focus:ring-1 focus:ring-gray-600 focus:ring-opacity-25
+`;
+
+const LoadingPopup = tw.div`
+  fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-70
+`;
+
+const LoadingWrapper = tw.div`
+  flex flex-col items-center justify-center py-6
+`;
+
+
+const Loader = tw.div`
+  w-16 h-16 border-4 border-dashed rounded-full animate-spin border-white-500
 `;

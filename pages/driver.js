@@ -6,23 +6,27 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import RecentTrips from './components/RecentTrips';
 import DriverStatus from './components/driverStatus';
-import DriverSettings from './components/driver/DriverSettings'; // Import your settings component
+import DriverSettings from './components/driver/DriverSettings';
 import Image from 'next/image';
 import { useDispatch, useSelector } from 'react-redux';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { setUser, clearUser } from '../store/reducers/authSlice';
 import Skeleton from 'react-loading-skeleton';
-import {fetchDriverSettings, setDriverSettings, getUser} from './api/api.service';
+
+const ACTION_COMPONENTS = {
+    TRIPS: 'trips',
+    EARNINGS: 'earnings',
+    SETTINGS: 'settings'
+};
 
 export default function Drivers() {
     const dispatch = useDispatch();
-    const user = useSelector((state) => state.auth.user);
+    const { user } = useSelector((state) => state.auth);
     const router = useRouter();
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeComponent, setActiveComponent] = useState('trips'); // Manage active component
-    const [settings, setSettings] = useState(null);
+    const [activeComponent, setActiveComponent] = useState(ACTION_COMPONENTS.TRIPS);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -30,11 +34,6 @@ export default function Drivers() {
                 dispatch(clearUser());
                 router.push('/login');
             } else {
-                await fetchDriverSettings(user?.id)
-                .then((res) => {
-                    setSettings(res);
-                })
-                .catch((err) => console.error("Error fetching settings:", err));
                 setIsLoading(false);
             }
         });
@@ -42,27 +41,18 @@ export default function Drivers() {
         return () => unsubscribe();
     }, [dispatch, router]);
 
-    const handleSignOut = () => {
-        signOut(auth).then(() => {
-            dispatch(clearUser());
-            router.push('/login');
-        });
+    const handleSignOut = async () => {
+        await signOut(auth);
+        dispatch(clearUser());
+        router.push('/login');
     };
 
-    const handlePopupOpen = () => {
-        setIsPopupOpen(true);
-    };
-
-    const handlePopupClose = () => {
-        setIsPopupOpen(false);
-    };
-
+    const handlePopupOpen = () => setIsPopupOpen(true);
+    const handlePopupClose = () => setIsPopupOpen(false);
 
     const handleOpenComponent = (component) => {
-        setActiveComponent(component); // Update to show the clicked component
-
-        // Open popup only for 'earnings' component
-        if (component === 'earnings') {
+        setActiveComponent(component);
+        if (component === ACTION_COMPONENTS.EARNINGS) {
             handlePopupOpen();
         }
     };
@@ -82,38 +72,43 @@ export default function Drivers() {
                     <ContentWrapper>
                         <ActionItems>
                             <Header style={{ backgroundColor: '#1a1a2e' }}>
-                                <Image src='https://moonride-media.s3.amazonaws.com/moon-ride.png' alt="MoonRides Logo" height={80} width={80} />
-                                <DriverStatus user={user}/> {/* Add the DriverStatus here */}
+                                <Image
+                                    src='https://moonride-media.s3.amazonaws.com/moon-ride.png'
+                                    alt="MoonRides Logo"
+                                    height={80}
+                                    width={80}
+                                />
+                                <DriverStatus user={user} />
                                 <Profile>
-                                    <Name>{user && user.name}</Name>
+                                    <Name>{user?.name || 'Driver'}</Name>
                                     <UserImage
-                                        src={user && user.photoUrl}
+                                        src={user?.photoUrl}
+                                        alt={`${user?.name}'s profile`}
                                         onClick={handleSignOut}
                                     />
                                 </Profile>
                             </Header>
-                             
+
                             <ActionButtons>
-                                <ActionButton onClick={() => handleOpenComponent('trips')} $isActive={activeComponent === 'trips'} >
-                                <ActionButtonImage src='https://i.ibb.co/cyvcpfF/uberx.png' />
+                                <ActionButton onClick={() => handleOpenComponent(ACTION_COMPONENTS.TRIPS)} $isActive={activeComponent === ACTION_COMPONENTS.TRIPS}>
+                                    <ActionButtonImage src='https://i.ibb.co/cyvcpfF/uberx.png' />
                                     <Label>Trips</Label>
                                 </ActionButton>
-                            
-                                <ActionButton onClick={() => handleOpenComponent('earnings')} $isActive={activeComponent === 'earnings'}>
+
+                                <ActionButton onClick={() => handleOpenComponent(ACTION_COMPONENTS.EARNINGS)} $isActive={activeComponent === ACTION_COMPONENTS.EARNINGS}>
                                     <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/earnings.png' />
                                     <Label>Earnings</Label>
                                 </ActionButton>
-                                <ActionButton onClick={() => handleOpenComponent('settings')} $isActive={activeComponent === 'settings'}>
+
+                                <ActionButton onClick={() => handleOpenComponent(ACTION_COMPONENTS.SETTINGS)} $isActive={activeComponent === ACTION_COMPONENTS.SETTINGS}>
                                     <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/settings.png' />
                                     <Label>Settings</Label>
                                 </ActionButton>
-                                
                             </ActionButtons>
 
-                            {activeComponent === 'trips' && <RecentTrips user={user} />}
-                            {activeComponent === 'settings' && <DriverSettings user={user} settings={settings}/>} {/* Render settings */}
-                            {/* You can add more conditions for other sections like earnings if needed */}
-                            {activeComponent === 'earnings' && <RecentTrips user={user} />}
+                            {activeComponent === ACTION_COMPONENTS.TRIPS && <RecentTrips user={user} />}
+                            {activeComponent === ACTION_COMPONENTS.SETTINGS && <DriverSettings user={user} />}
+                            {activeComponent === ACTION_COMPONENTS.EARNINGS && <RecentTrips user={user} />}
                         </ActionItems>
                     </ContentWrapper>
                     {isPopupOpen && (
@@ -141,11 +136,11 @@ const SkeletonWrapper = tw.div`
 `;
 
 const MapContainer = tw.div`
-    flex-none h-[150px] w-full // Ensure the map takes at least 150px height
+    flex-none h-[150px] w-full
 `;
 
 const ContentWrapper = tw.div`
-    flex-1 overflow-y-auto // Ensure the remaining content can scroll if needed
+    flex-1 overflow-y-auto
 `;
 
 const ActionItems = tw.div`
@@ -160,7 +155,6 @@ const Header = tw.div`
 const Profile = tw.div`
     flex justify-between items-center
 `;
-
 
 const Name = tw.div`
     mr-4 w-100 text-sm text-gray-300 font-medium
@@ -181,9 +175,8 @@ const ActionButton = tw.button`
     hover:bg-gradient-to-r hover:from-gray-500 hover:to-gray-300 transition-colors
     focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50
     flex-none w-32 h-32 max-w-xs overflow-hidden
-    ${(props) => (props.$isActive ? 'border-b-4 border-green-500' : '')} // Apply green border if active
+    ${(props) => (props.$isActive ? 'border-b-4 border-green-500' : '')}
 `;
-
 
 const ActionButtonImage = tw.img`
     h-20 w-20 object-cover mb-4 z-8

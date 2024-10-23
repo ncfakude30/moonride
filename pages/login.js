@@ -252,7 +252,7 @@ const ToggleCircle = tw.div`
 `;
 
 const ToggleText = tw.span`
-  text-white-500 ml-3 text-lg font-medium
+  text-white-500 ml-3 text-lg font-semibold
 `;
 
 const ToggleLink = tw.span`
