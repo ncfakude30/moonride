@@ -42,7 +42,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
             const queryParams: AWS.DynamoDB.DocumentClient.QueryInput = {
                 TableName: TRANSACTIONS_TABLE,
-                IndexName: 'UserIndex',  // Specify the GSI to use userId
+                IndexName: 'UserIndex',
                 KeyConditionExpression: 'userId = :userId',
                 ExpressionAttributeValues: {
                     ':userId': userId,
@@ -62,7 +62,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 transactions: response.Items?.map(item => {
                     return {
                         ...item,
-                        // Handle any additional decimal to float conversion here if needed
                     };
                 }) || [],
             } as any;
