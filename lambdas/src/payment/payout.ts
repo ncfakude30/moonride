@@ -4,51 +4,13 @@ import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 
+const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const PAYMENT_TABLE = process.env.TRANSACTIONS_TABLE || 'TransactionsTable';
-const OZOW_API_URL = process.env.OZOW_API_URL || 'https://api.ozow.com';
+const OZOW_API_URL = process.env.OZOW_API_URL || 'https://stagingpayoutsapi.ozow.com/mock';
 const OZOW_SITE_CODE = process.env.OZOW_SITE_CODE || 'NCF-NCF-001';
 const OZOW_API_KEY = process.env.OZOW_API_KEY || '667a79c009bd458c866666d98d8b2a75';
 const OZOW_PRIVATE_KEY = process.env.OZOW_PRIVATE_KEY || '9bc47fe01bbe475a9995a887dcb1e73a';
-const OZOW_SECRET = process.env.OZOW_SECRET || '9bc47fe01bbe475a9995a887dcb1e73a';
-const SUCCESS_URL = process.env.SUCCESS_URL || 'https://www.moonride.co.za/success';
-const CANCEL_URL = process.env.CANCEL_URL || 'https://www.moonride.co.za/cancel';
-const NOTIFY_URL = process.env.NOTIFY_URL || 'https://www.moonride.co.za/payout/notify';
-const ERROR_URL = process.env.ERROR_URL || 'https://www.moonride.co.za/error';
-
-const dynamodb = new AWS.DynamoDB.DocumentClient();
-
-// Define interfaces for the request and response payloads
-interface BankDetails {
-    BankGroupId: string;
-    AccountNumber: string; // Encrypted account number
-    BranchCode: string;
-  }
-  
-  interface PayoutRequest {
-    PayoutId: string;
-    SiteCode: string;
-    Amount: number;
-    MerchantReference: string;
-    CustomerBankReference: string;
-    IsRtc: boolean;
-    NotifyUrl: string;
-    BankingDetails: BankDetails;
-    HashCheck: string;
-  }
-  
-  interface PayoutResponse {
-    PayoutId: string;
-    IsVerified: boolean;
-    AccountNumberDecryptionKey: string;
-    Reason: string;
-  }
-
-// Generate a SHA512 hash to validate the request or response
-const generateHash = (input: string): string => {
-    const hash = crypto.createHash('sha512');
-    hash.update(input.toLowerCase());
-    return hash.digest('hex');
-  };
+const OZOW_SECRET = process.env.OZOW_SECRET || '9bc47fe01bbe475a...';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log(`Received event: ${JSON.stringify(JSON.parse(event.body || '{}'))}`);
@@ -71,81 +33,161 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
 
     if (event.httpMethod === 'POST') {
-        try {
+        return submitPayoutRequest(event, headers);
+    }
 
-            let { tripId, driverId, amount, bankDetails } = JSON.parse(event.body || '{}');
+    return {
+        statusCode: 405,
+        headers,
+        body: JSON.stringify({ message: 'Method not allowed' }),
+    };
+}
+        
+// Helper function to calculate SHA512 hash
+function getSha512Hash(input: string): string {
+    return crypto.createHash('sha512').update(input, 'utf8').digest('hex');
+}
 
-            bankDetails = {
-                ...bankDetails,
-                BankGroupId: "test",
-                AccountNumber: "test",
-                BranchCode: "test",
+// AES-256-CBC encryption for bank account number
+function encryptAccountNumber(accountNumber: string, encryptionKey: string, ivString: string): string {
+    const key = crypto.scryptSync(encryptionKey, 'salt', 32); // Generate key from encryptionKey
+    const iv = Buffer.from(getSha512Hash(ivString).substring(0, 16), 'utf8'); // Get first 16 bytes of IV
 
-            }
-            // Generate unique payout ID
-            const payoutId = uuidv4();
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    let encrypted = cipher.update(accountNumber, 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+    
+    return encrypted;
+}
 
-            // Calculate payout amount after deducting commission
-            const commission = 0.1; // 10% commission
-            const payoutAmount = amount * (1 - commission);
+// Generate payout hash check as per Ozow's API documentation
+function generatePayoutRequestHash(
+    siteCode: string,
+    amount: number,
+    merchantReference: string,
+    customerBankReference: string,
+    isRtc: boolean,
+    notifyUrl: string,
+    bankGroupId: string,
+    accountNumber: string,
+    branchCode: string,
+    apiKey: string
+): string {
+    const inputString = [
+        siteCode,
+        Math.round(amount * 100),
+        merchantReference,
+        customerBankReference,
+        isRtc,
+        notifyUrl,
+        bankGroupId,
+        accountNumber,
+        branchCode,
+        apiKey
+    ].join('').toLowerCase();
 
-            // Prepare payout request payload
-            const payoutRequest: PayoutRequest = {
-                PayoutId: payoutId,
-                SiteCode: OZOW_SITE_CODE,
-                Amount: payoutAmount,
-                MerchantReference: `trip-${tripId}`,
-                CustomerBankReference: `driver-${driverId}`,
-                IsRtc: true,
-                NotifyUrl: NOTIFY_URL,
-                BankingDetails: {
-                BankGroupId: bankDetails.BankGroupId,
-                AccountNumber: bankDetails.AccountNumber, // Encrypted
-                BranchCode: bankDetails.BranchCode,
-                },
-                HashCheck: '', // We'll generate this hash below
-            };
+    return getSha512Hash(inputString);
+}
 
-            // Create the input string for hash check (concatenating the fields in order)
-            const inputString = `${payoutRequest.PayoutId}${payoutRequest.SiteCode}${Math.floor(payoutRequest.Amount * 100)}${payoutRequest.MerchantReference}${payoutRequest.CustomerBankReference}${payoutRequest.IsRtc}${payoutRequest.NotifyUrl}${bankDetails.BankGroupId}${bankDetails.AccountNumber}${bankDetails.BranchCode}${OZOW_PRIVATE_KEY}`;
+// Function to handle the payout request
+const submitPayoutRequest = async (event: APIGatewayProxyEvent, headers: any): Promise<APIGatewayProxyResult> => {
+    try {
+        const body = JSON.parse(event.body || '{}');
+        const { amount, customerBankReference, bankGroupId, accountNumber, branchCode, notifyUrl, isRtc } = body;
 
-            // Generate the hash
-            payoutRequest.HashCheck = generateHash(inputString);
-
-            try {
-                // Make the API call to Ozow to initiate the payout
-                const response = await axios.post(`${OZOW_API_URL}/payout`, payoutRequest);
-                return {
-                statusCode: 200,
-                headers,
-                body: JSON.stringify({
-                    message: 'Payout initiated successfully',
-                    data: response.data,
-                }),
-                };
-            } catch (error) {
-                console.error('Error initiating payout:', error);
-                return {
-                statusCode: 500,
-                headers,
-                body: JSON.stringify({ message: 'Error initiating payout' }),
-                };
-            }
-        } catch (error) {
-            console.error(`Exception occurred: ${error}`);
+        // Validate input parameters
+        if (!amount || !customerBankReference || !bankGroupId || !accountNumber || !branchCode) {
             return {
-                statusCode: 500,
-                headers,
-                body: JSON.stringify({ message: 'Error initiating payment', error: (error as any)?.message }),
+                statusCode: 400,
+                body: JSON.stringify({ message: 'Invalid input parameters' }),
             };
         }
-    } else {
+
+        // Generate unique references
+        const merchantReference = uuidv4();
+
+        // Encrypt account number using AES-256-CBC
+        const ivString = merchantReference + Math.round(amount * 100) + OZOW_PRIVATE_KEY;
+        const encryptedAccountNumber = encryptAccountNumber(accountNumber, OZOW_PRIVATE_KEY, ivString);
+
+        // Generate the hash check for the payout request
+        const hashCheck = generatePayoutRequestHash(
+            OZOW_SITE_CODE,
+            amount,
+            merchantReference,
+            customerBankReference,
+            isRtc,
+            notifyUrl || '',
+            bankGroupId,
+            encryptedAccountNumber,
+            branchCode,
+            OZOW_API_KEY
+        );
+
+        // Payout request payload
+        const payoutPayload = {
+            SiteCode: OZOW_SITE_CODE,
+            Amount: amount,
+            MerchantReference: merchantReference,
+            CustomerBankReference: customerBankReference,
+            IsRtc: isRtc || false, // Set to false if not provided
+            NotifyUrl: notifyUrl || '',
+            BankingDetails: {
+                BankGroupId: bankGroupId,
+                AccountNumber: encryptedAccountNumber,
+                BranchCode: branchCode,
+            },
+            HashCheck: hashCheck,
+        };
+
+        // Make the payout request to Ozow API
+        const response = await axios.post(`${OZOW_API_URL}/requestpayout`, payoutPayload, {
+            headers: {
+                'ApiKey': OZOW_API_KEY,
+                'SiteCode': OZOW_SITE_CODE,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const { data } = response;
+
+        // Save the payout request in DynamoDB for tracking purposes
+        await dynamoDB.put({
+            TableName: PAYMENT_TABLE,
+            Item: {
+                id: merchantReference,
+                amount,
+                customerBankReference,
+                bankGroupId,
+                branchCode,
+                status: data.payoutStatus.status,
+                subStatus: data.payoutStatus.subStatus,
+                payoutId: data.payoutId,
+                timestamp: new Date().toISOString(),
+            },
+        }).promise();
+
+        // Return the successful response
         return {
-            statusCode: 405,
+            statusCode: 200,
             headers,
-            body: JSON.stringify({ message: 'Method not allowed' }),
+            body: JSON.stringify({
+                message: 'Payout request submitted successfully',
+                payoutId: data.payoutId,
+                payoutStatus: data.payoutStatus,
+            }),
+        };
+    } catch (error) {
+        console.error('Error submitting payout request:', error);
+
+        // Return error response
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({
+                message: 'Failed to submit payout request',
+                error: (error as any).message || 'Unknown error',
+            }),
         };
     }
 };
-
-
