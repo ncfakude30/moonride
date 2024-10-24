@@ -79,6 +79,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 paymentRequestId: paymentResponse?.paymentRequestId,
                 paymentDate,
                 status: 'PENDING',
+                vendorId: body?.vendorId || 'vendor',
             };
 
             await dynamodb.put({

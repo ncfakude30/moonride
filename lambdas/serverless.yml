@@ -180,6 +180,22 @@ functions:
               - Authorization
             allowCredentials: true
 
+  paymentTransactions:
+    handler: src/index.transactions
+    package:
+      include:
+        - payment/*
+    events:
+      - http:
+          path: transactions
+          method: get
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+            allowCredentials: true
+
   payoutCallback:
     handler: src/index.payoutCallback
     package:

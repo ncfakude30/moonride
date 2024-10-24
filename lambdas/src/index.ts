@@ -16,3 +16,4 @@ export { handler as setDriverSettings } from './driver/set-settings';
 export { handler as getDriverSettings } from './driver/get-settings';
 export { handler as payout } from './payment/payout';
 export { handler as payoutCallback } from './payment/payout_notify';
+export { handler as transactions } from './payment/transactions';

@@ -102,6 +102,40 @@ export async function fetchRecentTrips(userId, lastEvaluatedKey = null, limit = 
     }
 }
 
+export async function getPaymentTransactions(userId, lastEvaluatedKey = null, limit = 3) {
+    try {
+        if(!userId) {
+            console.log(`No userId`);
+            return;
+        }
+    
+        const params = { userId, limit };
+        if (lastEvaluatedKey) {
+            params.lastEvaluatedKey = lastEvaluatedKey;
+        }
+
+        const response = await apiClient.get('/transactions', { params });
+
+        // Assuming response.data.trips is an array of trips
+        const sortedTransactions= response.data?.trips?.sort((a, b) => {
+            // Ensure tripDate is in a Date format or a timestamp for accurate comparison
+            return new Date(b?.tripDate) - new Date(a?.tripDate);
+        });
+
+        return {
+            transactions: sortedTransactions,
+            lastEvaluatedKey: response.data.lastEvaluatedKey,
+            error: null,
+        };
+    } catch (error) {
+        console.error('Error fetching recent trips:', error);
+        return {
+            trips: [],
+            lastEvaluatedKey: null,
+            error: error.response ? error.response.data : 'An error occurred while fetching trips',
+        };
+    }
+}
 
 export const requestTrip = async (dto) => {
     try {

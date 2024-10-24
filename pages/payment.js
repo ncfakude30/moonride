@@ -91,6 +91,7 @@ function Payment() {
                 time: ride?.selectedCar ? ride?.selectedCar?.time : selectedCar?.time,
                 rating: ride?.selectedCar ? ride?.selectedCar?.rating : selectedCar?.rating,
                 driverProfile: ride?.selectedCar ? ride?.selectedCar?.driverProfile : selectedCar?.driverProfile,
+                vendorId: ride?.driverId || 'vendor',
                 userId: user?.id || user?.uuid,
                 pickupName: pickupPlace || pickupShortName,
                 dropoffName: dropoffPlace || dropoffShortName,

@@ -13,6 +13,7 @@ import { auth } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { setUser, clearUser } from '../store/reducers/authSlice';
 import Skeleton from 'react-loading-skeleton';
+import Earnings from './components/driver/Earnings';
 
 const ACTION_COMPONENTS = {
     TRIPS: 'trips',
@@ -52,9 +53,11 @@ export default function Drivers() {
 
     const handleOpenComponent = (component) => {
         setActiveComponent(component);
+        /*
         if (component === ACTION_COMPONENTS.EARNINGS) {
             handlePopupOpen();
         }
+            */
     };
 
     return (
@@ -108,7 +111,7 @@ export default function Drivers() {
 
                             {activeComponent === ACTION_COMPONENTS.TRIPS && <RecentTrips user={user} />}
                             {activeComponent === ACTION_COMPONENTS.SETTINGS && <DriverSettings user={user} />}
-                            {activeComponent === ACTION_COMPONENTS.EARNINGS && <RecentTrips user={user} />}
+                            {activeComponent === ACTION_COMPONENTS.EARNINGS && <Earnings user={user} />}
                         </ActionItems>
                     </ContentWrapper>
                     {isPopupOpen && (
