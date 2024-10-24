@@ -36,6 +36,7 @@ provider:
         - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.MESSAGES_TABLE}
         - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.DRIVERS_TABLE}
         - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.TRANSACTIONS_TABLE}
+        - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.TRANSACTIONS_TABLE}/index/*
         - !Sub arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${self:provider.environment.DRIVER_SETTINGS_TABLE}
     - Effect: "Allow"
       Action:
