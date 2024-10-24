@@ -25,9 +25,20 @@ const Tracking = () => {
         }
 
         if (pickup && dropoff) {
-            const pickupArray = pickup.split(',').map(coord => parseFloat(coord));
-            const dropoffArray = dropoff.split(',').map(coord => parseFloat(coord));
+            let pickupArray = [];
+            let dropoffArray = [];
+            try{
+                pickupArray = pickup.split(',').map(coord => parseFloat(coord));
+            }catch(e){
+                pickupArray = pickup;
+            }
 
+            try{
+                dropoffArray = dropoff.split(',').map(coord => parseFloat(coord));
+            }catch(e){
+                dropoffArray = dropoff;
+            }
+           
             setPickupCoords(pickupArray);
             setDropoffCoords(dropoffArray);
             dispatch(setTrackingDetails({
