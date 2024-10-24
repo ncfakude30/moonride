@@ -186,7 +186,7 @@ const BalanceLabel = tw.span`
 `;
 
 const BalanceValue = tw.span`
-    font-semibold text-green-600 ml-2 flex-grow text-center
+    font-semibold text-green-600 ml-2 flex-grow
 `;
 
 
