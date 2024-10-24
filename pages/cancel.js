@@ -60,16 +60,6 @@ function Cancel() {
       
       setIsValid(result);
 
-      if(result) {
-        console.log(`Attempting to process payout for transaction: ${query.TransactionId}`);
-        await processPayout({
-          tripId: query.TransactionReference,
-          driverId: query.TransactionId,
-          amount: query.Amount
-        }).then((response) => {
-          console.log(`Payout response: ${JSON.stringify(response)}`);
-        })
-      }
       } catch (error) {
         console.error('Payment verification error:', error);
         setIsValid(false); // Assume invalid on error
