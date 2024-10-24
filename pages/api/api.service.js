@@ -117,7 +117,7 @@ export async function getPaymentTransactions(userId, lastEvaluatedKey = null, li
         const response = await apiClient.get('/transactions', { params });
 
         // Assuming response.data.trips is an array of trips
-        const sortedTransactions= response.data?.trips?.sort((a, b) => {
+        const sortedTransactions= response.data?.transactions?.sort((a, b) => {
             // Ensure tripDate is in a Date format or a timestamp for accurate comparison
             return new Date(b?.tripDate) - new Date(a?.tripDate);
         });
@@ -128,11 +128,11 @@ export async function getPaymentTransactions(userId, lastEvaluatedKey = null, li
             error: null,
         };
     } catch (error) {
-        console.error('Error fetching recent trips:', error);
+        console.error('Error fetching recent transactions:', error);
         return {
-            trips: [],
+            transactions: [],
             lastEvaluatedKey: null,
-            error: error.response ? error.response.data : 'An error occurred while fetching trips',
+            error: error.response ? error.response.data : 'An error occurred while fetching transactions',
         };
     }
 }

@@ -42,12 +42,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
             const queryParams: AWS.DynamoDB.DocumentClient.QueryInput = {
                 TableName: TRANSACTIONS_TABLE,
+                IndexName: 'UserIndex',  // Specify the GSI to use userId
                 KeyConditionExpression: 'userId = :userId',
                 ExpressionAttributeValues: {
                     ':userId': userId,
                 },
                 Limit: limit,
-                ScanIndexForward: false,
+                ScanIndexForward: false,  // Most recent transactions first
             };
 
             // Add the ExclusiveStartKey if pagination is being used
@@ -61,7 +62,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 transactions: response.Items?.map(item => {
                     return {
                         ...item,
-                        // You may handle any additional decimal to float conversion here if needed
+                        // Handle any additional decimal to float conversion here if needed
                     };
                 }) || [],
             } as any;
