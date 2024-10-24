@@ -64,19 +64,19 @@ const Earnings = ({user}) => {
                 <>
                     {transactions.map(transaction => (
                         <TransactionCard key={transaction?.transactionId} onClick={() => handleTripClick(trip)}>
-                            <BadgeWrapper>
-                                <StatusBadge status={transaction?.status?.toLowerCase() || 'complete'}>
-                                    {transaction?.status?.toUpperCase() || 'COMPLETED'}
-                                </StatusBadge>
-                            </BadgeWrapper>
                             <TransactionDetails>
+                                <BadgeWrapper>
+                                <StatusBadge status={transaction?.status?.toLowerCase() || 'complete'}>
+                                    {transaction?.status?.toUpperCase() || 'SUCCESS'}
+                                </StatusBadge>
                                 <TransactionDetail>
-                                    <Label>Transaction:</Label>
-                                    <Value>{truncateText(transaction?.transactionId)}</Value>
+                                    <TypeValue>{truncateText('IN')}</TypeValue>
                                 </TransactionDetail>
+                                </BadgeWrapper>
+                                
                                 <TransactionDetail>
                                     <Label>Amount:</Label>
-                                    <Value>R{truncateText(transaction?.amount)}</Value>
+                                    <BalanceValue>R{truncateText(transaction?.amount)}</BalanceValue>
                                 </TransactionDetail>
                                 <TransactionDetail>
                                     <Label>Date:</Label>
@@ -135,8 +135,9 @@ const BadgeWrapper = tw.div`
 
 const StatusBadge = tw.div`
     w-20 h-6 px-1 py-1 text-white text-xs font-bold rounded-full flex items-center justify-center
-    ${props => props.status === 'complete' && 'bg-green-500'}
+    ${props => (props.status?.toLowerCase() === 'success' || props.status?.toLowerCase() === 'complete') && 'bg-green-500'}
     ${props => props.status === 'cancelled' && 'bg-blue-500'}
+    ${props => props.status === 'pending' && 'bg-gray-500'}
     ${props => props.status === 'failed' && 'bg-red-500'}
 `;
 
@@ -173,9 +174,12 @@ const Label = tw.span`
 `;
 
 const Value = tw.span`
-    semibold text-gray-800 ml-2 flex-grow text-left // Ensure Value is aligned to the left
+    semibold text-gray-800 ml-2 flex-grow text-left
 `;
 
+const TypeValue = tw.span`
+    font-semibold text-green-800 ml-2 flex-grow text-left
+`;
 
 const BalanceLabel = tw.span`
     absolute font-bold text-gray-900
