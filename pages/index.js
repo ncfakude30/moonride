@@ -5,6 +5,7 @@ import Map from './components/Map';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import RecentTrips from './components/RecentTrips';
+import OrderComponent from './components/Order'; // <-- Import the new order component
 import Image from 'next/image';
 import { useDispatch, useSelector } from 'react-redux';
 import { auth } from '../firebase';
@@ -18,6 +19,7 @@ export default function Home() {
     const router = useRouter();
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [showOrder, setShowOrder] = useState(false); // New state for toggling Order view
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -45,6 +47,11 @@ export default function Home() {
 
     const handlePopupClose = () => {
         setIsPopupOpen(false);
+    };
+
+    // Handler for Order button click: display the OrderComponent
+    const handleOrderClick = () => {
+        setShowOrder(true);
     };
 
     return (
@@ -78,10 +85,9 @@ export default function Home() {
                                         <Label>Ride</Label>
                                     </ActionButton>
                                 </Link>
-                                <ActionButton onClick={handlePopupOpen}>
-                                    <Badge>Coming Soon</Badge>
-                                    <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/bus.png'/>
-                                    <Label>Bus Tracker</Label>
+                                <ActionButton onClick={handleOrderClick}>
+                                    <ActionButtonImage src='https://i.ibb.co/n776JLm/bike.png'/>
+                                    <Label>Order</Label>
                                 </ActionButton>
                                 <ActionButton onClick={handlePopupOpen}>
                                     <Badge>Coming Soon</Badge>
@@ -90,16 +96,17 @@ export default function Home() {
                                 </ActionButton>
                                 <ActionButton onClick={handlePopupOpen}>
                                     <Badge>Coming Soon</Badge>
-                                    <ActionButtonImage src='https://i.ibb.co/n776JLm/bike.png'/>
-                                    <Label>Order</Label>
-                                </ActionButton>
-                                <ActionButton onClick={handlePopupOpen}>
-                                    <Badge>Coming Soon</Badge>
                                     <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/helper.png'/>
                                     <Label>Helper</Label>
                                 </ActionButton>
+                                <ActionButton onClick={handlePopupOpen}>
+                                    <Badge>Coming Soon</Badge>
+                                    <ActionButtonImage src='https://moonride-media.s3.amazonaws.com/bus.png'/>
+                                    <Label>Bus Tracker</Label>
+                                </ActionButton>
                             </ActionButtons>
-                            <RecentTrips user={user} />
+                            {/* Show OrderComponent if showOrder is true; otherwise, display RecentTrips */}
+                            {showOrder ? <OrderComponent /> : <RecentTrips user={user} />}
                         </ActionItems>
                     </ContentWrapper>
                     {isPopupOpen && (

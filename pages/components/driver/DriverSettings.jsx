@@ -231,3 +231,43 @@ const LoadingMessage = tw.div`
 const Loader = tw.div`
   w-16 h-16 border-4 border-dashed rounded-full animate-spin border-gray-500
 `;
+
+
+const SettingCard = tw.div`
+    relative bg-white text-gray-800 rounded-lg p-4 shadow-lg transition-transform transform hover:scale-105 cursor-pointer
+    hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50
+    overflow-hidden border border-gray-200 space-y-4
+`;
+
+
+const TransactionDetail = tw.div`
+    flex items-center border-gray-200
+`;
+
+const Label = tw.span`
+    semibold text-gray-600
+`;
+
+const Value = tw.span`
+    semibold text-gray-800 ml-2 flex-grow text-left
+`;
+
+const TypeValue = tw.span`
+    font-semibold text-green-800 ml-2 flex-grow text-left
+`;
+
+const BalanceLabel = tw.span`
+    absolute font-bold text-gray-900
+`;
+
+const BalanceValue = tw.span`
+    font-semibold text-green-600 ml-2 flex-grow
+`;
+
+const RecentTransactionsWrapper = tw.div`
+      flex flex-col flex-wrap space-x-2 space-y-2 p-2
+`;
+
+const Title = tw.h2`
+    text-2l font-bold mb-4 text-gray-800
+`;

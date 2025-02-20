@@ -185,7 +185,6 @@ function Payment() {
                     <Image
                         src='https://img.icons8.com/ios-filled/50/000000/left.png'
                         alt='Back'
-                        className='w-6 h-6'
                         width={50} height={50}
                     />
                 </BackButton>
