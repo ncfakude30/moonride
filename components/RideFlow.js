@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import tw from 'tailwind-styled-components';
-import DriverTracking from './DriverTracking';
-import TripSummary from './TripSummary';
+import DriverTracking from '../pages/components/DriverTracking';
+import TripSummary from '../pages/components/TripSummary';
 import { useWebSocket } from '../contexts/WebSocketContext';
 
 const RIDE_STATES = {

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import tw from 'tailwind-styled-components';
-import TripSummary from '../components/TripSummary';
+import TripSummary from './components/TripSummary';
 
 function TripSummaryPage() {
     const router = useRouter();

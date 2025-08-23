@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import tw from 'tailwind-styled-components';
-import DriverDashboard from '../components/DriverDashboard';
+import DriverDashboard from './components/DriverDashboard';
 
 function DriverDashboardPage() {
     const router = useRouter();
